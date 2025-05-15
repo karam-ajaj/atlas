@@ -15,8 +15,28 @@ input_file="/config/logs/docker.log"
 # Extract IP and Name
 # awk 'NF >= 2 { name = $1; sub(/^\//, "", name); print $2, name }' /config/logs/docker.log > /config/logs/docker_hosts.log
 
-# script to extract more data
+# # script to extract more data
+# exec > /config/logs/docker_hosts.log
+# while read -r ip name; do
+#     short_name="${name%%.*}"
+#     container_id=$(docker ps -q --filter name="^/${short_name}")
+
+#     if [ -n "$container_id" ]; then
+#         mac=$(docker inspect "$container_id" | grep -o '"MacAddress": *"[^"]*"' | cut -d'"' -f4 | paste -sd, -)
+#         image=$(docker inspect -f '{{.Config.Image}}' "$container_id")
+#         os=$(docker image inspect "$image" --format '{{.Os}}' 2>/dev/null)
+#         os=${os:-unknown}
+
+#         printf "%-15s %-50s %-10s %-30s\n" "$ip" "$name" "$os" "$mac"
+#     else
+#         printf "%-15s %-50s %-10s %-30s\n" "$ip" "$name" "unknown" "not_found"
+#     fi
+# done < <(awk 'NF >= 2 { name = $1; sub(/^\//, "", name); print $2, name }' /config/logs/docker.log)
+
+# script to extract more data including ports
+# script to extract more data including ports (Docker Swarm compatible)
 exec > /config/logs/docker_hosts.log
+
 while read -r ip name; do
     short_name="${name%%.*}"
     container_id=$(docker ps -q --filter name="^/${short_name}")
@@ -27,11 +47,18 @@ while read -r ip name; do
         os=$(docker image inspect "$image" --format '{{.Os}}' 2>/dev/null)
         os=${os:-unknown}
 
-        printf "%-15s %-50s %-10s %-30s\n" "$ip" "$name" "$os" "$mac"
+        # Extract ports from container inspect (Swarm compatible)
+        ports=$(docker inspect "$container_id" | \
+            jq -r '.[0].NetworkSettings.Ports // {} | to_entries[]? | "\(.key) -> \(.value[0].HostIp):\(.value[0].HostPort)"' | paste -sd, -)
+
+        ports=${ports:-no_ports}
+
+        printf "%-15s %-50s %-10s %-30s %-40s\n" "$ip" "$name" "$os" "$mac" "$ports"
     else
-        printf "%-15s %-50s %-10s %-30s\n" "$ip" "$name" "unknown" "not_found"
+        printf "%-15s %-50s %-10s %-30s %-40s\n" "$ip" "$name" "unknown" "not_found" "no_ports"
     fi
 done < <(awk 'NF >= 2 { name = $1; sub(/^\//, "", name); print $2, name }' /config/logs/docker.log)
+
 
 
 
@@ -81,10 +108,13 @@ while IFS= read -r line; do
     ip=$(echo "$line" | awk '{print $1}')
     name=$(echo "$line" | awk '{print $2}')
     os_details=$(echo "$line" | awk '{print $3}')
-    # MAC could be multiple parts if it has commas/spaces, get the rest after 3rd field
-    mac_address=$(echo "$line" | awk '{for(i=4; i<=NF; i++) printf "%s%s", $i, (i==NF ? "\n" : " ")}')
-
-    open_ports="Unknown"  # You can update this if you have actual open port info
+    
+    # Get everything after the 3rd field as mac_address + open_ports
+    mac_and_ports=$(echo "$line" | awk '{for(i=4;i<=NF;i++) printf "%s%s", $i, (i==NF ? "\n" : " ")}')
+    
+    # Separate mac_address and open_ports based on assumption that ports start with a digit or protocol format (e.g., 80/tcp)
+    mac_address=$(echo "$mac_and_ports" | sed -E 's/([0-9]+\/[a-z]+.*$)//' | sed 's/ *$//')
+    open_ports=$(echo "$mac_and_ports" | grep -oE '[0-9]+/tcp[^,]*([, ]+[0-9]+/tcp[^,]*)*' || echo "no_ports")
 
     # Insert into database only if IP doesn't already exist
     sqlite3 "$db_file" <<EOF
@@ -96,6 +126,7 @@ WHERE NOT EXISTS (
 EOF
 
 done < "$input_file"
+
 
 
 
