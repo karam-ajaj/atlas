@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Hosts</title>
+    <script>
+        function fetchHosts() {
+            fetch('http://192.168.2.81:8889/hosts')
+                .then(response => response.json())
+                .then(data => {
+                    const [regularHosts, dockerHosts] = data;
+
+                    const regularTable = document.getElementById('regularHostsTable');
+                    const dockerTable = document.getElementById('dockerHostsTable');
+
+                    // Populate regular hosts table
+                    regularHosts.forEach(host => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${host[0]}</td>
+                            <td>${host[1]}</td>
+                            <td>${host[2]}</td>
+                            <td>${host[3]}</td>
+                            <td>${host[4]}</td>
+                            <td>${host[5]}</td>
+                        `;
+                        regularTable.appendChild(row);
+                    });
+
+                    // Populate docker hosts table
+                    dockerHosts.forEach(host => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${host[0]}</td>
+                            <td>${host[1]}</td>
+                            <td>${host[2]}</td>
+                            <td>${host[3]}</td>
+                            <td>${host[4]}</td>
+                            <td>${host[5]}</td>
+                        `;
+                        dockerTable.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        window.onload = fetchHosts;
+    </script>
+</head>
+<body>
+    <h1>Network Hosts</h1>
+
+    <h2>Regular Hosts</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>IP</th>
+                <th>Name</th>
+                <th>OS Details</th>
+                <th>MAC Address</th>
+                <th>Open Ports</th>
+            </tr>
+        </thead>
+        <tbody id="regularHostsTable">
+            <!-- Regular hosts will be added here -->
+        </tbody>
+    </table>
+
+    <h2>Docker Hosts</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>IP</th>
+                <th>Name</th>
+                <th>OS Details</th>
+                <th>MAC Address</th>
+                <th>Open Ports</th>
+            </tr>
+        </thead>
+        <tbody id="dockerHostsTable">
+            <!-- Docker hosts will be added here -->
+        </tbody>
+    </table>
+</body>
+</html>

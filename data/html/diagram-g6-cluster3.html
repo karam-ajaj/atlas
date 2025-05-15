@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Network Diagram - G6 Enhanced</title>
+<script src="https://unpkg.com/@antv/g6@4.8.8/dist/g6.min.js"></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 10px;
+    background: #fafafa;
+    color: #333;
+  }
+  #network {
+    width: 100%;
+    height: 600px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+  }
+  #controls {
+    margin-bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+  }
+  #searchInput, #portFilterInput {
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #bbb;
+    width: 200px;
+  }
+  #dockerToggle {
+    cursor: pointer;
+    user-select: none;
+  }
+  #legend {
+    margin-top: 10px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+  }
+  .legend-shape {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid #666;
+    display: inline-block;
+  }
+  .legend-shape.rectangle {
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+<h1>Network Diagram</h1>
+
+<div id="controls">
+  <input id="searchInput" placeholder="Search by name or IP..." />
+  <input id="portFilterInput" placeholder="Filter by open port..." />
+  <label><input type="checkbox" id="dockerToggle" /> Show only Docker hosts</label>
+  <button id="exportBtn">Export as PNG</button>
+</div>
+
+<div id="network"></div>
+
+<div id="legend">
+  <div class="legend-item">
+    <span class="legend-shape" style="background:#9fd5ff; border-color:#5b8ff9"></span> Normal Host (Circle)
+  </div>
+  <div class="legend-item">
+    <span class="legend-shape rectangle" style="background:#ff9f7f; border-color:#d46a6a"></span> Docker Host (Rectangle)
+  </div>
+  <div class="legend-item">
+    <span class="legend-shape" style="background:#f5f5f5; border:1px dashed #bbb"></span> Subnet Ring
+  </div>
+</div>
+
+<script>
+  // API URL for your data
+  const API_URL = 'http://192.168.2.81:8889/hosts';
+
+  let graph;
+  let allNodes = [];
+  let allEdges = [];
+  let subnetGroups = {};
+  let currentFilteredNodes = [];
+  let currentFilteredEdges = [];
+
+  // Color map by OS keyword (basic example)
+  const osColorMap = {
+    'windows': '#4caf50',
+    'linux': '#2196f3',
+    'unknown': '#9fd5ff',
+  };
+
+  // Helper: assign color by OS name
+  function getColorByOS(os) {
+    if (!os) return osColorMap['unknown'];
+    os = os.toLowerCase();
+    for (const key of Object.keys(osColorMap)) {
+      if (os.includes(key)) return osColorMap[key];
+    }
+    return osColorMap['unknown'];
+  }
+
+  // Shape by type: Docker hosts are rectangle else circle
+  function getShapeByName(name) {
+    if (!name) return 'circle';
+    return name.toLowerCase().includes('docker') || name.toLowerCase().includes('dockwatch') || name.toLowerCase().includes('portainer') ? 'rect' : 'circle';
+  }
+
+  // Extract subnet (simple /24) from IP
+  function getSubnet(ip) {
+    if (!ip) return 'unknown';
+    const parts = ip.split('.');
+    if (parts.length === 4) {
+      return parts.slice(0, 3).join('.') + '.0/24';
+    }
+    return 'unknown';
+  }
+
+  // Group nodes by subnet (for rings)
+  function groupBySubnet(nodes) {
+    const groups = {};
+    nodes.forEach(node => {
+      const subnet = getSubnet(node.ip);
+      if (!groups[subnet]) groups[subnet] = [];
+      groups[subnet].push(node.id);
+    });
+    return groups;
+  }
+
+  // Create subnet ring shapes
+  function createSubnetRings(groups, graph) {
+    const rings = [];
+    const center = { x: graph.getWidth() / 2, y: graph.getHeight() / 2 };
+    const maxRadius = Math.min(center.x, center.y) - 50;
+    const subnets = Object.keys(groups);
+    const ringCount = subnets.length;
+
+    subnets.forEach((subnet, idx) => {
+      const radius = maxRadius * ((ringCount - idx) / ringCount);
+      rings.push({
+        id: `ring-${idx}`,
+        type: 'circle',
+        x: center.x,
+        y: center.y,
+        r: radius,
+        style: {
+          stroke: '#bbb',
+          lineWidth: 1,
+          lineDash: [5, 5],
+          fill: '#f5f5f5',
+          opacity: 0.3,
+        },
+        label: subnet,
+        labelCfg: {
+          position: 'top',
+          style: {
+            fill: '#999',
+            fontSize: 12,
+            fontWeight: 'bold',
+          },
+        },
+        // rings are not interactable nodes
+        selectable: false,
+        draggable: false,
+        visible: true,
+      });
+    });
+
+    return rings;
+  }
+
+  // Highlight connected edges and nodes on node click
+  function highlightConnections(node) {
+    const edges = graph.getEdges();
+    const nodes = graph.getNodes();
+
+    // Reset all styles first
+    edges.forEach(edge => graph.clearItemStates(edge));
+    nodes.forEach(n => graph.clearItemStates(n));
+
+    if (!node) return;
+
+    graph.setItemState(node, 'highlighted', true);
+
+    const nodeId = node.getID();
+
+    edges.forEach(edge => {
+      if (edge.getSource().getID() === nodeId || edge.getTarget().getID() === nodeId) {
+        graph.setItemState(edge, 'highlighted', true);
+
+        const otherNodeId = edge.getSource().getID() === nodeId ? edge.getTarget().getID() : edge.getSource().getID();
+        const otherNode = graph.findById(otherNodeId);
+        if (otherNode) {
+          graph.setItemState(otherNode, 'highlighted', true);
+        }
+      }
+    });
+  }
+
+  // Apply filtering: search text, docker only, port filter
+  function applyFilters() {
+    const searchText = document.getElementById('searchInput').value.trim().toLowerCase();
+    const dockerOnly = document.getElementById('dockerToggle').checked;
+    const portFilter = document.getElementById('portFilterInput').value.trim();
+
+    // Filter nodes by conditions
+    let filteredNodes = allNodes.filter(node => {
+      const nameLower = node.name.toLowerCase();
+      const ipLower = node.ip.toLowerCase();
+      const matchSearch = searchText === '' || nameLower.includes(searchText) || ipLower.includes(searchText);
+      const matchDocker = !dockerOnly || (getShapeByName(node.name) === 'rect');
+      const matchPort = portFilter === '' || (node.ports && node.ports.includes(portFilter));
+      return matchSearch && matchDocker && matchPort;
+    });
+
+    // Filter edges to only those connecting filtered nodes
+    const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+    let filteredEdges = allEdges.filter(edge => filteredNodeIds.has(edge.source) && filteredNodeIds.has(edge.target));
+
+    currentFilteredNodes = filteredNodes;
+    currentFilteredEdges = filteredEdges;
+
+    graph.changeData({
+      nodes: filteredNodes,
+      edges: filteredEdges,
+    });
+
+    // Clear highlight on filter change
+    highlightConnections(null);
+  }
+
+  // Fetch data and initialize graph
+  async function initGraph() {
+    const response = await fetch(API_URL);
+    const data = await response.json();
+
+    // Flatten data: handle 2D array (multiple tables) into a single array with type
+    const hosts = [];
+    const dockerHosts = [];
+
+    // Data is an array of arrays - first is normal hosts, second Docker hosts, etc
+    data.forEach((table, idx) => {
+      table.forEach(host => {
+        const node = {
+          id: `node-${idx}-${host[0]}`,
+          ip: host[1],
+          name: host[2] || 'NoName',
+          os: host[3] || 'Unknown',
+          mac: host[4] || 'Unknown',
+          ports: host[5] || 'Unknown',
+        };
+        if (idx === 1) {
+          dockerHosts.push(node);
+        } else {
+          hosts.push(node);
+        }
+      });
+    });
+
+    allNodes = hosts.concat(dockerHosts);
+
+    // Create edges: connect nodes to a central hub
+    allEdges = [];
+
+    allNodes.forEach(node => {
+      allEdges.push({
+        source: 'center',
+        target: node.id,
+      });
+    });
+
+    // Add central hub node
+    const centerNode = {
+      id: 'center',
+      label: 'Network Hub',
+      size: 60,
+      style: {
+        fill: '#ffeb3b',
+        stroke: '#f57f17',
+      },
+      labelCfg: {
+        style: {
+          fontSize: 16,
+          fontWeight: 'bold',
+        },
+      },
+      shape: 'circle',
+    };
+
+    // Add subnet rings
+    subnetGroups = groupBySubnet(allNodes);
+    const rings = createSubnetRings(subnetGroups, {
+      getWidth: () => window.innerWidth * 0.9,
+      getHeight: () => 600,
+    });
+
+    const graphData = {
+      nodes: [centerNode, ...allNodes.map(n => ({
+        id: n.id,
+        label: n.name,
+        ip: n.ip,
+        os: n.os,
+        mac: n.mac,
+        ports: n.ports,
+        size: 40,
+        shape: getShapeByName(n.name),
+        style: {
+          fill: getColorByOS(n.os),
+          stroke: '#5b8ff9',
+        },
+        labelCfg: {
+          style: {
+            fill: '#000',
+            fontSize: 12,
+          },
+        },
+        // Place nodes randomly initially, layout will reposition
+        x: Math.random() * window.innerWidth * 0.8 + 50,
+        y: Math.random() * 500 + 50,
+      })), ...rings],
+      edges: allEdges,
+    };
+
+    // Create graph
+    graph = new G6.Graph({
+      container: 'network',
+      width: document.getElementById('network').clientWidth,
+      height: 600,
+      layout: {
+        type: 'force',
+        preventOverlap: true,
+        linkDistance: 150,
+        nodeStrength: -50,
+        edgeStrength: 0.5,
+      },
+      defaultNode: {
+        size: 40,
+        style: {
+          lineWidth: 2,
+        },
+        labelCfg: {
+          style: {
+            fill: '#000',
+            fontSize: 12,
+          },
+        },
+      },
+      defaultEdge: {
+        style: {
+          stroke: '#bfbfbf',
+          lineWidth: 2,
+          opacity: 0.7,
+        },
+      },
+      modes: {
+        default: ['drag-node', 'zoom-canvas', 'drag-canvas'],
+      },
+      nodeStateStyles: {
+        highlighted: {
+          fill: '#ff5722',
+          stroke: '#e64a19',
+          lineWidth: 3,
+          shadowBlur: 10,
+          shadowColor: 'rgba(255, 87, 34, 0.6)',
+        },
+      },
+      edgeStateStyles: {
+        highlighted: {
+          stroke: '#ff5722',
+          lineWidth: 3,
+          opacity: 1,
+          shadowBlur: 10,
+          shadowColor: 'rgba(255, 87, 34, 0.6)',
+        },
+      },
+    });
+
+    graph.data(graphData);
+    graph.render();
+
+    // Tooltip on hover
+    graph.tooltip({
+      offsetX: 10,
+      offsetY: 20,
+      itemTypes: ['node'],
+      getContent: (e) => {
+        const model = e.item.getModel();
+        if (model.id.startsWith('ring-') || model.id === 'center') return null;
+        return `
+          <div style="padding:10px;">
+            <strong>${model.label}</strong><br/>
+            <b>IP:</b> ${model.ip}<br/>
+            <b>OS:</b> ${model.os}<br/>
+            <b>MAC:</b> ${model.mac}<br/>
+            <b>Open Ports:</b> ${model.ports}
+          </div>
+        `;
+      }
+    });
+
+    // Node click to highlight connections
+    graph.on('node:click', evt => {
+      highlightConnections(evt.item);
+    });
+
+    // Export button
+    document.getElementById('exportBtn').onclick = () => {
+      const img = graph.toDataURL('image/png', {
+        backgroundColor: '#fff',
+        pixelRatio: 2,
+      });
+      const a = document.createElement('a');
+      a.href = img;
+      a.download = 'network-diagram.png';
+      a.click();
+    };
+
+    // Filter controls event listeners
+    document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 300));
+    document.getElementById('dockerToggle').addEventListener('change', applyFilters);
+    document.getElementById('portFilterInput').addEventListener('input', debounce(applyFilters, 300));
+  }
+
+  // Simple debounce function
+  function debounce(fn, delay) {
+    let timeout;
+    return function () {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => fn.apply(this, arguments), delay);
+    };
+  }
+
+  // Start
+  initGraph();
+
+  // Resize graph on window resize
+  window.addEventListener('resize', () => {
+    if (!graph) return;
+    graph.changeSize(document.getElementById('network').clientWidth, 600);
+  });
+</script>
+</body>
+</html>

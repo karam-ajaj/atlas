@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Network Diagram - G6 Enhanced</title>
+  <script src="https://unpkg.com/@antv/g6@4.8.8/dist/g6.min.js"></script>
+  <style>
+    body { font-family: sans-serif; }
+    #network { width: 100%; height: 600px; border: 1px solid lightgray; }
+    #controls { margin: 10px 0; }
+    #tooltip {
+      position: absolute;
+      display: none;
+      padding: 8px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      border-radius: 4px;
+      pointer-events: none;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Network Diagram</h1>
+  <div id="controls">
+    <button onclick="download()">📁 Export as PNG</button>
+    <label>Filter:
+      <select id="filter" onchange="createNetwork()">
+        <option value="all">Show All</option>
+        <option value="docker">Docker Hosts</option>
+        <option value="normal">Normal Hosts</option>
+      </select>
+    </label>
+  </div>
+  <div id="network"></div>
+  <div id="tooltip"></div>
+
+  <script>
+    let graph;
+
+    async function fetchData() {
+      const response = await fetch('http://192.168.2.81:8889/hosts');
+      const data = await response.json();
+
+      const nodes = [];
+      const edges = [];
+      const typeFilter = document.getElementById("filter").value;
+
+      const addNode = (host, index, type) => {
+        if (typeFilter !== "all" && typeFilter !== type) return;
+        const id = `node-${type}-${index}`;
+        nodes.push({
+          id,
+          label: host[2] || host[1],
+          ip: host[1],
+          name: host[2],
+          os: host[3],
+          mac: host[4],
+          ports: host[5],
+          cluster: type === "docker" ? "Docker" : "Normal",
+          style: {
+            fill: type === "docker" ? "#d1eaff" : "#ffe6e6",
+            stroke: type === "docker" ? "#1890ff" : "#ff4d4f"
+          }
+        });
+        edges.push({ source: 'center', target: id });
+      };
+
+      data[0].forEach((host, i) => addNode(host, i, "normal"));
+      data[1].forEach((host, i) => addNode(host, i, "docker"));
+
+      // Add central hub
+      nodes.push({
+        id: 'center',
+        label: 'Network Hub',
+        size: 50,
+        style: { fill: '#ffeb3b', stroke: '#f57f17' },
+        labelCfg: { style: { fontSize: 16, fontWeight: 'bold' } },
+      });
+
+      return { nodes, edges };
+    }
+
+    async function createNetwork() {
+      const { nodes, edges } = await fetchData();
+      const container = document.getElementById('network');
+
+      if (graph) graph.destroy();
+
+      graph = new G6.Graph({
+        container: 'network',
+        width: container.clientWidth,
+        height: 600,
+        layout: {
+          type: 'force',
+          preventOverlap: true,
+          linkDistance: 200,
+        },
+        defaultNode: {
+          size: 40,
+          labelCfg: {
+            style: {
+              fill: '#000',
+              fontSize: 12,
+            }
+          }
+        },
+        defaultEdge: {
+          style: {
+            stroke: '#bfbfbf',
+            lineWidth: 2,
+          }
+        },
+        modes: {
+          default: ['drag-node', 'zoom-canvas', 'drag-canvas'],
+        },
+      });
+
+      graph.data({ nodes, edges });
+      graph.render();
+
+      // Tooltip logic
+      const tooltip = document.getElementById('tooltip');
+
+      graph.on('node:mouseenter', (e) => {
+        const model = e.item.getModel();
+        tooltip.style.display = 'block';
+        tooltip.innerHTML = `
+          <strong>${model.label}</strong><br/>
+          IP: ${model.ip}<br/>
+          OS: ${model.os}<br/>
+          MAC: ${model.mac}<br/>
+          Ports: ${model.ports}<br/>
+          Type: ${model.cluster}
+        `;
+      });
+
+      graph.on('node:mousemove', (e) => {
+        tooltip.style.left = e.clientX + 10 + 'px';
+        tooltip.style.top = e.clientY + 10 + 'px';
+      });
+
+      graph.on('node:mouseleave', () => {
+        tooltip.style.display = 'none';
+      });
+    }
+
+    function download() {
+      if (graph) {
+        graph.downloadImage('network-diagram', 'image/png');
+      }
+    }
+
+    createNetwork();
+  </script>
+</body>
+</html>

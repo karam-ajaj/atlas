@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Diagram</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        #network {
+            width: 100%;
+            height: 600px;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+    <h1>Network Diagram</h1>
+    <div id="network"></div>
+
+    <script>
+        async function fetchData() {
+            const response = await fetch('http://192.168.2.81:8889/hosts');
+            const data = await response.json();
+
+            const nodes = [];
+            const edges = [];
+
+            // Process the data to create nodes and edges
+            data.forEach((host, index) => {
+                // Add node for each host
+                nodes.push({
+                    id: index + 1, // Use the index as a unique id
+                    label: host[2] || `Host ${host[0]}`,
+                    title: `IP: ${host[1]}`,
+                    // title: `IP1: ${host[2]}`,
+                    // title: `IP2: ${host[3]}`,
+                });
+
+                // Optionally add edges (connections between nodes)
+                // You can determine which nodes are connected based on your data
+                if (index > 0) {
+                    edges.push({ from: index, to: index + 1 });
+                }
+            });
+
+            return { nodes, edges };
+        }
+
+        async function createNetwork() {
+            const { nodes, edges } = await fetchData();
+
+            // Create a network diagram
+            const container = document.getElementById('network');
+            const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    size: 15,
+                    font: { size: 14, color: 'black' },
+                    borderWidth: 2,
+                },
+                edges: {
+                    width: 2,
+                    color: { highlight: 'blue' },
+                },
+                physics: {
+                    enabled: true, // To make the network interactive
+                },
+            };
+
+            new vis.Network(container, data, options);
+        }
+
+        // Call the function to create the network
+        createNetwork();
+    </script>
+</body>
+</html>

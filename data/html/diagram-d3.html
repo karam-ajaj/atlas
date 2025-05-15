@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Diagram</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        #network {
+            width: 100%;
+            height: 600px;
+            border: 1px solid lightgray;
+        }
+
+        .node circle {
+            fill: #ffcc00;
+            stroke: black;
+            stroke-width: 1.5px;
+        }
+
+        .node text {
+            font-size: 12px;
+            fill: #333;
+            text-anchor: middle;
+        }
+
+        .link {
+            fill: none;
+            stroke: #666;
+            stroke-width: 1.5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Network Diagram</h1>
+    <div id="network"></div>
+
+    <script>
+        async function fetchData() {
+            const response = await fetch('http://192.168.2.81:8889/hosts');
+            const data = await response.json();
+
+            const nodes = [];
+            const links = [];
+
+            // Process the data to create nodes and links (edges)
+            data.forEach((host, index) => {
+                // Add node for each host
+                nodes.push({
+                    id: index + 1, // Use the index as a unique id
+                    label: host[1] || `Host ${host[0]}`,
+                    ip: host[0],
+                });
+
+                // Optionally add links (connections between nodes)
+                if (index > 0) {
+                    links.push({ source: index - 1, target: index });
+                }
+            });
+
+            return { nodes, links };
+        }
+        
+        async function fetchData() {
+    const response = await fetch('http://192.168.2.81:8889/hosts');
+    const data = await response.json();
+    console.log("Fetched Data:", data); // Log the fetched data
+    return data;
+}
+
+
+        async function createNetwork() {
+            const { nodes, links } = await fetchData();
+
+            // Set up the SVG container
+            const width = 800;
+            const height = 600;
+
+            const svg = d3.select("#network").append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+                .force("charge", d3.forceManyBody().strength(-100))
+                .force("center", d3.forceCenter(width / 2, height / 2));
+
+            const link = svg.append("g")
+                .selectAll(".link")
+                .data(links)
+                .enter().append("line")
+                .attr("class", "link");
+
+            const node = svg.append("g")
+                .selectAll(".node")
+                .data(nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .call(d3.drag()
+                    .on("start", dragstart)
+                    .on("drag", dragged)
+                    .on("end", dragend));
+
+            node.append("circle")
+                .attr("r", 10);
+
+            node.append("text")
+                .attr("dy", -15)
+                .text(d => d.label);
+
+            simulation.on("tick", () => {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                node
+                    .attr("transform", d => `translate(${d.x},${d.y})`);
+            });
+
+            function dragstart(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragend(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        }
+
+        // Call the function to create the network
+        createNetwork();
+    </script>
+</body>
+</html>
