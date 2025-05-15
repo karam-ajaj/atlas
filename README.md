@@ -1,1 +1,1 @@
-# atlas
+config/scripts/READ.ME
