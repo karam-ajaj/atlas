@@ -1,0 +1,36 @@
+docker run -d -p 8888:80 -p 8889:8000 --name atlas \
+-v /swarm/data/atlas/html:/usr/share/nginx/html \
+-v /swarm/config/atlas:/config \
+-v /var/run/docker.sock:/var/run/docker.sock \
+nginx
+
+## URLs
+API
+http://192.168.2.81:8889/hosts
+nginx
+http://192.168.2.81:8888/
+http://192.168.2.81:8888/diagram-g6-cluster.html
+
+
+cd /config/scripts
+./script.sh
+
+# start the api op port 8889
+uvicorn scripts.app:app --host 0.0.0.0 --port 8000
+cd /config/scripts
+# export the path
+export PYTHONPATH=/config
+# start in the background and save to log file
+uvicorn scripts.app:app --host 0.0.0.0 --port 8000 > /config/logs/uvicorn.log 2>&1 &
+
+# docker file
+CMD ["uvicorn", "/config/scripts/app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+
+# check table
+sqlite3 /config/db/atlas.db "SELECT * FROM hosts;"
+
+
+# collect containers infos
+docker inspect $(docker ps -q ) \
+--format='{{ printf "%-50s" .Name}} {{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}'
