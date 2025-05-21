@@ -38,51 +38,45 @@
 
 ## 🧱 Architecture
 
+```
++-----------------------------+
+|   Docker Container (Atlas) |
+|-----------------------------|
+| - Runs scanner scripts      |
+| - Parses Docker/Nmap data   |
+| - Outputs logs and JSON     |
 +-----------------------------+
 
-Docker Container (Atlas)
-- Runs scanner scripts
-- Parses Docker/Nmap data
-- Outputs logs and JSON
-+-----------------------------+
+         ↓
 
-markdown
-Copy
-Edit
-     ↓
 +-----------------------------+
-
-Web Frontend (HTML)
-- G6 or vis.js visualization
-- Dynamic subnet layout
-- Info sidebar and filters
+|     Web Frontend (HTML)    |
+|-----------------------------|
+| - G6 or vis.js visualization|
+| - Dynamic subnet layout     |
+| - Info sidebar and filters  |
 +-----------------------------+
-
-yaml
-Copy
-Edit
+```
 
 ---
 
 ## 📂 Project Structure
 
+```
 atlas/
 ├── config/
-│ └── logs/
-│ ├── docker.log # Docker container info
-│ ├── nmap.log # Nmap scan results
-│ └── docker_hosts.log # Processed container data
+│   └── logs/
+│       ├── docker.log        # Docker container info
+│       ├── nmap.log          # Nmap scan results
+│       └── docker_hosts.log  # Processed container data
 ├── data/
-│ └── html/
-│ ├── visuals/ # G6-based working dashboard
-│ └── visuals2/ # vis.js-based dashboard version
+│   └── html/
+│       ├── visuals/          # G6-based working dashboard
+│       └── visuals2/         # vis.js-based dashboard version
 ├── scripts/
-│ └── docker_script.sh # Script to scan Docker containers
+│   └── docker_script.sh      # Script to scan Docker containers
 └── README.md
-
-yaml
-Copy
-Edit
+```
 
 ---
 
@@ -92,48 +86,49 @@ Edit
    ```bash
    git clone https://github.com/karam-ajaj/atlas.git
    cd atlas
-Run the scanner script inside your container:
+   ```
 
-bash
-Copy
-Edit
-bash scripts/docker_script.sh
-Serve the dashboard using Nginx or Python server:
+2. **Run the scanner script inside your container:**
+   ```bash
+   bash scripts/docker_script.sh
+   ```
 
-bash
-Copy
-Edit
-cd data/html/visuals
-python3 -m http.server 8889
-# Then open http://localhost:8889 in browser
-📈 Roadmap
-Phase	Feature	Status
-1	Docker/Nmap log parser	✅ Complete
-2	Interactive dashboard UI	✅ Working
-3	Subnet clustering & stats	🚧 Ongoing
-3	Connection detection	🚧 Ongoing
-3	Export to PNG/CSV/JSON	📝 Planned
-3	Live host reachability	⏳ Optional
+3. **Serve the dashboard using Nginx or Python server:**
+   ```bash
+   cd data/html/visuals
+   python3 -m http.server 8889
+   # Then open http://localhost:8889 in browser
+   ```
 
-👨‍💻 Author
-Karam Ajaj
-Infrastructure & Automation Engineer
-https://github.com/karam-ajaj
+---
 
-📝 License
+## 📈 Roadmap
+
+| Phase | Feature                        | Status     |
+|-------|--------------------------------|------------|
+| 1     | Docker/Nmap log parser         | ✅ Complete |
+| 2     | Interactive dashboard UI       | ✅ Working  |
+| 3     | Subnet clustering & stats      | 🚧 Ongoing |
+| 3     | Connection detection           | 🚧 Ongoing |
+| 3     | Export to PNG/CSV/JSON         | 📝 Planned |
+| 3     | Live host reachability         | ⏳ Optional |
+
+---
+
+## 👨‍💻 Author
+
+**Karam Ajaj**  
+Infrastructure & Automation Engineer  
+[https://github.com/karam-ajaj](https://github.com/karam-ajaj)
+
+---
+
+## 📝 License
+
 This project is licensed under the MIT License.
 
-💡 Contribution
+---
+
+## 💡 Contribution
+
 Ideas, issues, and PRs are welcome. Feel free to fork the repo and contribute to better infrastructure visibility!
-
-vbnet
-Copy
-Edit
-
-Let me know if you want me to push it directly to your GitHub repo via instructions or as a downloadable file.
-
-
-
-
-
-
