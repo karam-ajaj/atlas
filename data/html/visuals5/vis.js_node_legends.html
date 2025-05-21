@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Atlas Infra Map</title>
+  <title>Infra Dashboard</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap">
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
     :root {
       --bg: #f7f7fa;
       --fg: #232323;
@@ -13,156 +17,291 @@
       --sidebar: #f0f0f0;
       --border: #ddd;
       --accent: #0057b8;
-      --shadow: 0 2px 8px rgba(0,0,0,0.07);
     }
-    body { margin:0; padding:0; font-family:Roboto,sans-serif; background:var(--bg); color:var(--fg); height:100vh; overflow:hidden; }
-    .dark { --bg:#1a1b21; --fg:#eee; --panel:#21222c; --sidebar:#16171d; --border:#262733; --accent:#40a9ff; }
-    #root { display:flex; height:100vh; }
+    body {
+      font-family: Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      height: 100vh;
+      overflow: hidden;
+    }
+    .dark {
+      --bg: #1a1b21;
+      --fg: #eee;
+      --panel: #21222c;
+      --sidebar: #16171d;
+      --border: #262733;
+      --accent: #40a9ff;
+    }
 
-    /* Sidebar */
-    #sidebar { background:var(--sidebar); width:230px; border-right:1px solid var(--border); box-shadow:var(--shadow); display:flex; flex-direction:column; z-index:2; min-width:180px; }
-    #sidebar h2 { margin:20px 0 10px 20px; font-size:20px; }
-    .sidebar-tabs { display:flex; flex-direction:column; margin-bottom:16px; }
-    .sidebar-tab { padding:12px 24px; background:none; border:none; text-align:left; font-size:15px; cursor:pointer; color:var(--fg); transition:background .15s; }
-    .sidebar-tab.active, .sidebar-tab:hover { background:var(--accent); color:#fff; }
-    .sidebar-section { display:none; flex:1; flex-direction:column; padding:10px 18px; font-size:14px; }
-    .sidebar-section.active { display:flex; }
+    #root {
+      display: flex;
+      height: 100%;
+    }
 
-    /* Main */
-    #main { flex:1; display:flex; flex-direction:column; min-width:0; }
-    #topbar { background:var(--panel); border-bottom:1px solid var(--border); height:54px; display:flex; align-items:center; justify-content:space-between; padding:0 18px; box-shadow:var(--shadow); }
-    #topbar h1 { margin:0; font-size:22px; color:var(--accent); }
-    #topbar #date { font-size:14px; }
-    #dark-toggle { cursor:pointer; }
+    #sidebar {
+      width: 230px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-tab {
+      padding: 10px 20px;
+      text-align: left;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .sidebar-tab.active {
+      background: var(--accent);
+      color: white;
+    }
 
-    /* Panel bar */
-    #panel-bar { display:flex; gap:8px; align-items:center; background:var(--panel); border-bottom:1px solid var(--border); padding:4px 12px; }
-    .panel-toggle { padding:5px 14px; background:none; border:1px solid var(--border); border-radius:7px; cursor:pointer; transition:background .15s; color:var(--fg);}
-    .panel-toggle.active, .panel-toggle:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .sidebar-section {
+      display: none;
+      padding: 10px 18px;
+    }
+    .sidebar-section.active {
+      display: block;
+    }
 
-    /* Panels */
-    #panels { flex:1; display:flex; height:0; min-width:0; }
-    .panel { background:var(--panel); box-shadow:var(--shadow); border-radius:10px; margin:10px; padding:12px; flex:1; min-width:0; display:flex; flex-direction:column; border:1px solid var(--border); }
-    .panel.hidden { display:none!important; }
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
 
-    /* Scrollable table */
-    #panel-table { overflow-y:auto; }
-    #hostTable { width:100%; border-collapse:collapse; font-size:13px; }
-    #hostTable th, #hostTable td { padding:8px; border:1px solid #ccc; text-align:left; }
-    #hostTable thead { background:#eee; }
-    #hostTable tbody { display:block; max-height:300px; overflow-y:auto; }
-    #hostTable thead, #hostTable tbody tr { display:table; width:100%; table-layout:fixed; }
+    #topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    #topbar .right > * {
+      margin-left: 8px;
+    }
+
+    #panel-bar {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 4px 12px;
+    }
+
+    #panels {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .panel {
+      flex: 1;
+      padding: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel.hidden {
+      display: none;
+    }
+
+    .table-wrapper {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    #hostTable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    #hostTable th, #hostTable td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: left;
+    }
+
+    #hostTable thead {
+      position: sticky;
+      top: 0;
+      background: #eee;
+      z-index: 2;
+    }
+
+    #mynetwork {
+      flex: 1;
+      height: 100%;
+    }
   </style>
   <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
   <script src="vis_network.js"></script>
 </head>
 <body>
   <div id="root">
-    <!-- Sidebar -->
     <aside id="sidebar">
-      <h2>Dashboard</h2>
-      <div class="sidebar-tabs">
-        <button class="sidebar-tab active" data-tab="overview">📊 Overview</button>
-        <button class="sidebar-tab" data-tab="node">🔎 Node Info</button>
-        <button class="sidebar-tab" data-tab="logs">📑 Logs</button>
-        <button class="sidebar-tab" data-tab="settings">⚙️ Settings</button>
-      </div>
+      <h2 style="padding-left: 18px;">Dashboard</h2>
+      <button class="sidebar-tab active" data-tab="overview">📊 Overview</button>
+      <button class="sidebar-tab" data-tab="node">🔎 Node Info</button>
+      <button class="sidebar-tab" data-tab="logs">📑 Logs</button>
+      <button class="sidebar-tab" data-tab="settings">⚙️ Settings</button>
+
       <div class="sidebar-section active" id="tab-overview">
-        <b>Status:</b> <span id="statusMsg">OK</span><hr>
-        <b>Total Hosts:</b> <span id="totalHosts">-</span><br>
-        <b>Docker Hosts:</b> <span id="dockerHosts">-</span><br>
-        <b>Normal Hosts:</b> <span id="normalHosts">-</span>
+        <p>Total Hosts: <span id="totalHosts">0</span></p>
+        <p>Docker Hosts: <span id="dockerHosts">0</span></p>
+        <p>Normal Hosts: <span id="normalHosts">0</span></p>
       </div>
+
       <div class="sidebar-section" id="tab-node">
         <b>Selected Node:</b>
-        <div id="selectedNodeInfo" style="padding-top:8px;">(none)</div>
+        <div id="selectedNodeInfo">(none)</div>
       </div>
+
       <div class="sidebar-section" id="tab-logs">
-        <b>System Logs:</b>
-        <pre style="flex:1; overflow:auto;">[Logs loading soon...]</pre>
+        <b>Logs:</b>
+        <pre>[Log stream not yet connected]</pre>
       </div>
+
       <div class="sidebar-section" id="tab-settings">
-        <label><input type="checkbox" id="darkSidebar"/> Dark Mode</label><br>
-        <button style="margin-top:1em;" onclick="location.reload()">Reload</button>
+        <label><input type="checkbox" id="darkSidebar"/> Dark Mode</label>
       </div>
     </aside>
 
-    <!-- Main -->
     <main id="main">
-      <header id="topbar">
-        <h1>Atlas Infra Map</h1>
-        <div>
-          <span id="date"></span>
-          <span id="dark-toggle">🌙</span>
+      <div id="topbar">
+        <strong>Atlas Infra Map</strong>
+        <div class="right">
+          <label><input type="checkbox" id="dockerOnly"> Docker only</label>
+          <input type="text" id="searchText" placeholder="Search...">
+          <select id="subnetFilter"><option value="">All Subnets</option></select>
+          <select id="osFilter"><option value="">All OS</option></select>
+          <label><input type="checkbox" id="groupSubnets" checked> Group Subnets</label>
+          <button id="clearFilters">Clear</button>
+          <button id="exportBtn">📸 Export</button>
         </div>
-      </header>
+      </div>
 
-      <!-- Panel Toggles -->
-      <nav id="panel-bar">
-        <button class="panel-toggle active" data-panel="network">Network Map</button>
-        <button class="panel-toggle active" data-panel="table">Hosts Table</button>
+      <div id="panel-bar">
+        <button class="panel-toggle active" data-panel="network">Network</button>
+        <button class="panel-toggle active" data-panel="table">Hosts</button>
         <button class="panel-toggle" data-panel="logs">Logs</button>
-      </nav>
+      </div>
 
-      <!-- Panels -->
       <section id="panels">
         <div class="panel" id="panel-network">
-          <div id="mynetwork" style="height:480px; flex:1;"></div>
+          <div id="mynetwork"></div>
         </div>
         <div class="panel" id="panel-table">
           <h3>Host Table</h3>
-          <table id="hostTable">
-            <thead>
-              <tr><th>Type</th><th>IP</th><th>Name</th><th>OS</th><th>MAC</th><th>Ports</th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+          <div class="table-wrapper">
+            <table id="hostTable">
+              <thead>
+                <tr><th>Type</th><th>IP</th><th>Name</th><th>OS</th><th>MAC</th><th>Ports</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
         <div class="panel hidden" id="panel-logs">
           <h3>Logs</h3>
-          <pre style="flex:1; overflow:auto;">[Logs Panel]</pre>
+          <pre>[Logs go here]</pre>
         </div>
       </section>
     </main>
   </div>
 
   <script>
-    // Dark Mode
-    function setDark(on) {
-      document.body.classList.toggle('dark', on);
-      localStorage.setItem('atlas-dark', on ? '1' : '');
-      document.getElementById('darkSidebar').checked = on;
-    }
-    document.getElementById('dark-toggle').addEventListener('click', () => setDark(!document.body.classList.contains('dark')));
-    document.getElementById('darkSidebar').addEventListener('change', e => setDark(e.target.checked));
-    setDark(localStorage.getItem('atlas-dark') === '1');
+    const applyFilters = () => {
+      const dockerOnly = document.getElementById('dockerOnly').checked;
+      const text = document.getElementById('searchText').value;
+      const subnet = document.getElementById('subnetFilter').value;
+      const os = document.getElementById('osFilter').value;
+      const groupSubnets = document.getElementById('groupSubnets').checked;
+      if (window.applyVisFilter) {
+        window.applyVisFilter({ dockerOnly, text, subnet, os, groupSubnets });
+      }
+    };
 
-    // Sidebar Tabs
+    document.getElementById('dockerOnly').onchange =
+    document.getElementById('searchText').oninput =
+    document.getElementById('subnetFilter').onchange =
+    document.getElementById('osFilter').onchange =
+    document.getElementById('groupSubnets').onchange = applyFilters;
+
+    document.getElementById('clearFilters').onclick = () => {
+      document.getElementById('dockerOnly').checked = false;
+      document.getElementById('searchText').value = '';
+      document.getElementById('subnetFilter').value = '';
+      document.getElementById('osFilter').value = '';
+      document.getElementById('groupSubnets').checked = true;
+      applyFilters();
+    };
+
+    document.getElementById('exportBtn').onclick = () => {
+      const canvas = document.querySelector('#mynetwork canvas');
+      if (!canvas) return alert("No network visible.");
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = 'network-map.png';
+      a.click();
+    };
+
     document.querySelectorAll('.sidebar-tab').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.onclick = () => {
         document.querySelectorAll('.sidebar-tab').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         const tab = btn.dataset.tab;
         document.querySelectorAll('.sidebar-section').forEach(sec =>
-          sec.classList.toggle('active', sec.id === 'tab-' + tab)
-        );
-      });
+          sec.classList.toggle('active', sec.id === 'tab-' + tab));
+      };
     });
 
-    // Panel Toggles
     document.querySelectorAll('.panel-toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.onclick = () => {
         btn.classList.toggle('active');
-        document.getElementById('panel-' + btn.dataset.panel).classList.toggle('hidden');
-      });
+        const p = btn.dataset.panel;
+        document.getElementById('panel-' + p).classList.toggle('hidden', !btn.classList.contains('active'));
+      };
     });
 
-    // Date
-    function updateDate() {
-      document.getElementById('date').textContent = new Date().toLocaleString();
-    }
-    setInterval(updateDate, 20000);
-    updateDate();
+    window.onNetworkNodeSelect = function(node){
+      const panel = document.getElementById('selectedNodeInfo');
+      if (!node || !node.id) {
+        panel.innerHTML = "<i>(none)</i>";
+      } else {
+        panel.innerHTML = `
+          <b>Name:</b> ${node.name || '-'}<br>
+          <b>IP:</b> ${node.ip || '-'}<br>
+          <b>OS:</b> ${node.os || '-'}<br>
+          <b>MAC:</b> ${node.mac || '-'}<br>
+          <b>Ports:</b> ${node.ports || '-'}<br>
+          <b>Subnet:</b> ${node.subnet || '-'}<br>
+          <b>Type:</b> ${node.group === 'docker' ? 'Docker' : 'Normal'}
+        `;
+      }
+      document.querySelector('.sidebar-tab[data-tab="node"]').click();
+    };
+
+    window.onNetworkDataReady = function(nodes, dockerCount, normalCount) {
+      document.getElementById('totalHosts').textContent = nodes.length;
+      document.getElementById('dockerHosts').textContent = dockerCount;
+      document.getElementById('normalHosts').textContent = normalCount;
+
+      const tbody = document.querySelector('#hostTable tbody');
+      tbody.innerHTML = '';
+      nodes.forEach(n => {
+        tbody.innerHTML += `<tr>
+          <td>${n.group}</td><td>${n.ip}</td><td>${n.name}</td>
+          <td>${n.os}</td><td>${n.mac}</td><td>${n.ports}</td>
+        </tr>`;
+      });
+    };
   </script>
 </body>
 </html>

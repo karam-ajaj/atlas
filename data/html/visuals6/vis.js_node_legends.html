@@ -7,10 +7,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap">
   <style>
     html, body {
-  height: 100%;
-  margin: 0;
-}
-
+      height: 100%;
+      margin: 0;
+    }
     :root {
       --bg: #f7f7fa;
       --fg: #232323;
@@ -35,51 +34,39 @@
       --accent: #40a9ff;
     }
     #root { display:flex; height:100vh; }
-
-    .table-wrapper {
+    .table-wrapper { flex: 1; overflow-y: auto; min-height: 0; }
+    #hostTable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    #hostTable th, #hostTable td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: left;
+    }
+    #hostTable thead {
+      position: sticky;
+      top: 0;
+      background: #eee;
+      z-index: 2;
+    }
+    #panels {
       flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-}
-
-#hostTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-#hostTable th, #hostTable td {
-  border: 1px solid #ccc;
-  padding: 6px;
-  text-align: left;
-}
-#hostTable thead {
-  position: sticky;
-  top: 0;
-  background: #eee;
-  z-index: 2;
-}
-
-#panels {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-}
-
-.panel {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-}
-
-#panel-table .table-wrapper {
-  flex: 1;
-  overflow-y: auto;
-}
-
-    
-    /* Sidebar */
+      display: flex;
+      overflow: hidden;
+    }
+    .panel {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+    #panel-table .table-wrapper {
+      flex: 1;
+      overflow-y: auto;
+    }
     #sidebar {
       background: var(--sidebar);
       width: 230px;
@@ -116,8 +103,6 @@
       font-size:14px;
     }
     .sidebar-section.active { display:flex; }
-
-    /* Main area */
     #main {
       flex:1; display:flex; flex-direction:column; min-width:0;
       background:var(--bg);
@@ -136,8 +121,6 @@
     #topbar .right { display:flex; gap:10px; align-items:center;}
     #topbar h1 { font-size:22px; margin:0; color: var(--accent); }
     #dark-toggle { margin-left:16px; }
-
-    /* Modular Panels */
     #panel-bar {
       display:flex; gap:8px; align-items:center;
       background:var(--panel);
@@ -161,38 +144,22 @@
       color: #fff;
       border-color: var(--accent);
     }
-
-    /* Panels */
-    #panels { flex:1; display:flex; height:0; min-width:0;}
-    .panel {
-      background:var(--panel);
-      box-shadow: var(--shadow);
-      border-radius:10px;
-      margin:10px; padding:12px;
-      flex:1; min-width:0; display:flex; flex-direction:column;
-      border: 1px solid var(--border);
-      transition: background .2s;
-    }
+    .panel { background:var(--panel); box-shadow: var(--shadow); border-radius:10px; margin:10px; padding:12px; flex:1; min-width:0; display:flex; flex-direction:column; border: 1px solid var(--border); transition: background .2s; }
     .hidden { display:none!important; }
-
-    /* Responsive: sidebar collapses */
     @media (max-width:900px) {
       #sidebar { width:55px; min-width:45px;}
       #sidebar h2, .sidebar-tab span { display:none; }
       .sidebar-tab { padding:13px 9px;}
       .sidebar-section { font-size:12px;}
     }
-    /* Nice scrollbars */
     ::-webkit-scrollbar { width:8px;}
     ::-webkit-scrollbar-thumb { background: #aaa3; border-radius:8px;}
   </style>
   <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
-  <!-- Reuse your existing vis_network.js file -->
   <script src="vis_network.js"></script>
 </head>
 <body>
   <div id="root">
-    <!-- Sidebar -->
     <aside id="sidebar">
       <h2>Dashboard</h2>
       <div class="sidebar-tabs">
@@ -200,6 +167,7 @@
         <button class="sidebar-tab" data-tab="node"><span>🔎 Node Info</span></button>
         <button class="sidebar-tab" data-tab="logs"><span>📑 Logs</span></button>
         <button class="sidebar-tab" data-tab="settings"><span>⚙️ Settings</span></button>
+        <button class="sidebar-tab" data-tab="stats"><span>📈 Stats</span></button>
       </div>
       <div class="sidebar-section active" id="tab-overview">
         <b>Status:</b> <span id="statusMsg">OK</span>
@@ -225,9 +193,17 @@
           <button onclick="location.reload()">Reload Dashboard</button>
         </div>
       </div>
+      <div class="sidebar-section" id="tab-stats">
+        <b>Network Stats:</b>
+        <ul id="statsList" style="margin-top: 8px; padding-left: 16px;">
+          <li>Total Hosts: <span id="stat-total">-</span></li>
+          <li>Docker Hosts: <span id="stat-docker">-</span></li>
+          <li>Normal Hosts: <span id="stat-normal">-</span></li>
+          <li>Unique Subnets: <span id="stat-subnets">-</span></li>
+          <li>Duplicate IPs: <span id="stat-duplicates">-</span></li>
+        </ul>
+      </div>
     </aside>
-
-    <!-- Main Section -->
     <main id="main">
       <header id="topbar">
         <div class="left">
@@ -245,7 +221,6 @@
       </nav>
       <section id="panels">
         <div class="panel" id="panel-network">
-          <!-- The original controls+map will be injected here by vis_network.js -->
           <div id="visjsControls"></div>
           <div id="mynetwork" style="height:480px;"></div>
         </div>
@@ -259,7 +234,7 @@
               <tbody></tbody>
             </table>
           </div>
-        </div>        
+        </div>
         <div class="panel hidden" id="panel-logs">
           <h3>Logs</h3>
           <pre style="height:200px;overflow:auto;">[Logs Panel: Connect your log backend here.]</pre>
@@ -267,9 +242,7 @@
       </section>
     </main>
   </div>
-
   <script>
-    // --- DARK MODE ---
     function setDarkMode(on) {
       document.body.classList.toggle('dark', on);
       localStorage.setItem('atlas-dark', on ? '1' : '');
@@ -279,11 +252,8 @@
       setDarkMode(!document.body.classList.contains('dark'));
     };
     document.getElementById('darkSidebar').onchange = (e) => setDarkMode(e.target.checked);
-
-    // restore dark mode
     setDarkMode(localStorage.getItem('atlas-dark')==='1');
 
-    // --- SIDEBAR TABS ---
     document.querySelectorAll('.sidebar-tab').forEach(btn => {
       btn.onclick = function() {
         document.querySelectorAll('.sidebar-tab').forEach(b=>b.classList.remove('active'));
@@ -294,7 +264,6 @@
       }
     });
 
-    // --- MODULAR PANEL SYSTEM ---
     document.querySelectorAll('.panel-toggle').forEach(btn=>{
       btn.onclick = function() {
         btn.classList.toggle('active');
@@ -303,21 +272,15 @@
       }
     });
 
-    // --- DATE ---
     function updateDate(){
-      document.getElementById('date').textContent =
-        new Date().toLocaleString();
+      document.getElementById('date').textContent = new Date().toLocaleString();
     }
     setInterval(updateDate, 20000); updateDate();
 
-    // --- HOOK INTO vis_network.js ---
-    // The following expects vis_network.js to have this function, call at end of its init:
-    //   window.onNetworkDataReady(nodes, dockerCount, normalCount);
     window.onNetworkDataReady = function(nodes, dockerCount, normalCount) {
       document.getElementById('totalHosts').textContent = nodes.length;
       document.getElementById('dockerHosts').textContent = dockerCount;
       document.getElementById('normalHosts').textContent = normalCount;
-      // update host table
       const tbody = document.querySelector('#hostTable tbody');
       tbody.innerHTML = '';
       nodes.forEach(n=>{
@@ -331,8 +294,25 @@
           <td>${n.ports||''}</td>
         </tr>`;
       });
+
+      // Update Stats Panel
+      const subnets = new Set();
+      const ipMap = {};
+      let duplicateCount = 0;
+      nodes.forEach(n => {
+        if (n.subnet) subnets.add(n.subnet);
+        if (n.ip) {
+          if (ipMap[n.ip]) duplicateCount++;
+          else ipMap[n.ip] = true;
+        }
+      });
+      document.getElementById('stat-total').textContent = nodes.length;
+      document.getElementById('stat-docker').textContent = dockerCount;
+      document.getElementById('stat-normal').textContent = normalCount;
+      document.getElementById('stat-subnets').textContent = subnets.size;
+      document.getElementById('stat-duplicates').textContent = duplicateCount;
     };
-    // Show node info on click (you can wire up from vis_network.js too)
+
     window.onNetworkNodeSelect = function(node){
       document.getElementById('selectedNodeInfo').textContent =
         JSON.stringify(node, null, 2);

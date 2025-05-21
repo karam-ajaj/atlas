@@ -1,202 +1,147 @@
-// vis_network.js
-
-// --- CONFIG ---
-const API_URL = 'http://192.168.2.81:8889/hosts'; // your backend
+// This is the updated vis_network.js for your visuals3 with filters, clear button, export, and grouping toggle
+const API_URL = 'http://192.168.2.81:8889/hosts';
 
 let network, nodesDS, edgesDS;
-let nodesArr = []; // Only host nodes for table and sidebar
-let allNodes = [];
-let allEdges = [];
+let nodesArr = [], allNodes = [], allEdges = [];
+let allSubnets = new Set(), allOSes = new Set();
 
-// Fetch data from backend
 async function fetchData() {
-  const response = await fetch(API_URL);
-  const data = await response.json();
-  // data[0] = normal hosts, data[1] = docker hosts
-  return data;
+  const res = await fetch(API_URL);
+  return res.json();
 }
 
-// Utility: get /24 subnet
 function getSubnet(ip) {
-  if (!ip || typeof ip !== "string") return "";
-  const m = ip.match(/^(\d+\.\d+\.\d+)\./);
-  return m ? m[1] + '.0' : "other";
+  const m = ip?.match(/^([\d.]+)\./);
+  return m ? `${m[1]}.0` : 'unknown';
 }
 
-// Utility: deterministic color by subnet
 function subnetColor(subnet) {
-  const palette = [
-    "#f39c12", "#16a085", "#e67e22", "#c0392b", "#2980b9",
-    "#8e44ad", "#27ae60", "#d35400", "#2c3e50", "#e84393"
-  ];
-  let sum = 0;
-  for (let ch of subnet) sum += ch.charCodeAt(0);
-  return palette[sum % palette.length];
+  const palette = ["#f39c12","#16a085","#e67e22","#c0392b","#2980b9","#8e44ad","#27ae60","#d35400","#2c3e50","#e84393"];
+  return palette[[...subnet].reduce((a, c) => a + c.charCodeAt(0), 0) % palette.length];
 }
 
-// Build nodes and edges for vis network
-function buildNetworkData(data, filters = {}) {
-  nodesArr = [];    // reset host nodes list
-  allEdges = [];
-  allNodes = [];
-  let idCounter = 1;
-  let dockerCount = 0, normalCount = 0;
-  let subnetMap = {};
+function buildNetworkData(data, filters = {}, groupSubnets = true) {
+  nodesArr = []; allEdges = []; allNodes = [];
+  allSubnets.clear(); allOSes.clear();
 
-  // Helper to add a host node
-  function addHost(host, type) {
-    const [_, ip, name, os, mac, ports] = host;
+  let idCounter = 1, dockerCount = 0, normalCount = 0;
+  const subnetMap = {};
+
+  function addHost(h, _, type) {
+    const [id, ip, name, os, mac, ports] = h;
     const subnet = getSubnet(ip);
-
-    // Filtering logic
-    if (filters.dockerOnly && type !== 'docker') return;
-    if (filters.text && ![ip, name, os, mac, ports].join(' ').toLowerCase().includes(filters.text.toLowerCase())) return;
-    if (filters.os && filters.os !== os) return;
-    if (filters.subnet && filters.subnet !== subnet) return;
-
-    // Track subnet groups
     if (!subnetMap[subnet]) subnetMap[subnet] = [];
+    allSubnets.add(subnet);
+    allOSes.add(os);
+
     const node = {
-      id: idCounter++,
-      label: name || ip,
-      ip, name, os, mac, ports,
-      group: type,
-      color: type === 'docker' ? "#40a9ff" : "#ff6666",
-      font: { color: "#fff" },
-      subnet
+      id: idCounter++, label: name || ip, ip, name, os, mac, ports,
+      group: type, subnet,
+      color: type === 'docker' ? '#40a9ff' : '#ff6666',
+      font: { color: '#fff' }
     };
 
-    nodesArr.push(node);
+    if (filters.dockerOnly && type !== 'docker') return;
+    if (filters.text && ![ip,name,os,mac,ports].join(' ').toLowerCase().includes(filters.text.toLowerCase())) return;
+    if (filters.subnet && filters.subnet !== subnet) return;
+    if (filters.os && filters.os !== os) return;
+
     subnetMap[subnet].push(node.id);
-
-    // Count types
-    if (type === 'docker') dockerCount++;
-    else normalCount++;
+    allNodes.push(node);
+    nodesArr.push(node);
+    if (type === 'docker') dockerCount++; else normalCount++;
   }
 
-  // Add normal and docker hosts
-  data[0].forEach(h => addHost(h, 'normal'));
-  data[1].forEach(h => addHost(h, 'docker'));
+  data[0].forEach(h => addHost(h, 0, 'normal'));
+  data[1].forEach(h => addHost(h, 0, 'docker'));
 
-  // Add all host nodes to allNodes
-  allNodes = [...nodesArr];
-
-  // Create subnet cluster nodes and edges
-  for (const [subnet, ids] of Object.entries(subnetMap)) {
-    const subnetNode = {
-      id: 'subnet-' + subnet,
-      label: subnet,
-      group: 'subnet',
-      shape: 'ellipse',
-      color: subnetColor(subnet),
-      font: { color: "#fff", size: 14 },
-      fixed: false,
-      physics: false
-    };
-    allNodes.push(subnetNode);
-
-    // Connect subnet to each host
-    ids.forEach(id => {
-      allEdges.push({
-        from: subnetNode.id,
-        to: id,
-        color: { color: subnetColor(subnet), opacity: 0.35 },
-        width: 1,
-        dashes: true
+  const subnetNodes = [];
+  if (groupSubnets) {
+    for (const [subnet, ids] of Object.entries(subnetMap)) {
+      subnetNodes.push({
+        id: `subnet-${subnet}`,
+        label: subnet,
+        group: 'subnet',
+        shape: 'ellipse',
+        color: subnetColor(subnet),
+        font: { color: '#fff', size: 14 },
+        physics: false
       });
-    });
-
-    // Optionally connect subnets to root
-    allEdges.push({
-      from: 0,
-      to: subnetNode.id,
-      color: { color: '#888', opacity: 0.2 },
-      width: 2,
-      dashes: true
-    });
+      ids.forEach(id => allEdges.push({
+        from: `subnet-${subnet}`, to: id,
+        color: { color: subnetColor(subnet), opacity: 0.35 }, dashes: true, width: 1
+      }));
+    }
+    subnetNodes.forEach(sn => allEdges.push({
+      from: 0, to: sn.id, color: { color: '#888', opacity: 0.2 }, width: 2, dashes: true
+    }));
+    allNodes.push(...subnetNodes);
   }
 
-  // Add central hub node
   allNodes.push({
-    id: 0,
-    label: 'Network Hub',
-    group: 'hub',
-    shape: 'star',
-    color: '#ffd600',
-    size: 36,
-    font: { color: '#000', size: 17 }
+    id: 0, label: 'Network Hub', group: 'hub', shape: 'star',
+    color: '#ffd600', font: { color: '#000', size: 16 }, size: 36
   });
 
   return { nodes: allNodes, edges: allEdges, dockerCount, normalCount };
 }
 
-// Draw the vis network and bind events
 async function drawVisNetwork(filters = {}) {
   const data = await fetchData();
-  const { nodes, edges, dockerCount, normalCount } = buildNetworkData(data, filters);
+  const groupSubnets = filters.groupSubnets ?? true;
+  const { nodes, edges, dockerCount, normalCount } = buildNetworkData(data, filters, groupSubnets);
 
-  // Create vis DataSets
   nodesDS = new vis.DataSet(nodes);
   edgesDS = new vis.DataSet(edges);
 
-  // Setup container
   const container = document.getElementById('mynetwork');
   container.innerHTML = '';
 
   const options = {
-    interaction: { hover: true, tooltipDelay: 150 },
-    nodes: { shape: 'dot', size: 21, borderWidth: 2, font: { color: '#fff', size: 12 }, shadow: true },
-    edges: { color: { color: '#ccc', highlight: '#40a9ff', hover: '#ff9800' }, smooth: { type: 'dynamic' } },
+    interaction: { hover: true },
+    nodes: { shape: 'dot', size: 20, borderWidth: 2, shadow: true, font: { color: '#fff' } },
+    edges: { color: { color: '#ccc' }, smooth: { type: 'dynamic' } },
     groups: {
       normal: { shape: 'dot', color: '#ff6666' },
       docker: { shape: 'square', color: '#40a9ff' },
       subnet: { shape: 'ellipse', color: '#222', font: { color: '#fff' } },
       hub: { shape: 'star', color: '#ffd600', font: { color: '#000' } }
     },
-    layout: { improvedLayout: true, hierarchical: false },
     physics: { barnesHut: { gravitationalConstant: -5000 }, stabilization: false }
   };
 
   network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, options);
 
-  // Update dashboard: use nodesArr so only hosts update the table
-  if (window.onNetworkDataReady) {
+  if (window.onNetworkDataReady)
     window.onNetworkDataReady(nodesArr, dockerCount, normalCount);
-  }
 
-  // Tooltips on hover
+  // TOOLTIP
   network.on('hoverNode', ({ node }) => {
     const n = nodesDS.get(node);
-    network.body.container.title = `
-${n.label}
-${n.group === 'docker' ? 'Docker' : 'Normal'} Host
-IP: ${n.ip}
-OS: ${n.os}
-MAC: ${n.mac}
-Ports: ${n.ports}
-Subnet: ${n.subnet}
-    `;
+    network.body.container.title = `${n.name}\nIP: ${n.ip}\nOS: ${n.os}\nMAC: ${n.mac}\nPorts: ${n.ports}`;
   });
-  network.on('blurNode', () => {
-    network.body.container.title = '';
-  });
+  network.on('blurNode', () => network.body.container.title = '');
 
-  // Node selection for sidebar info
   network.on('selectNode', ({ nodes }) => {
-    const n = nodesDS.get(nodes[0]);
-    if (window.onNetworkNodeSelect) window.onNetworkNodeSelect(n);
+    const node = nodesDS.get(nodes[0]);
+    if (window.onNetworkNodeSelect) window.onNetworkNodeSelect(node);
   });
   network.on('deselectNode', () => {
     if (window.onNetworkNodeSelect) window.onNetworkNodeSelect({});
   });
 
-  // Expose filter function
-  window.applyVisFilter = function(filters) {
-    drawVisNetwork(filters);
-  };
+  // Populate dropdowns
+  const sub = document.getElementById('subnetFilter'), os = document.getElementById('osFilter');
+  if (sub && os) {
+    sub.innerHTML = '<option value="">All Subnets</option>' + Array.from(allSubnets).sort().map(s => `<option>${s}</option>`).join('');
+    os.innerHTML = '<option value="">All OS</option>' + Array.from(allOSes).sort().map(o => `<option>${o}</option>`).join('');
+    sub.value = filters.subnet || '';
+    os.value = filters.os || '';
+  }
 }
 
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-  drawVisNetwork();
-});
+window.applyVisFilter = function(filters) {
+  drawVisNetwork(filters);
+};
+
+document.addEventListener('DOMContentLoaded', () => drawVisNetwork());
