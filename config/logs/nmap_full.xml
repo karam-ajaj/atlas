@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.93 scan initiated Wed May 21 10:03:50 2025 as: nmap -O -sS -p- -oX /config/logs/nmap_full.xml 192.168.2.0/24 -->
+<nmaprun scanner="nmap" args="nmap -O -sS -p- -oX /config/logs/nmap_full.xml 192.168.2.0/24" start="1747821830" startstr="Wed May 21 10:03:50 2025" version="7.93" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="65535" services="1-65535"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
+<address addr="192.168.2.1" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
+<address addr="192.168.2.4" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<taskprogress task="Ping Scan" time="1747821830" percent="1.17" remaining="0" etc="1747821830"/>
+<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
+<address addr="192.168.2.111" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
+<address addr="192.168.2.254" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
+<address addr="192.168.2.81" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<taskprogress task="SYN Stealth Scan" time="1747821834" percent="2.58" remaining="38" etc="1747821872"/>
+<taskprogress task="SYN Stealth Scan" time="1747821839" percent="22.94" remaining="21" etc="1747821859"/>
+<taskprogress task="SYN Stealth Scan" time="1747821851" percent="69.72" remaining="8" etc="1747821859"/>
+<taskprogress task="SYN Stealth Scan" time="1747821875" percent="81.09" remaining="10" etc="1747821885"/>
+<taskprogress task="SYN Stealth Scan" time="1747821880" percent="81.94" remaining="11" etc="1747821890"/>
+<taskprogress task="SYN Stealth Scan" time="1747821882" percent="82.52" remaining="11" etc="1747821892"/>
+<host starttime="1747821833" endtime="1747821950"><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="192.168.2.1" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="closed" count="65534">
+<extrareasons reason="reset" count="65534" proto="tcp" ports="1-79,81-65535"/>
+</extraports>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="63"/><service name="http" method="table" conf="3"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="80"/>
+<portused state="closed" proto="tcp" portid="1"/>
+<portused state="closed" proto="udp" portid="35867"/>
+<osmatch name="Linux 2.6.23 - 2.6.38" accuracy="100" line="52080">
+<osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="2.6.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:2.6</cpe></osclass>
+</osmatch>
+</os>
+<uptime seconds="1512388" lastboot="Sat May  3 21:59:24 2025"/>
+<distance value="2"/>
+<tcpsequence index="205" difficulty="Good luck!" values="D51D54DC,D4FFD720,D577FD26,D543FC0A,D60CB102,D55153A9"/>
+<ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
+<tcptssequence class="other" values="16B771EC,16B77205,16B7721E,16B77237,16B77251,16B7726A"/>
+<times srtt="4941" rttvar="2350" to="100000"/>
+</host>
+<host starttime="1747821833" endtime="1747821952"><status state="up" reason="echo-reply" reason_ttl="127"/>
+<address addr="192.168.2.4" addrtype="ipv4"/>
+<hostnames>
+<hostname name="yoga.home" type="PTR"/>
+</hostnames>
+<ports><extraports state="filtered" count="65523">
+<extrareasons reason="no-response" count="65523" proto="tcp" ports="1-134,136-138,140-444,446-5039,5041-5356,5358-7069,7071-7679,7681-23442,23444-49676,49678-57620,57622-59868,59870-61629,61631-65535"/>
+</extraports>
+<port protocol="tcp" portid="135"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="msrpc" method="table" conf="3"/></port>
+<port protocol="tcp" portid="139"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="netbios-ssn" method="table" conf="3"/></port>
+<port protocol="tcp" portid="445"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="microsoft-ds" method="table" conf="3"/></port>
+<port protocol="tcp" portid="5040"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="unknown" method="table" conf="3"/></port>
+<port protocol="tcp" portid="5357"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="wsdapi" method="table" conf="3"/></port>
+<port protocol="tcp" portid="7070"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="realserver" method="table" conf="3"/></port>
+<port protocol="tcp" portid="7680"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="pando-pub" method="table" conf="3"/></port>
+<port protocol="tcp" portid="23443"><state state="open" reason="syn-ack" reason_ttl="127"/></port>
+<port protocol="tcp" portid="49677"><state state="open" reason="syn-ack" reason_ttl="127"/></port>
+<port protocol="tcp" portid="57621"><state state="open" reason="syn-ack" reason_ttl="127"/></port>
+<port protocol="tcp" portid="59869"><state state="open" reason="syn-ack" reason_ttl="127"/></port>
+<port protocol="tcp" portid="61630"><state state="open" reason="syn-ack" reason_ttl="127"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="135"/>
+<osmatch name="FreeBSD 6.2-RELEASE" accuracy="95" line="27735">
+<osclass type="general purpose" vendor="FreeBSD" osfamily="FreeBSD" osgen="6.X" accuracy="95"><cpe>cpe:/o:freebsd:freebsd:6.2</cpe></osclass>
+</osmatch>
+<osmatch name="Microsoft Windows 10" accuracy="93" line="69394">
+<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="10" accuracy="93"><cpe>cpe:/o:microsoft:windows_10</cpe></osclass>
+</osmatch>
+<osmatch name="Microsoft Windows Server 2008 or 2008 Beta 3" accuracy="91" line="74530">
+<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="2008" accuracy="91"><cpe>cpe:/o:microsoft:windows_server_2008::beta3</cpe><cpe>cpe:/o:microsoft:windows_server_2008</cpe></osclass>
+</osmatch>
+<osmatch name="Microsoft Windows Server 2008 SP1" accuracy="87" line="75133">
+<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="2008" accuracy="87"><cpe>cpe:/o:microsoft:windows_server_2008::sp1</cpe></osclass>
+</osmatch>
+<osmatch name="m0n0wall 1.3b11 - 1.3b15 (FreeBSD 6.3)" accuracy="86" line="27418">
+<osclass type="firewall" vendor="FreeBSD" osfamily="FreeBSD" osgen="6.X" accuracy="86"><cpe>cpe:/o:freebsd:freebsd:6.3</cpe></osclass>
+</osmatch>
+<osmatch name="Juniper SRX-series firewall (JUNOS 12.1)" accuracy="86" line="41239">
+<osclass type="firewall" vendor="Juniper" osfamily="JUNOS" osgen="12.X" accuracy="86"><cpe>cpe:/o:juniper:junos:12.1</cpe></osclass>
+</osmatch>
+<osmatch name="Microsoft Windows 10 1703" accuracy="86" line="69874">
+<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="10" accuracy="86"><cpe>cpe:/o:microsoft:windows_10:1703</cpe></osclass>
+</osmatch>
+<osmatch name="Microsoft Windows 10 1511 - 1607" accuracy="86" line="69586">
+<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="10" accuracy="86"><cpe>cpe:/o:microsoft:windows_10</cpe></osclass>
+</osmatch>
+<osmatch name="Juniper SRX100-series or SRX200-series firewall (JUNOS 10.4 - 12.1)" accuracy="85" line="41201">
+<osclass type="firewall" vendor="Juniper" osfamily="JUNOS" osgen="10.X" accuracy="85"><cpe>cpe:/o:juniper:junos:10</cpe></osclass>
+<osclass type="firewall" vendor="Juniper" osfamily="JUNOS" osgen="12.X" accuracy="85"><cpe>cpe:/o:juniper:junos:12</cpe></osclass>
+</osmatch>
+</os>
+<uptime seconds="624698" lastboot="Wed May 14 04:34:14 2025"/>
+<tcpsequence index="261" difficulty="Good luck!" values="12A200,919B758D,E73BCCEB,ED9944F7,128693FA,C7A8A541"/>
+<ipidsequence class="Incremental" values="5EC9,5ECA,5ECB,5ECC,5ECD,5ECE"/>
+<tcptssequence class="1000HZ" values="253C223C,253C22A2,253C2304,253C2367,253C23CB,253C2430"/>
+<times srtt="6283" rttvar="2009" to="100000"/>
+</host>
+<host starttime="1747821833" endtime="1747821950"><status state="up" reason="echo-reply" reason_ttl="64"/>
+<address addr="192.168.2.81" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="closed" count="65520">
+<extrareasons reason="reset" count="65520" proto="tcp" ports="1-21,23-79,81-110,112-442,444-887,889-2376,2378-3021,3023-3024,3026-3027,3029-3079,3081-3388,3390-7945,7947-8887,8890-8999,9001-65535"/>
+</extraports>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" method="table" conf="3"/></port>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="http" method="table" conf="3"/></port>
+<port protocol="tcp" portid="111"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="rpcbind" method="table" conf="3"/></port>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="https" method="table" conf="3"/></port>
+<port protocol="tcp" portid="888"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="accessbuilder" method="table" conf="3"/></port>
+<port protocol="tcp" portid="2377"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="swarm" method="table" conf="3"/></port>
+<port protocol="tcp" portid="3022"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="csregagent" method="table" conf="3"/></port>
+<port protocol="tcp" portid="3025"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="slnp" method="table" conf="3"/></port>
+<port protocol="tcp" portid="3028"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="LiebDevMgmt_DM" method="table" conf="3"/></port>
+<port protocol="tcp" portid="3080"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="stm_pproc" method="table" conf="3"/></port>
+<port protocol="tcp" portid="3389"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="ms-wbt-server" method="table" conf="3"/></port>
+<port protocol="tcp" portid="7946"><state state="open" reason="syn-ack" reason_ttl="64"/></port>
+<port protocol="tcp" portid="8888"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="sun-answerbook" method="table" conf="3"/></port>
+<port protocol="tcp" portid="8889"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ddi-tcp-2" method="table" conf="3"/></port>
+<port protocol="tcp" portid="9000"><state state="open" reason="syn-ack" reason_ttl="62"/><service name="cslistener" method="table" conf="3"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="22"/>
+<portused state="closed" proto="tcp" portid="1"/>
+<portused state="closed" proto="udp" portid="30520"/>
+<osmatch name="Linux 4.15 - 5.6" accuracy="100" line="67238">
+<osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="4.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:4</cpe></osclass>
+<osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:5</cpe></osclass>
+</osmatch>
+</os>
+<uptime seconds="2241467" lastboot="Fri Apr 25 11:28:05 2025"/>
+<distance value="1"/>
+<tcpsequence index="256" difficulty="Good luck!" values="D7322F47,EF7C6382,A20F9501,D08EE1F0,7B7B2E97,AD7D16DA"/>
+<ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
+<tcptssequence class="1000HZ" values="859A0675,859A06D9,859A073D,859A07A1,859A0806,859A086A"/>
+<times srtt="8" rttvar="4" to="100000"/>
+</host>
+<host starttime="1747821833" endtime="1747821950"><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="192.168.2.111" addrtype="ipv4"/>
+<hostnames>
+<hostname name="192.168.2.111" type="PTR"/>
+</hostnames>
+<ports><extraports state="closed" count="65531">
+<extrareasons reason="reset" count="65531" proto="tcp" ports="1-21,23-110,112-3127,3129-8005,8007-65535"/>
+</extraports>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="63"/><service name="ssh" method="table" conf="3"/></port>
+<port protocol="tcp" portid="111"><state state="open" reason="syn-ack" reason_ttl="63"/><service name="rpcbind" method="table" conf="3"/></port>
+<port protocol="tcp" portid="3128"><state state="open" reason="syn-ack" reason_ttl="63"/><service name="squid-http" method="table" conf="3"/></port>
+<port protocol="tcp" portid="8006"><state state="open" reason="syn-ack" reason_ttl="63"/><service name="wpl-analytics" method="table" conf="3"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="22"/>
+<portused state="closed" proto="tcp" portid="1"/>
+<portused state="closed" proto="udp" portid="34886"/>
+<osmatch name="Linux 5.0 - 5.4" accuracy="100" line="68103">
+<osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:5</cpe></osclass>
+</osmatch>
+</os>
+<uptime seconds="2799609" lastboot="Sat Apr 19 00:25:43 2025"/>
+<distance value="2"/>
+<tcpsequence index="262" difficulty="Good luck!" values="2C8800E6,AAD7FD29,7AC7B7F3,30BFC785,385775A8,85920DF3"/>
+<ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
+<tcptssequence class="1000HZ" values="A6DE951E,A6DE9582,A6DE95E6,A6DE964B,A6DE96AF,A6DE9713"/>
+<times srtt="68" rttvar="44" to="100000"/>
+</host>
+<host starttime="1747821952" endtime="1747821960"><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="192.168.2.254" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="closed" count="65531">
+<extrareasons reason="reset" count="65531" proto="tcp" ports="1-52,54-79,81-442,444-52868,52870-65535"/>
+</extraports>
+<port protocol="tcp" portid="53"><state state="open" reason="syn-ack" reason_ttl="63"/><service name="domain" method="table" conf="3"/></port>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="63"/><service name="http" method="table" conf="3"/></port>
+<port protocol="tcp" portid="443"><state state="filtered" reason="no-response" reason_ttl="0"/><service name="https" method="table" conf="3"/></port>
+<port protocol="tcp" portid="52869"><state state="open" reason="syn-ack" reason_ttl="63"/><service name="unknown" method="table" conf="3"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="53"/>
+<portused state="closed" proto="tcp" portid="1"/>
+<portused state="closed" proto="udp" portid="36452"/>
+<osmatch name="Linux 2.6.32 - 3.13" accuracy="100" line="56601">
+<osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="2.6.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:2.6</cpe></osclass>
+<osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="3.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:3</cpe></osclass>
+</osmatch>
+</os>
+<uptime seconds="3170017" lastboot="Mon Apr 14 17:32:23 2025"/>
+<distance value="2"/>
+<tcpsequence index="260" difficulty="Good luck!" values="95A47DEC,8CD061ED,915D2CB2,556798D8,FEA8D444,CD4C655F"/>
+<ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
+<tcptssequence class="1000HZ" values="BCF29915,BCF29979,BCF299DD,BCF29A41,BCF29AA5,BCF29B09"/>
+<times srtt="1653" rttvar="473" to="100000"/>
+</host>
+<runstats><finished time="1747821960" timestr="Wed May 21 10:06:00 2025" summary="Nmap done at Wed May 21 10:06:00 2025; 256 IP addresses (5 hosts up) scanned in 130.31 seconds" elapsed="130.31" exit="success"/><hosts up="5" down="251" total="256"/>
+</runstats>
+</nmaprun>

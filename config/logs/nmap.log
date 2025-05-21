@@ -1,8 +1,7 @@
-# Nmap 7.93 scan initiated Thu May 15 22:50:48 2025 as: nmap -sn -oG /config/logs/nmap.log 192.168.2.0/24
+# Nmap 7.93 scan initiated Wed May 21 00:40:04 2025 as: nmap -sn -oG /config/logs/nmap.log 192.168.2.0/24
 Host: 192.168.2.1 ()	Status: Up
-Host: 192.168.2.5 (yoga.home)	Status: Up
-Host: 192.168.2.8 ()	Status: Up
-Host: 192.168.2.81 (192.168.2.81)	Status: Up
-Host: 192.168.2.111 ()	Status: Up
-Host: 192.168.2.254 (mijnmodem.kpn.home)	Status: Up
-# Nmap done at Thu May 15 22:50:52 2025 -- 256 IP addresses (6 hosts up) scanned in 3.90 seconds
+Host: 192.168.2.4 (yoga.home)	Status: Up
+Host: 192.168.2.81 ()	Status: Up
+Host: 192.168.2.111 (192.168.2.111)	Status: Up
+Host: 192.168.2.254 ()	Status: Up
+# Nmap done at Wed May 21 00:40:08 2025 -- 256 IP addresses (5 hosts up) scanned in 3.50 seconds

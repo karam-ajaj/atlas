@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.93 scan initiated Wed May 21 10:03:46 2025 as: nmap -sn -oX /config/logs/nmap_mac.xml 192.168.2.0/24 -->
+<nmaprun scanner="nmap" args="nmap -sn -oX /config/logs/nmap_mac.xml 192.168.2.0/24" start="1747821826" startstr="Wed May 21 10:03:46 2025" version="7.93" xmloutputversion="1.05">
+<verbose level="0"/>
+<debugging level="0"/>
+<host><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="192.168.2.1" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<times srtt="3166" rttvar="5000" to="100000"/>
+</host>
+<host><status state="up" reason="echo-reply" reason_ttl="127"/>
+<address addr="192.168.2.4" addrtype="ipv4"/>
+<hostnames>
+<hostname name="yoga.home" type="PTR"/>
+</hostnames>
+<times srtt="5978" rttvar="5978" to="100000"/>
+</host>
+<host><status state="up" reason="echo-reply" reason_ttl="64"/>
+<address addr="192.168.2.81" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<times srtt="14" rttvar="5000" to="100000"/>
+</host>
+<host><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="192.168.2.111" addrtype="ipv4"/>
+<hostnames>
+<hostname name="192.168.2.111" type="PTR"/>
+</hostnames>
+<times srtt="217" rttvar="5000" to="100000"/>
+</host>
+<host><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="192.168.2.254" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<times srtt="2586" rttvar="4084" to="100000"/>
+</host>
+<runstats><finished time="1747821829" timestr="Wed May 21 10:03:49 2025" summary="Nmap done at Wed May 21 10:03:49 2025; 256 IP addresses (5 hosts up) scanned in 3.50 seconds" elapsed="3.50" exit="success"/><hosts up="5" down="251" total="256"/>
+</runstats>
+</nmaprun>

@@ -41,3 +41,5 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all methods like GET, POST, etc.
     allow_headers=["*"],  # Allow all headers
 )
+
+

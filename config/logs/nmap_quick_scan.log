@@ -1,1 +1,299 @@
-# Nmap 7.93 scan initiated Thu May 15 22:50:56 2025 as: nmap -A -O -T4 -oN /config/logs/nmap_quick_scan.log -iL /config/logs/live_hosts.txt
+# Nmap 7.93 scan initiated Wed May 21 00:24:58 2025 as: nmap -A -O -T4 -oN /config/logs/nmap_quick_scan.log -iL /config/logs/live_hosts.txt
+Nmap scan report for 192.168.2.1
+Host is up (0.0066s latency).
+Not shown: 999 closed tcp ports (reset)
+PORT   STATE SERVICE VERSION
+80/tcp open  http    TP-LINK RE200 WAP http config
+|_http-server-header: Router Webserver
+| http-auth: 
+| HTTP/1.1 401 N/A\x0D
+|_  Basic realm=TP-LINK AC750 WiFi Range Extender RE200
+|_http-title: Login Incorrect
+Device type: general purpose
+Running: Linux 2.6.X
+OS CPE: cpe:/o:linux:linux_kernel:2.6
+OS details: Linux 2.6.23 - 2.6.38
+Network Distance: 2 hops
+Service Info: Device: WAP; CPE: cpe:/h:tp-link:re200
+
+TRACEROUTE (using port 995/tcp)
+HOP RTT     ADDRESS
+1   0.01 ms 172.17.0.1
+2   9.62 ms re200.home (192.168.2.1)
+
+Nmap scan report for yoga.home (192.168.2.4)
+Host is up (0.0085s latency).
+Not shown: 995 filtered tcp ports (no-response)
+PORT     STATE SERVICE         VERSION
+135/tcp  open  msrpc           Microsoft Windows RPC
+139/tcp  open  netbios-ssn     Microsoft Windows netbios-ssn
+445/tcp  open  microsoft-ds?
+5357/tcp open  http            Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|_http-title: Service Unavailable
+|_http-server-header: Microsoft-HTTPAPI/2.0
+7070/tcp open  ssl/realserver?
+| ssl-cert: Subject: commonName=AnyDesk Client
+| Not valid before: 2024-08-03T15:28:03
+|_Not valid after:  2074-07-22T15:28:03
+|_ssl-date: TLS randomness does not represent time
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Aggressive OS guesses: FreeBSD 6.2-RELEASE (95%), Microsoft Windows 10 (93%), Microsoft Windows Server 2008 or 2008 Beta 3 (91%), Microsoft Windows Server 2008 SP1 (87%), m0n0wall 1.3b11 - 1.3b15 (FreeBSD 6.3) (86%), Juniper SRX-series firewall (JUNOS 12.1) (86%), Juniper Networks JUNOS 12 (86%), Juniper Networks JUNOS 9.0R2.10 (86%), Microsoft Windows 10 1703 (86%), Microsoft Windows 10 1511 - 1607 (86%)
+No exact OS matches for host (test conditions non-ideal).
+Network Distance: 2 hops
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+| smb2-security-mode: 
+|   311: 
+|_    Message signing enabled but not required
+|_nbstat: NetBIOS name: YOGA, NetBIOS user: <unknown>, NetBIOS MAC: 089df47456b2 (Intel Corporate)
+| smb2-time: 
+|   date: 2025-05-21T00:26:47
+|_  start_date: N/A
+
+TRACEROUTE (using port 135/tcp)
+HOP RTT      ADDRESS
+-   Hop 1 is the same as for 192.168.2.1
+2   10.75 ms yoga.home (192.168.2.4)
+
+Nmap scan report for 192.168.2.81
+Host is up (0.0000080s latency).
+Not shown: 992 closed tcp ports (reset)
+PORT     STATE SERVICE        VERSION
+22/tcp   open  ssh            OpenSSH 8.9p1 Ubuntu 3ubuntu0.13 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   256 b0dda5180b6ccafe3357eb92e8dc0d1d (ECDSA)
+|_  256 7e0bdd77c5c1638721f7e9ac58159e43 (ED25519)
+80/tcp   open  http           Golang net/http server (Go-IPFS json-rpc or InfluxDB API)
+|_http-title: Site doesn't have a title (text/plain; charset=utf-8).
+111/tcp  open  rpcbind        2-4 (RPC #100000)
+| rpcinfo: 
+|   program version    port/proto  service
+|   100000  2,3,4        111/tcp   rpcbind
+|   100000  2,3,4        111/udp   rpcbind
+|   100000  3,4          111/tcp6  rpcbind
+|_  100000  3,4          111/udp6  rpcbind
+443/tcp  open  ssl/http       Golang net/http server (Go-IPFS json-rpc or InfluxDB API)
+|_http-title: Site doesn't have a title (text/plain; charset=utf-8).
+| ssl-cert: Subject: commonName=TRAEFIK DEFAULT CERT
+| Subject Alternative Name: DNS:21d841245bffd32ab1b7ade5760d83d3.6e911f291e52a3d870309c464e5621f8.traefik.default
+| Not valid before: 2025-05-20T14:59:23
+|_Not valid after:  2026-05-20T14:59:23
+888/tcp  open  accessbuilder?
+| fingerprint-strings: 
+|   FourOhFourRequest: 
+|     HTTP/1.1 404 Not Found
+|     Content-Type: application/octet-stream
+|     X-Xss-Protection: 1; mode=block
+|     X-Frame-Options: SAMEORIGIN
+|     X-Content-Type-Options: nosniff
+|     Content-Length: 0
+|     Server: http-kit
+|     Date: Wed, 21 May 2025 00:25:39 GMT
+|   GetRequest: 
+|     HTTP/1.1 200 OK
+|     Content-Type: text/html
+|     Content-Length: 2599
+|     Server: http-kit
+|     Date: Wed, 21 May 2025 00:25:09 GMT
+|     <!DOCTYPE html>
+|     <html lang="en">
+|     <head>
+|     <title>swarmpit</title>
+|     <meta charset="utf-8" />
+|     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
+|     <meta name="description" content="Lightweight Docker Swarm management UI" />
+|     <meta name="theme-color" content="#65519f" />
+|     <link rel="apple-touch-icon" sizes="180x180" href="icon/apple-touch-icon.png?v=2" />
+|     <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32x32.png?v=2" />
+|     <link rel="icon" type="image/png" sizes="16x16" href="icon/favicon-16x16.png?v=2" />
+|     <link rel="mask-icon" href="icon/safari-pinned-tab.svg?v=2" color="#5bbad5" />
+|     <link rel="manifest" href="manifest.json" />
+|     <link rel="stylesheet" href="css/rc-slider
+|   HTTPOptions, RTSPRequest: 
+|     HTTP/1.1 200 OK
+|     Allow: GET,OPTIONS
+|     Content-Length: 0
+|     Server: http-kit
+|     Date: Wed, 21 May 2025 00:25:09 GMT
+|   SIPOptions: 
+|     HTTP/1.1 404 Not Found
+|     Content-Type: application/octet-stream
+|     X-Xss-Protection: 1; mode=block
+|     X-Frame-Options: SAMEORIGIN
+|     X-Content-Type-Options: nosniff
+|     Content-Length: 0
+|     Server: http-kit
+|_    Date: Wed, 21 May 2025 00:25:44 GMT
+3389/tcp open  ssl/http       Golang net/http server (Go-IPFS json-rpc or InfluxDB API)
+| ssl-cert: Subject: commonName=TRAEFIK DEFAULT CERT
+| Subject Alternative Name: DNS:21d841245bffd32ab1b7ade5760d83d3.6e911f291e52a3d870309c464e5621f8.traefik.default
+| Not valid before: 2025-05-20T14:59:23
+|_Not valid after:  2026-05-20T14:59:23
+|_http-title: Site doesn't have a title (text/plain; charset=utf-8).
+8888/tcp open  http           nginx 1.27.3
+|_http-title: Network Hosts
+|_http-server-header: nginx/1.27.3
+9000/tcp open  cslistener?
+| fingerprint-strings: 
+|   GenericLines, Help, Kerberos, RTSPRequest, SSLSessionReq, TLSSessionReq, TerminalServerCookie: 
+|     HTTP/1.1 400 Bad Request
+|     Content-Type: text/plain; charset=utf-8
+|     Connection: close
+|     Request
+|   GetRequest: 
+|     HTTP/1.0 400 Bad Request
+|     Accept-Ranges: bytes
+|     Content-Length: 276
+|     Content-Type: application/xml
+|     Server: MinIO
+|     Strict-Transport-Security: max-age=31536000; includeSubDomains
+|     Vary: Origin
+|     X-Amz-Id-2: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8
+|     X-Amz-Request-Id: 1841631D9BF5D039
+|     X-Content-Type-Options: nosniff
+|     X-Xss-Protection: 1; mode=block
+|     Date: Wed, 21 May 2025 00:25:09 GMT
+|     <?xml version="1.0" encoding="UTF-8"?>
+|     <Error><Code>InvalidRequest</Code><Message>Invalid Request (invalid argument)</Message><Resource>/</Resource><RequestId>1841631D9BF5D039</RequestId><HostId>dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8</HostId></Error>
+|   HTTPOptions: 
+|     HTTP/1.0 200 OK
+|     Vary: Origin
+|     Date: Wed, 21 May 2025 00:25:09 GMT
+|_    Content-Length: 0
+2 services unrecognized despite returning data. If you know the service/version, please submit the following fingerprints at https://nmap.org/cgi-bin/submit.cgi?new-service :
+==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============
+SF-Port888-TCP:V=7.93%I=7%D=5/21%Time=682D1D65%P=x86_64-pc-linux-gnu%r(Get
+SF:Request,AA0,"HTTP/1\.1\x20200\x20OK\r\nContent-Type:\x20text/html\r\nCo
+SF:ntent-Length:\x202599\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x2021\x20
+SF:May\x202025\x2000:25:09\x20GMT\r\n\r\n<!DOCTYPE\x20html>\n<html\x20lang
+SF:=\"en\">\n<head>\n\x20\x20\x20\x20<title>swarmpit</title>\n\x20\x20\x20
+SF:\x20<meta\x20charset=\"utf-8\"\x20/>\n\x20\x20\x20\x20<meta\x20name=\"v
+SF:iewport\"\x20content=\"width=device-width,initial-scale=1,maximum-scale
+SF:=1,user-scalable=0\"\x20/>\n\x20\x20\x20\x20<meta\x20name=\"description
+SF:\"\x20content=\"Lightweight\x20Docker\x20Swarm\x20management\x20UI\"\x2
+SF:0/>\n\x20\x20\x20\x20<meta\x20name=\"theme-color\"\x20content=\"#65519f
+SF:\"\x20/>\n\x20\x20\x20\x20<link\x20rel=\"apple-touch-icon\"\x20sizes=\"
+SF:180x180\"\x20href=\"icon/apple-touch-icon\.png\?v=2\"\x20/>\n\x20\x20\x
+SF:20\x20<link\x20rel=\"icon\"\x20type=\"image/png\"\x20sizes=\"32x32\"\x2
+SF:0href=\"icon/favicon-32x32\.png\?v=2\"\x20/>\n\x20\x20\x20\x20<link\x20
+SF:rel=\"icon\"\x20type=\"image/png\"\x20sizes=\"16x16\"\x20href=\"icon/fa
+SF:vicon-16x16\.png\?v=2\"\x20/>\n\x20\x20\x20\x20<link\x20rel=\"mask-icon
+SF:\"\x20href=\"icon/safari-pinned-tab\.svg\?v=2\"\x20color=\"#5bbad5\"\x2
+SF:0/>\n\x20\x20\x20\x20<link\x20rel=\"manifest\"\x20href=\"manifest\.json
+SF:\"\x20/>\n\x20\x20\x20\x20<link\x20rel=\"stylesheet\"\x20href=\"css/rc-
+SF:slider")%r(HTTPOptions,71,"HTTP/1\.1\x20200\x20OK\r\nAllow:\x20GET,OPTI
+SF:ONS\r\nContent-Length:\x200\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x20
+SF:21\x20May\x202025\x2000:25:09\x20GMT\r\n\r\n")%r(RTSPRequest,71,"HTTP/1
+SF:\.1\x20200\x20OK\r\nAllow:\x20GET,OPTIONS\r\nContent-Length:\x200\r\nSe
+SF:rver:\x20http-kit\r\nDate:\x20Wed,\x2021\x20May\x202025\x2000:25:09\x20
+SF:GMT\r\n\r\n")%r(FourOhFourRequest,EB,"HTTP/1\.1\x20404\x20Not\x20Found\
+SF:r\nContent-Type:\x20application/octet-stream\r\nX-Xss-Protection:\x201;
+SF:\x20mode=block\r\nX-Frame-Options:\x20SAMEORIGIN\r\nX-Content-Type-Opti
+SF:ons:\x20nosniff\r\nContent-Length:\x200\r\nServer:\x20http-kit\r\nDate:
+SF:\x20Wed,\x2021\x20May\x202025\x2000:25:39\x20GMT\r\n\r\n")%r(SIPOptions
+SF:,EB,"HTTP/1\.1\x20404\x20Not\x20Found\r\nContent-Type:\x20application/o
+SF:ctet-stream\r\nX-Xss-Protection:\x201;\x20mode=block\r\nX-Frame-Options
+SF::\x20SAMEORIGIN\r\nX-Content-Type-Options:\x20nosniff\r\nContent-Length
+SF::\x200\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x2021\x20May\x202025\x20
+SF:00:25:44\x20GMT\r\n\r\n");
+==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============
+SF-Port9000-TCP:V=7.93%I=7%D=5/21%Time=682D1D65%P=x86_64-pc-linux-gnu%r(Ge
+SF:nericLines,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20t
+SF:ext/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x
+SF:20Request")%r(GetRequest,2B0,"HTTP/1\.0\x20400\x20Bad\x20Request\r\nAcc
+SF:ept-Ranges:\x20bytes\r\nContent-Length:\x20276\r\nContent-Type:\x20appl
+SF:ication/xml\r\nServer:\x20MinIO\r\nStrict-Transport-Security:\x20max-ag
+SF:e=31536000;\x20includeSubDomains\r\nVary:\x20Origin\r\nX-Amz-Id-2:\x20d
+SF:d9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8\r\nX-Am
+SF:z-Request-Id:\x201841631D9BF5D039\r\nX-Content-Type-Options:\x20nosniff
+SF:\r\nX-Xss-Protection:\x201;\x20mode=block\r\nDate:\x20Wed,\x2021\x20May
+SF:\x202025\x2000:25:09\x20GMT\r\n\r\n<\?xml\x20version=\"1\.0\"\x20encodi
+SF:ng=\"UTF-8\"\?>\n<Error><Code>InvalidRequest</Code><Message>Invalid\x20
+SF:Request\x20\(invalid\x20argument\)</Message><Resource>/</Resource><Requ
+SF:estId>1841631D9BF5D039</RequestId><HostId>dd9025bab4ad464b049177c95eb6e
+SF:bf374d3b3fd1af9251148b658df7ac2e3e8</HostId></Error>")%r(HTTPOptions,59
+SF:,"HTTP/1\.0\x20200\x20OK\r\nVary:\x20Origin\r\nDate:\x20Wed,\x2021\x20M
+SF:ay\x202025\x2000:25:09\x20GMT\r\nContent-Length:\x200\r\n\r\n")%r(RTSPR
+SF:equest,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/
+SF:plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Re
+SF:quest")%r(Help,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\
+SF:x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20B
+SF:ad\x20Request")%r(SSLSessionReq,67,"HTTP/1\.1\x20400\x20Bad\x20Request\
+SF:r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20clos
+SF:e\r\n\r\n400\x20Bad\x20Request")%r(TerminalServerCookie,67,"HTTP/1\.1\x
+SF:20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-
+SF:8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request")%r(TLSSessionRe
+SF:q,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain
+SF:;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request
+SF:")%r(Kerberos,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x
+SF:20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Ba
+SF:d\x20Request");
+Device type: general purpose
+Running: Linux 4.X|5.X
+OS CPE: cpe:/o:linux:linux_kernel:4 cpe:/o:linux:linux_kernel:5
+OS details: Linux 4.15 - 5.6
+Network Distance: 1 hop
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+TRACEROUTE (using port 995/tcp)
+HOP RTT     ADDRESS
+1   0.01 ms 192.168.2.81
+
+Nmap scan report for 192.168.2.111 (192.168.2.111)
+Host is up (0.000065s latency).
+Not shown: 997 closed tcp ports (reset)
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 9.2p1 Debian 2+deb12u2 (protocol 2.0)
+| ssh-hostkey: 
+|   256 31148681675b0e1f1e39597f90dedebf (ECDSA)
+|_  256 e5d7a18b58935aee46f70cc2c523b568 (ED25519)
+111/tcp  open  rpcbind 2-4 (RPC #100000)
+| rpcinfo: 
+|   program version    port/proto  service
+|   100000  2,3,4        111/tcp   rpcbind
+|   100000  2,3,4        111/udp   rpcbind
+|   100000  3,4          111/tcp6  rpcbind
+|_  100000  3,4          111/udp6  rpcbind
+3128/tcp open  http    Proxmox Virtual Environment REST API 3.0
+|_http-server-header: pve-api-daemon/3.0
+|_http-title: Site doesn't have a title.
+Device type: general purpose
+Running: Linux 5.X
+OS CPE: cpe:/o:linux:linux_kernel:5
+OS details: Linux 5.0 - 5.4
+Network Distance: 2 hops
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+TRACEROUTE (using port 995/tcp)
+HOP RTT     ADDRESS
+-   Hop 1 is the same as for 192.168.2.1
+2   0.09 ms 192.168.2.111 (192.168.2.111)
+
+Nmap scan report for 192.168.2.254
+Host is up (0.0014s latency).
+Not shown: 996 closed tcp ports (reset)
+PORT      STATE    SERVICE VERSION
+53/tcp    open     domain  Unbound
+| dns-nsid: 
+|   NSID: rec-inc-pv025-1 (7265632d696e632d70763032352d31)
+|_  id.server: rec-inc-pv025-1
+80/tcp    open     http    Mini web server 1.0 (ZTE ZXV10 W300 ADSL router http config)
+|_http-server-header: Mini web server 1.0 ZTE corp 2005.
+|_http-title: &#72;&#51;&#54;&#57;&#65;
+443/tcp   filtered https
+52869/tcp open     upnp    Portable SDK for UPnP devices 1.6.18 (UPnP 1.0)
+Device type: general purpose
+Running: Linux 2.6.X|3.X
+OS CPE: cpe:/o:linux:linux_kernel:2.6 cpe:/o:linux:linux_kernel:3
+OS details: Linux 2.6.32 - 3.13
+Network Distance: 2 hops
+Service Info: OSs: Linux 2.4.17, Linux; Device: broadband router; CPE: cpe:/h:zte:zxv10_w300, cpe:/o:montavista:linux_kernel:2.4.17, cpe:/o:linux:linux_kernel
+
+TRACEROUTE (using port 995/tcp)
+HOP RTT     ADDRESS
+-   Hop 1 is the same as for 192.168.2.1
+2   1.54 ms mijnmodem.kpn.home (192.168.2.254)
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Wed May 21 00:27:27 2025 -- 5 IP addresses (5 hosts up) scanned in 149.19 seconds

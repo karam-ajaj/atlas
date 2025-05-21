@@ -24,3 +24,6 @@ apt install docker.io -y
 
 # install jq
 apt update && apt install -y jq
+
+# install lxml (for nmap xml script)
+apt install python3-lxml -y

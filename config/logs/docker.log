@@ -1,32 +1,55 @@
-teleport_teleport.1.489dgxyenratwmdv3a62evv9z 10.0.0.5 MAC:02:42:0a:00:00:05 10.0.26.2 MAC:02:42:0a:00:1a:02 10.0.6.3 MAC:02:42:0a:00:06:03 10.0.1.17 MAC:02:42:0a:00:01:11 Image:public.ecr.aws/gravitational/teleport:14.3.32@sha256:8919856caa6938d8ebfbbfd0c972666364741baf718c8c018e48ae724818b8cf
-flaresolverr_flaresolverr.1.za0o429c4dpfc8c6exbm5780g 10.0.17.3 MAC:02:42:0a:00:11:03 10.0.1.34 MAC:02:42:0a:00:01:22 Ports:8191/tcp 8192/tcp Image:ghcr.io/flaresolverr/flaresolverr:latest@sha256:f104ee51e5124d83cf3be9b37480649355d223f7d8f9e453d0d5ef06c6e3b31b
-tools_tools.1.j34t8nd569xfb97om44zpe1sg 10.0.7.3 MAC:02:42:0a:00:07:03 10.0.1.28 MAC:02:42:0a:00:01:1c Ports:80/tcp Image:corentinth/it-tools:latest@sha256:8b8128748339583ca951af03dfe02a9a4d7363f61a216226fc28030731a5a61f
-dockwatch_dockwatch-pxsw01.1.q2wkhaw8hc7wsqav9est2fei6 10.0.12.3 MAC:02:42:0a:00:0c:03 10.0.1.33 MAC:02:42:0a:00:01:21 Ports:443/tcp 80/tcp Image:ghcr.io/notifiarr/dockwatch:main@sha256:73850afb8b946d1fb0903e19633d800e6d3437ae8c6fdd85b4f2952b09a721b3
-docs_docs.1.vy3fxxqzpq68r1fu0wl5hv0ly 10.0.4.3 MAC:02:42:0a:00:04:03 10.0.1.6 MAC:02:42:0a:00:01:06 Ports:8000/tcp Image:keinstien/mkdocs-material:9.5.26@sha256:ad6858568291502d47cb9986790aeef1d0ca08551d533bc8e188c9199c7513e2
-pdf_pdf.1.fui4cdrn0mdawzwdgeqjjp6qf 10.0.33.3 MAC:02:42:0a:00:21:03 10.0.1.4 MAC:02:42:0a:00:01:04 Ports:8080/tcp Image:frooodle/s-pdf:latest@sha256:254d4a6e7b5ea11d1558ed7b8c38d22fabe37e1ea0cc58e05440746aaf18a343
-grav_grav.1.j8ez8ok73u9sml6igxuopk09x 10.0.20.3 MAC:02:42:0a:00:14:03 10.0.1.8 MAC:02:42:0a:00:01:08 Ports:443/tcp 80/tcp Image:lscr.io/linuxserver/grav:latest@sha256:78915c57a7afa4972d42e3565c6f01c19a6d6ef97bb81adeb67121064d4e0fc5
-password_vaultwarden.1.uj0ryq496pcowtves88fmff9j 10.0.21.3 MAC:02:42:0a:00:15:03 10.0.1.24 MAC:02:42:0a:00:01:18 Ports:80/tcp Image:vaultwarden/server:latest@sha256:87edb99945da91bd7504ac1435495595af2e89ad2c7adc151ae5bf091ec8baf2
-influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc 10.0.10.2 MAC:02:42:0a:00:0a:02 10.0.22.3 MAC:02:42:0a:00:16:03 10.0.0.3 MAC:02:42:0a:00:00:03 10.0.1.14 MAC:02:42:0a:00:01:0e Ports:8086/tcp Image:influxdb:latest@sha256:190c3605b92c3887be32d335cbc32773af8c618dab1d103b4a78f259e670c290
-diskover_diskover.1.0iv1rj6m8c5m0yg4r74wdds6r 10.0.18.3 MAC:02:42:0a:00:12:03 10.0.1.10 MAC:02:42:0a:00:01:0a Ports:443/tcp 80/tcp Image:lscr.io/linuxserver/diskover:latest@sha256:ad9f9ccafc741a6961208b1987b81faa7eae4f861ee4c05f952b6301b8e434fa
-wetty_pc01.1.e0pk5bvwi5ww3hkes0yawt1s8 10.0.1.31 MAC:02:42:0a:00:01:1f 10.0.25.3 MAC:02:42:0a:00:19:03 Ports:3000/tcp Image:krishnasrinivas/wetty:latest@sha256:203112512b3e972f64ce54bfad6b777061829e6eba81391a021a1733744e7789
-grafana_grafana.1.r583rtebf29fh8zhbnx83kvix 10.0.19.3 MAC:02:42:0a:00:13:03 10.0.1.29 MAC:02:42:0a:00:01:1d Ports:3000/tcp Image:grafana/grafana-enterprise:latest@sha256:098749567519a97ddee6394921027a8888ce5afa14896010b4ce10407b7f9147
-sablier_sablier.1.z517njwdp3ns3wvbqvf4odw22 10.0.0.6 MAC:02:42:0a:00:00:06 10.0.2.3 MAC:02:42:0a:00:02:03 10.0.1.20 MAC:02:42:0a:00:01:14 Ports:10000/tcp Image:sablierapp/sablier:1.8.1@sha256:f028eb855563cb55fbdaf40716e8ad7678cfda2bebbe15843007c7df1f89d138
-portainer_agent.phoi9opu9cpmpasi72bsk15hv.j708xclw3no114gpxt6bbzbsz 10.0.5.3 MAC:02:42:0a:00:05:03 Image:portainer/agent:latest@sha256:d2e6833bb6f067962f79be262066cc96921159bc9a49a3100cacecb542522fd5
-swarmpit_db.1.zq24ea3g4c13bivhvhrunsimz 10.0.39.6 MAC:02:42:0a:00:27:06 Ports:4369/tcp 5984/tcp 9100/tcp Image:couchdb:2.3.0@sha256:ee75c9a737e7c48af0170142689959f2d70f93700162fef40818c799dfeecb8e
-swarmpit_influxdb.1.7j2yl32cme100fyimrm7ta8xw 10.0.39.3 MAC:02:42:0a:00:27:03 Ports:8086/tcp Image:influxdb:1.7@sha256:a25a134e87489cb3e642c712576cf8471667b0cad1cfd65727d453fb40e759d8
-swarmpit_app.1.b9zrqdv4eka8salmpy8jgigj8 10.0.0.4 MAC:02:42:0a:00:00:04 10.0.39.4 MAC:02:42:0a:00:27:04 10.0.1.15 MAC:02:42:0a:00:01:0f Ports:8080/tcp Image:swarmpit/swarmpit:1.9@sha256:8e0f8b86f2815de76a9d8746e0affaa54ad02841c55b185ed6df1100443c36c2
-homarr_homarr.1.u8hinxde9y3ybhj9szyu152py 10.0.1.21 MAC:02:42:0a:00:01:15 Ports:7575/tcp Image:ghcr.io/ajnart/homarr:0.15.6@sha256:889162656ea48d6ad151aa56328a81ac5320fd99f8923d065d915296384c346e
-cv_cv.1.99alnrcewvorr5nu4quo794f1 10.0.1.35 MAC:02:42:0a:00:01:23 Ports:80/tcp Image:nginx:latest@sha256:9d6b58feebd2dbd3c56ab5853333d627cc6e281011cfd6050fa4bcf2072c9496
-traefikv3_traefik.1.dwr8n7fas6k7a5uihm0g5q1uq 10.0.0.7 MAC:02:42:0a:00:00:07 10.0.1.22 MAC:02:42:0a:00:01:16 Ports:80/tcp Image:traefik:v3.3.4@sha256:cc11989f418e2cfe5e60fc40c92c1813be847f58eda15eced7d5ac890255ad9e
-scripts_scripts.1.sgj8m35zsn2b2mx3nfld3ehtp 10.0.1.18 MAC:02:42:0a:00:01:12 Ports:80/tcp Image:nginx:latest@sha256:5ed8fcc66f4ed123c1b2560ed708dc148755b6e4cbd8b943fab094f2c6bfa91e
-api_aria.1.olg5o3uiy7dxobq4azld22j3o 10.0.1.25 MAC:02:42:0a:00:01:19 Ports:80/tcp 8080/tcp Image:swaggerapi/swagger-ui:latest@sha256:2a9cd79ed1101ac546fcf37e6ce3ac8092f4b0cdd0382d4f4b1d5f7b1debb299
-api_lcm.1.pm0cmkgf5okbll5symzlnhsag 10.0.1.36 MAC:02:42:0a:00:01:24 Ports:80/tcp 8080/tcp Image:swaggerapi/swagger-ui:latest@sha256:2a9cd79ed1101ac546fcf37e6ce3ac8092f4b0cdd0382d4f4b1d5f7b1debb299
-api_vc.1.fot2643dp9kpjjmuvsuw7t3j7 10.0.1.27 MAC:02:42:0a:00:01:1b Ports:80/tcp 8080/tcp Image:swaggerapi/swagger-ui:latest@sha256:2a9cd79ed1101ac546fcf37e6ce3ac8092f4b0cdd0382d4f4b1d5f7b1debb299
-coder_coder.1.upf5l9kz83hmn7hi7k4jy7hk7 10.0.1.19 MAC:02:42:0a:00:01:13 Ports:8443/tcp Image:lscr.io/linuxserver/code-server:latest@sha256:733c98b11faf45078c2a98cb1049fa10f386a725c893e867b82b4349ad4c5944
-authelia_authelia.1.8qzlnqsmrvb2a4vego5zcsqvi 10.0.1.3 MAC:02:42:0a:00:01:03 Ports:9091/tcp Image:authelia/authelia:4.38.0@sha256:75cd300b22dcf979398fea0fc979530c61563f7efb4811127b44ddd620bab7ac
-minio_app.1.2klebb73h4cj5i7tspzobb1w5 10.0.0.2 MAC:02:42:0a:00:00:02 10.0.1.7 MAC:02:42:0a:00:01:07 Ports:9000/tcp Image:minio/minio:latest@sha256:1df91be8d6a6146001cd6be2569a12785a8ece583b511f56ebed08f1e65d3611
-notifiarr_notifiarr.1.wvchpybyzpi8hfv6fqcktfr2p 10.0.1.5 MAC:02:42:0a:00:01:05 Ports:5454/tcp Image:golift/notifiarr:latest@sha256:3568cce0d51906f86bd88fc239ba6ada79fc44aa02f74600ac58be5eda7e8cae
-luai-wordpress_wordpress-luai.1.uuuw2vyhfols2rkn1jdzelpcm 10.0.29.3 MAC:02:42:0a:00:1d:03 10.0.1.11 MAC:02:42:0a:00:01:0b Ports:80/tcp Image:wordpress:latest@sha256:c31edd83f61ee9f524ff6a36357bd3bf6bdd4c397c32e15d7ce4708b717569e9
-api_api.1.id6jw858c8oelboq436nsc9ko 10.0.1.26 MAC:02:42:0a:00:01:1a Ports:80/tcp 8080/tcp Image:swaggerapi/swagger-editor:latest@sha256:5456a27d921f4cba2fd25a9dd501462b9f130ced91062b3d91ca6476e0137495
-luai-wordpress_db-luai.1.6wqcw6bbkk1y5ykktjwhptg4g 10.0.29.4 MAC:02:42:0a:00:1d:04 Ports:3306/tcp 33060/tcp Image:mysql:5.7@sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb
-atlas 172.17.0.2 MAC:02:42:ac:11:00:02 Ports:80/tcp 8000/tcp Image:nginx
+/teleport_teleport.1.489dgxyenratwmdv3a62evv9z	ingress	10.0.0.5	02:42:0a:00:00:05
+/teleport_teleport.1.489dgxyenratwmdv3a62evv9z	librenms_internal	10.0.26.2	02:42:0a:00:1a:02
+/teleport_teleport.1.489dgxyenratwmdv3a62evv9z	teleport_internal	10.0.6.3	02:42:0a:00:06:03
+/teleport_teleport.1.489dgxyenratwmdv3a62evv9z	traefik-public	10.0.1.17	02:42:0a:00:01:11
+/flaresolverr_flaresolverr.1.za0o429c4dpfc8c6exbm5780g	flaresolverr_internal	10.0.17.3	02:42:0a:00:11:03
+/flaresolverr_flaresolverr.1.za0o429c4dpfc8c6exbm5780g	traefik-public	10.0.1.34	02:42:0a:00:01:22
+/tools_tools.1.j34t8nd569xfb97om44zpe1sg	tools_internal	10.0.7.3	02:42:0a:00:07:03
+/tools_tools.1.j34t8nd569xfb97om44zpe1sg	traefik-public	10.0.1.28	02:42:0a:00:01:1c
+/dockwatch_dockwatch-pxsw01.1.q2wkhaw8hc7wsqav9est2fei6	dockwatch_internal	10.0.12.3	02:42:0a:00:0c:03
+/dockwatch_dockwatch-pxsw01.1.q2wkhaw8hc7wsqav9est2fei6	traefik-public	10.0.1.33	02:42:0a:00:01:21
+/docs_docs.1.vy3fxxqzpq68r1fu0wl5hv0ly	docs_internal	10.0.4.3	02:42:0a:00:04:03
+/docs_docs.1.vy3fxxqzpq68r1fu0wl5hv0ly	traefik-public	10.0.1.6	02:42:0a:00:01:06
+/pdf_pdf.1.fui4cdrn0mdawzwdgeqjjp6qf	pdf_internal	10.0.33.3	02:42:0a:00:21:03
+/pdf_pdf.1.fui4cdrn0mdawzwdgeqjjp6qf	traefik-public	10.0.1.4	02:42:0a:00:01:04
+/grav_grav.1.j8ez8ok73u9sml6igxuopk09x	grav_internal	10.0.20.3	02:42:0a:00:14:03
+/grav_grav.1.j8ez8ok73u9sml6igxuopk09x	traefik-public	10.0.1.8	02:42:0a:00:01:08
+/password_vaultwarden.1.uj0ryq496pcowtves88fmff9j	password_internal	10.0.21.3	02:42:0a:00:15:03
+/password_vaultwarden.1.uj0ryq496pcowtves88fmff9j	traefik-public	10.0.1.24	02:42:0a:00:01:18
+/influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc	cloudbeaver_internal	10.0.10.2	02:42:0a:00:0a:02
+/influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc	influxdb_internal	10.0.22.3	02:42:0a:00:16:03
+/influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc	ingress	10.0.0.3	02:42:0a:00:00:03
+/influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc	traefik-public	10.0.1.14	02:42:0a:00:01:0e
+/diskover_diskover.1.0iv1rj6m8c5m0yg4r74wdds6r	diskover_internal	10.0.18.3	02:42:0a:00:12:03
+/diskover_diskover.1.0iv1rj6m8c5m0yg4r74wdds6r	traefik-public	10.0.1.10	02:42:0a:00:01:0a
+/wetty_pc01.1.e0pk5bvwi5ww3hkes0yawt1s8	traefik-public	10.0.1.31	02:42:0a:00:01:1f
+/wetty_pc01.1.e0pk5bvwi5ww3hkes0yawt1s8	wetty_internal	10.0.25.3	02:42:0a:00:19:03
+/grafana_grafana.1.r583rtebf29fh8zhbnx83kvix	grafana_internal	10.0.19.3	02:42:0a:00:13:03
+/grafana_grafana.1.r583rtebf29fh8zhbnx83kvix	traefik-public	10.0.1.29	02:42:0a:00:01:1d
+/sablier_sablier.1.z517njwdp3ns3wvbqvf4odw22	ingress	10.0.0.6	02:42:0a:00:00:06
+/sablier_sablier.1.z517njwdp3ns3wvbqvf4odw22	sablier_internal	10.0.2.3	02:42:0a:00:02:03
+/sablier_sablier.1.z517njwdp3ns3wvbqvf4odw22	traefik-public	10.0.1.20	02:42:0a:00:01:14
+/portainer_agent.phoi9opu9cpmpasi72bsk15hv.j708xclw3no114gpxt6bbzbsz	portainer_portainer-internal	10.0.5.3	02:42:0a:00:05:03
+/swarmpit_db.1.zq24ea3g4c13bivhvhrunsimz	swarmpit_swarmpit-network	10.0.39.6	02:42:0a:00:27:06
+/swarmpit_influxdb.1.7j2yl32cme100fyimrm7ta8xw	swarmpit_swarmpit-network	10.0.39.3	02:42:0a:00:27:03
+/swarmpit_app.1.b9zrqdv4eka8salmpy8jgigj8	ingress	10.0.0.4	02:42:0a:00:00:04
+/swarmpit_app.1.b9zrqdv4eka8salmpy8jgigj8	swarmpit_swarmpit-network	10.0.39.4	02:42:0a:00:27:04
+/swarmpit_app.1.b9zrqdv4eka8salmpy8jgigj8	traefik-public	10.0.1.15	02:42:0a:00:01:0f
+/homarr_homarr.1.u8hinxde9y3ybhj9szyu152py	traefik-public	10.0.1.21	02:42:0a:00:01:15
+/cv_cv.1.99alnrcewvorr5nu4quo794f1	traefik-public	10.0.1.35	02:42:0a:00:01:23
+/traefikv3_traefik.1.dwr8n7fas6k7a5uihm0g5q1uq	ingress	10.0.0.7	02:42:0a:00:00:07
+/traefikv3_traefik.1.dwr8n7fas6k7a5uihm0g5q1uq	traefik-public	10.0.1.22	02:42:0a:00:01:16
+/scripts_scripts.1.sgj8m35zsn2b2mx3nfld3ehtp	traefik-public	10.0.1.18	02:42:0a:00:01:12
+/api_aria.1.olg5o3uiy7dxobq4azld22j3o	traefik-public	10.0.1.25	02:42:0a:00:01:19
+/api_lcm.1.pm0cmkgf5okbll5symzlnhsag	traefik-public	10.0.1.36	02:42:0a:00:01:24
+/api_vc.1.fot2643dp9kpjjmuvsuw7t3j7	traefik-public	10.0.1.27	02:42:0a:00:01:1b
+/coder_coder.1.upf5l9kz83hmn7hi7k4jy7hk7	traefik-public	10.0.1.19	02:42:0a:00:01:13
+/authelia_authelia.1.8qzlnqsmrvb2a4vego5zcsqvi	traefik-public	10.0.1.3	02:42:0a:00:01:03
+/minio_app.1.2klebb73h4cj5i7tspzobb1w5	ingress	10.0.0.2	02:42:0a:00:00:02
+/minio_app.1.2klebb73h4cj5i7tspzobb1w5	traefik-public	10.0.1.7	02:42:0a:00:01:07
+/notifiarr_notifiarr.1.wvchpybyzpi8hfv6fqcktfr2p	traefik-public	10.0.1.5	02:42:0a:00:01:05
+/luai-wordpress_wordpress-luai.1.uuuw2vyhfols2rkn1jdzelpcm	luai-wordpress_internal	10.0.29.3	02:42:0a:00:1d:03
+/luai-wordpress_wordpress-luai.1.uuuw2vyhfols2rkn1jdzelpcm	traefik-public	10.0.1.11	02:42:0a:00:01:0b
+/api_api.1.id6jw858c8oelboq436nsc9ko	traefik-public	10.0.1.26	02:42:0a:00:01:1a
+/luai-wordpress_db-luai.1.6wqcw6bbkk1y5ykktjwhptg4g	luai-wordpress_internal	10.0.29.4	02:42:0a:00:1d:04
+/atlas	bridge	172.17.0.2	02:42:ac:11:00:02
