@@ -8,20 +8,20 @@
 
 ### ✅ Phase 1: Infrastructure Parsing
 - Scans running Docker containers and extracts:
-  - IP addresses
-  - MAC addresses
-  - Open ports
-  - Image names
+  - IP addresses  
+  - MAC addresses  
+  - Open ports  
+  - Image names  
 - Supports parsing of Nmap output and other static logs.
 - Outputs structured data into files like `docker.log` and `nmap.log`.
 
 ### 🎨 Phase 2: Usability & Styling
 - Interactive web-based dashboard using `G6` or `vis.js`.
 - Sidebar with modular panels:
-  - Overview
-  - Node Info
-  - Logs
-  - Settings
+  - Overview  
+  - Node Info  
+  - Logs  
+  - Settings  
 - Dark Mode toggle for comfortable viewing.
 - Node tooltips and info panel on click.
 - Search and filtering by IP, OS, or service.
@@ -38,21 +38,102 @@
 
 ## 🧱 Architecture
 
-```plaintext
-+-----------------------------+
-|   Docker Container (Atlas) |
-|-----------------------------|
-| - Runs scanner scripts      |
-| - Parses Docker/Nmap data   |
-| - Outputs logs and JSON     |
 +-----------------------------+
 
-         ↓
+Docker Container (Atlas)
+- Runs scanner scripts
+- Parses Docker/Nmap data
+- Outputs logs and JSON
++-----------------------------+
 
+markdown
+Copy
+Edit
+     ↓
 +-----------------------------+
-|     Web Frontend (HTML)    |
-|-----------------------------|
-| - G6 or vis.js visualization|
-| - Dynamic subnet layout     |
-| - Info sidebar and filters  |
+
+Web Frontend (HTML)
+- G6 or vis.js visualization
+- Dynamic subnet layout
+- Info sidebar and filters
 +-----------------------------+
+
+yaml
+Copy
+Edit
+
+---
+
+## 📂 Project Structure
+
+atlas/
+├── config/
+│ └── logs/
+│ ├── docker.log # Docker container info
+│ ├── nmap.log # Nmap scan results
+│ └── docker_hosts.log # Processed container data
+├── data/
+│ └── html/
+│ ├── visuals/ # G6-based working dashboard
+│ └── visuals2/ # vis.js-based dashboard version
+├── scripts/
+│ └── docker_script.sh # Script to scan Docker containers
+└── README.md
+
+yaml
+Copy
+Edit
+
+---
+
+## 🧪 Getting Started
+
+1. **Clone the repo:**
+   ```bash
+   git clone https://github.com/karam-ajaj/atlas.git
+   cd atlas
+Run the scanner script inside your container:
+
+bash
+Copy
+Edit
+bash scripts/docker_script.sh
+Serve the dashboard using Nginx or Python server:
+
+bash
+Copy
+Edit
+cd data/html/visuals
+python3 -m http.server 8889
+# Then open http://localhost:8889 in browser
+📈 Roadmap
+Phase	Feature	Status
+1	Docker/Nmap log parser	✅ Complete
+2	Interactive dashboard UI	✅ Working
+3	Subnet clustering & stats	🚧 Ongoing
+3	Connection detection	🚧 Ongoing
+3	Export to PNG/CSV/JSON	📝 Planned
+3	Live host reachability	⏳ Optional
+
+👨‍💻 Author
+Karam Ajaj
+Infrastructure & Automation Engineer
+https://github.com/karam-ajaj
+
+📝 License
+This project is licensed under the MIT License.
+
+💡 Contribution
+Ideas, issues, and PRs are welcome. Feel free to fork the repo and contribute to better infrastructure visibility!
+
+vbnet
+Copy
+Edit
+
+Let me know if you want me to push it directly to your GitHub repo via instructions or as a downloadable file.
+
+
+
+
+
+
