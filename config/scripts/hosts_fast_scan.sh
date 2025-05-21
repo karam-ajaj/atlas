@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-/config/scripts/install.sh
+# /config/scripts/install.sh
 
 
 uname -a > /config/logs/uname.log

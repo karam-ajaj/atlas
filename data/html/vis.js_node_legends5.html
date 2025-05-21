@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Network Diagram with Minimap & Viewport</title>
+  <style>
+    body { margin: 0; font: 12px Arial; }
+    #controls {
+      padding: 10px;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #mynetwork {
+      position: absolute;
+      top: 50px; bottom: 0; left: 0; right: 0;
+      border: 1px solid #ccc;
+    }
+    #minimap {
+      position: absolute;
+      width: 200px; height: 200px;
+      bottom: 10px; right: 10px;
+      border: 2px solid #888;
+      background: #fff;
+      z-index: 10;
+      overflow: hidden;
+    }
+    #minimapViewport {
+      position: absolute;
+      border: 2px dashed red;
+      background: rgba(255,0,0,0.1);
+      cursor: move;
+    }
+    #sidebar {
+      position: absolute;
+      top: 60px; right: 220px;
+      width: 240px; max-height: 70vh;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      background: #fafafa;
+      padding: 8px;
+      display: none;
+      font-size: 13px;
+    }
+  </style>
+  <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+  <div id="controls">
+    <input id="searchBox" placeholder="Search e.g. os:ubuntu docker" style="width:300px"/>
+    <button onclick="clearSearch()">Clear</button>
+    <label><input type="checkbox" id="dockerOnly"/> Docker only</label>
+    <button onclick="exportPNG()">Export PNG</button>
+  </div>
+  <div id="mynetwork"></div>
+
+  <div id="minimap">
+    <div id="minimapViewport"></div>
+  </div>
+
+  <div id="sidebar"></div>
+
+  <script>
+    let network, miniNetwork, allData = { nodes: new vis.DataSet(), edges: new vis.DataSet() };
+    const minimap = document.getElementById('minimap');
+    const viewport = document.getElementById('minimapViewport');
+
+    function getSubnet(ip) {
+      const p = ip?.split('.');
+      return p && p.length===4 ? `${p[0]}.${p[1]}.${p[2]}.0/24` : 'unknown';
+    }
+
+    async function draw() {
+      const res = await fetch('http://192.168.2.81:8889/hosts');
+      const [normalHosts, dockerHosts] = await res.json();
+
+      const nodes = new vis.DataSet(), edges = new vis.DataSet();
+      const subnetMap = new Map(); let idx=0;
+
+      function addHost(host, type){
+        const ip=host[1], name=host[2]||ip, os=host[3], mac=host[4], ports=host[5];
+        const isDocker = type==='docker', group = isDocker?'docker':'normal';
+        const subnet = getSubnet(ip);
+        if(!subnetMap.has(subnet)){
+          const sid=`subnet-${subnet}`;
+          subnetMap.set(subnet,sid);
+          nodes.add({ id:sid, label:subnet, group:'subnet', shape:'triangle', color:'#FF9900' });
+        }
+        const id=`node-${idx++}`;
+        nodes.add({ id, label:name, group, ip, os, mac, ports, isDocker,
+          title:`<b>${name}</b><br>IP: ${ip}<br>OS: ${os}<br>MAC: ${mac}<br>Ports: ${ports}<br>Type: ${isDocker?'Docker':'Normal'}`
+        });
+        edges.add({ from: subnetMap.get(subnet), to:id });
+      }
+
+      normalHosts.forEach(h=>addHost(h,'normal'));
+      dockerHosts.forEach(h=>addHost(h,'docker'));
+      allData = { nodes, edges };
+
+      // Main network
+      const container = document.getElementById('mynetwork');
+      network = new vis.Network(container, allData, {
+        interaction:{ hover:true },
+        physics:{ stabilization:false },
+        layout:{ improvedLayout:true },
+        groups:{
+          subnet:{ shape:'triangle', color:'#FF9900' },
+          normal:{ shape:'dot', color:'#2B7CE9' },
+          docker:{ shape:'square', color:'#C5000B' }
+        },
+        nodes:{ shape:'dot', size:16 },
+        edges:{ smooth:false, font:{align:'middle'} }
+      });
+
+      // Minimap
+      miniNetwork = new vis.Network(minimap, allData, {
+        interaction:{ dragView:false, zoomView:false, dragNodes:false, selectable:false },
+        physics:{ enabled:false },
+        layout:{ randomSeed:2 },
+        autoResize:false,
+        nodes:{ fixed:true },
+        edges:{ smooth:false }
+      });
+
+      // Sync viewport on events
+      ['zoom','dragEnd','stabilizationIterationsDone'].forEach(evt=>{
+        network.on(evt, updateViewport);
+      });
+      // Initial draw
+      updateViewport();
+
+      // Click on minimap to recenter
+      miniNetwork.on('click', params=>{
+        if (!params.pointer) return;
+        const {x,y} = params.pointer.canvas;
+        const world = miniNetwork.DOMtoCanvas({x,y});
+        network.moveTo({position: {x: world.x, y: world.y}});
+      });
+
+      // Sidebar
+      const sidebar = document.getElementById('sidebar');
+      network.on('hoverNode', ({node})=>{
+        const n = allData.nodes.get(node);
+        sidebar.innerHTML = n.title;
+        sidebar.style.display = 'block';
+      });
+      network.on('blurNode', ()=> sidebar.style.display = 'none');
+
+      document.getElementById('searchBox').addEventListener('keyup', handleFilter);
+      document.getElementById('dockerOnly').addEventListener('change', handleFilter);
+    }
+
+    function updateViewport(){
+      const scale = network.getScale();
+      const center = network.getViewPosition();
+      const canvasSize = network.canvas.body.container.getBoundingClientRect();
+      // world coords of corners
+      const halfW = (canvasSize.width/2)/scale;
+      const halfH = (canvasSize.height/2)/scale;
+      const topLeft = { x: center.x - halfW, y: center.y - halfH };
+      const bottomRight = { x: center.x + halfW, y: center.y + halfH };
+      // convert to minimap DOM coords
+      const tl = miniNetwork.canvasToDOM(topLeft);
+      const br = miniNetwork.canvasToDOM(bottomRight);
+      // compute rectangle in minimap
+      const mmRect = minimap.getBoundingClientRect();
+      const left = tl.x - mmRect.left;
+      const top  = tl.y - mmRect.top;
+      const width = br.x - tl.x;
+      const height= br.y - tl.y;
+      // apply to viewport div
+      Object.assign(viewport.style, {
+        left: left + 'px',
+        top: top + 'px',
+        width: width + 'px',
+        height: height + 'px'
+      });
+    }
+
+    function handleFilter(){
+      const txt = document.getElementById('searchBox').value.trim().toLowerCase();
+      const dockerOnly = document.getElementById('dockerOnly').checked;
+      let nodes = allData.nodes.get(), edges = allData.edges.get();
+
+      if(dockerOnly){
+        const dockerIds = new Set(nodes.filter(n=>n.group==='docker').map(n=>n.id));
+        const subnetIds = new Set(edges.filter(e=>dockerIds.has(e.to)).map(e=>e.from));
+        nodes = nodes.filter(n=>dockerIds.has(n.id)||subnetIds.has(n.id));
+        edges = edges.filter(e=>dockerIds.has(e.to));
+      }
+
+      if(txt){
+        const terms = txt.split(/\s+/).map(t=>{
+          const [k,v]=t.includes(':')?t.split(':'):[null,t];
+          return {k,v};
+        });
+        const keep = new Set();
+        nodes.filter(n=>n.group!=='subnet').forEach(n=>{
+          if(terms.every(({k,v})=>{
+            if(k==='os') return n.os.toLowerCase().includes(v);
+            if(k==='ip') return n.ip.includes(v);
+            if(k==='type') return (v==='docker'?n.group==='docker':n.group==='normal');
+            return (`${n.label} ${n.title} ${n.os} ${n.ports}`).toLowerCase().includes(v);
+          })) keep.add(n.id);
+        });
+        const subnetIds = new Set(), newEdges = [];
+        edges.forEach(e=>{ if(keep.has(e.to)){ subnetIds.add(e.from); newEdges.push(e);}});
+        const newNodes = [...nodes.filter(n=>keep.has(n.id)), ...nodes.filter(n=>subnetIds.has(n.id))];
+        network.setData({nodes:new vis.DataSet(newNodes), edges:new vis.DataSet(newEdges)});
+        miniNetwork.setData({nodes:new vis.DataSet(newNodes), edges:new vis.DataSet(newEdges)});
+        updateViewport();
+        return;
+      }
+
+      network.setData(allData);
+      miniNetwork.setData(allData);
+      updateViewport();
+    }
+
+    function clearSearch(){
+      document.getElementById('searchBox').value='';
+      document.getElementById('dockerOnly').checked=false;
+      network.setData(allData);
+      miniNetwork.setData(allData);
+      updateViewport();
+    }
+
+    function exportPNG(){
+      const canvas = document.querySelector('#mynetwork canvas');
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = 'network.png';
+      a.click();
+    }
+
+    draw();
+  </script>
+</body>
+</html>
