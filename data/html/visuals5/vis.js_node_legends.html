@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Atlas Infra Map</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap">
+  <style>
+    :root {
+      --bg: #f7f7fa;
+      --fg: #232323;
+      --panel: #fff;
+      --sidebar: #f0f0f0;
+      --border: #ddd;
+      --accent: #0057b8;
+      --shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    body { margin:0; padding:0; font-family:Roboto,sans-serif; background:var(--bg); color:var(--fg); height:100vh; overflow:hidden; }
+    .dark { --bg:#1a1b21; --fg:#eee; --panel:#21222c; --sidebar:#16171d; --border:#262733; --accent:#40a9ff; }
+    #root { display:flex; height:100vh; }
+
+    /* Sidebar */
+    #sidebar { background:var(--sidebar); width:230px; border-right:1px solid var(--border); box-shadow:var(--shadow); display:flex; flex-direction:column; z-index:2; min-width:180px; }
+    #sidebar h2 { margin:20px 0 10px 20px; font-size:20px; }
+    .sidebar-tabs { display:flex; flex-direction:column; margin-bottom:16px; }
+    .sidebar-tab { padding:12px 24px; background:none; border:none; text-align:left; font-size:15px; cursor:pointer; color:var(--fg); transition:background .15s; }
+    .sidebar-tab.active, .sidebar-tab:hover { background:var(--accent); color:#fff; }
+    .sidebar-section { display:none; flex:1; flex-direction:column; padding:10px 18px; font-size:14px; }
+    .sidebar-section.active { display:flex; }
+
+    /* Main */
+    #main { flex:1; display:flex; flex-direction:column; min-width:0; }
+    #topbar { background:var(--panel); border-bottom:1px solid var(--border); height:54px; display:flex; align-items:center; justify-content:space-between; padding:0 18px; box-shadow:var(--shadow); }
+    #topbar h1 { margin:0; font-size:22px; color:var(--accent); }
+    #topbar #date { font-size:14px; }
+    #dark-toggle { cursor:pointer; }
+
+    /* Panel bar */
+    #panel-bar { display:flex; gap:8px; align-items:center; background:var(--panel); border-bottom:1px solid var(--border); padding:4px 12px; }
+    .panel-toggle { padding:5px 14px; background:none; border:1px solid var(--border); border-radius:7px; cursor:pointer; transition:background .15s; color:var(--fg);}
+    .panel-toggle.active, .panel-toggle:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+    /* Panels */
+    #panels { flex:1; display:flex; height:0; min-width:0; }
+    .panel { background:var(--panel); box-shadow:var(--shadow); border-radius:10px; margin:10px; padding:12px; flex:1; min-width:0; display:flex; flex-direction:column; border:1px solid var(--border); }
+    .panel.hidden { display:none!important; }
+
+    /* Scrollable table */
+    #panel-table { overflow-y:auto; }
+    #hostTable { width:100%; border-collapse:collapse; font-size:13px; }
+    #hostTable th, #hostTable td { padding:8px; border:1px solid #ccc; text-align:left; }
+    #hostTable thead { background:#eee; }
+    #hostTable tbody { display:block; max-height:300px; overflow-y:auto; }
+    #hostTable thead, #hostTable tbody tr { display:table; width:100%; table-layout:fixed; }
+  </style>
+  <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
+  <script src="vis_network.js"></script>
+</head>
+<body>
+  <div id="root">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <h2>Dashboard</h2>
+      <div class="sidebar-tabs">
+        <button class="sidebar-tab active" data-tab="overview">📊 Overview</button>
+        <button class="sidebar-tab" data-tab="node">🔎 Node Info</button>
+        <button class="sidebar-tab" data-tab="logs">📑 Logs</button>
+        <button class="sidebar-tab" data-tab="settings">⚙️ Settings</button>
+      </div>
+      <div class="sidebar-section active" id="tab-overview">
+        <b>Status:</b> <span id="statusMsg">OK</span><hr>
+        <b>Total Hosts:</b> <span id="totalHosts">-</span><br>
+        <b>Docker Hosts:</b> <span id="dockerHosts">-</span><br>
+        <b>Normal Hosts:</b> <span id="normalHosts">-</span>
+      </div>
+      <div class="sidebar-section" id="tab-node">
+        <b>Selected Node:</b>
+        <div id="selectedNodeInfo" style="padding-top:8px;">(none)</div>
+      </div>
+      <div class="sidebar-section" id="tab-logs">
+        <b>System Logs:</b>
+        <pre style="flex:1; overflow:auto;">[Logs loading soon...]</pre>
+      </div>
+      <div class="sidebar-section" id="tab-settings">
+        <label><input type="checkbox" id="darkSidebar"/> Dark Mode</label><br>
+        <button style="margin-top:1em;" onclick="location.reload()">Reload</button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main id="main">
+      <header id="topbar">
+        <h1>Atlas Infra Map</h1>
+        <div>
+          <span id="date"></span>
+          <span id="dark-toggle">🌙</span>
+        </div>
+      </header>
+
+      <!-- Panel Toggles -->
+      <nav id="panel-bar">
+        <button class="panel-toggle active" data-panel="network">Network Map</button>
+        <button class="panel-toggle active" data-panel="table">Hosts Table</button>
+        <button class="panel-toggle" data-panel="logs">Logs</button>
+      </nav>
+
+      <!-- Panels -->
+      <section id="panels">
+        <div class="panel" id="panel-network">
+          <div id="mynetwork" style="height:480px; flex:1;"></div>
+        </div>
+        <div class="panel" id="panel-table">
+          <h3>Host Table</h3>
+          <table id="hostTable">
+            <thead>
+              <tr><th>Type</th><th>IP</th><th>Name</th><th>OS</th><th>MAC</th><th>Ports</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel hidden" id="panel-logs">
+          <h3>Logs</h3>
+          <pre style="flex:1; overflow:auto;">[Logs Panel]</pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Dark Mode
+    function setDark(on) {
+      document.body.classList.toggle('dark', on);
+      localStorage.setItem('atlas-dark', on ? '1' : '');
+      document.getElementById('darkSidebar').checked = on;
+    }
+    document.getElementById('dark-toggle').addEventListener('click', () => setDark(!document.body.classList.contains('dark')));
+    document.getElementById('darkSidebar').addEventListener('change', e => setDark(e.target.checked));
+    setDark(localStorage.getItem('atlas-dark') === '1');
+
+    // Sidebar Tabs
+    document.querySelectorAll('.sidebar-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.sidebar-section').forEach(sec =>
+          sec.classList.toggle('active', sec.id === 'tab-' + tab)
+        );
+      });
+    });
+
+    // Panel Toggles
+    document.querySelectorAll('.panel-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+        document.getElementById('panel-' + btn.dataset.panel).classList.toggle('hidden');
+      });
+    });
+
+    // Date
+    function updateDate() {
+      document.getElementById('date').textContent = new Date().toLocaleString();
+    }
+    setInterval(updateDate, 20000);
+    updateDate();
+  </script>
+</body>
+</html>
