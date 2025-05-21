@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE nmaprun>
 <?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
-<!-- Nmap 7.93 scan initiated Wed May 21 10:03:50 2025 as: nmap -O -sS -p- -oX /config/logs/nmap_full.xml 192.168.2.0/24 -->
-<nmaprun scanner="nmap" args="nmap -O -sS -p- -oX /config/logs/nmap_full.xml 192.168.2.0/24" start="1747821830" startstr="Wed May 21 10:03:50 2025" version="7.93" xmloutputversion="1.05">
+<!-- Nmap 7.93 scan initiated Wed May 21 13:47:33 2025 as: nmap -O -sS -p- -oX /config/logs/nmap_full.xml 192.168.2.0/24 -->
+<nmaprun scanner="nmap" args="nmap -O -sS -p- -oX /config/logs/nmap_full.xml 192.168.2.0/24" start="1747835253" startstr="Wed May 21 13:47:33 2025" version="7.93" xmloutputversion="1.05">
 <scaninfo type="syn" protocol="tcp" numservices="65535" services="1-65535"/>
 <verbose level="0"/>
 <debugging level="0"/>
@@ -12,11 +12,15 @@
 </hostnames>
 </hosthint>
 <hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.4" addrtype="ipv4"/>
+<address addr="192.168.2.2" addrtype="ipv4"/>
 <hostnames>
 </hostnames>
 </hosthint>
-<taskprogress task="Ping Scan" time="1747821830" percent="1.17" remaining="0" etc="1747821830"/>
+<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
+<address addr="192.168.2.81" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+</hosthint>
 <hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
 <address addr="192.168.2.111" addrtype="ipv4"/>
 <hostnames>
@@ -27,18 +31,7 @@
 <hostnames>
 </hostnames>
 </hosthint>
-<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.81" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-</hosthint>
-<taskprogress task="SYN Stealth Scan" time="1747821834" percent="2.58" remaining="38" etc="1747821872"/>
-<taskprogress task="SYN Stealth Scan" time="1747821839" percent="22.94" remaining="21" etc="1747821859"/>
-<taskprogress task="SYN Stealth Scan" time="1747821851" percent="69.72" remaining="8" etc="1747821859"/>
-<taskprogress task="SYN Stealth Scan" time="1747821875" percent="81.09" remaining="10" etc="1747821885"/>
-<taskprogress task="SYN Stealth Scan" time="1747821880" percent="81.94" remaining="11" etc="1747821890"/>
-<taskprogress task="SYN Stealth Scan" time="1747821882" percent="82.52" remaining="11" etc="1747821892"/>
-<host starttime="1747821833" endtime="1747821950"><status state="up" reason="echo-reply" reason_ttl="63"/>
+<host starttime="1747835257" endtime="1747835287"><status state="up" reason="echo-reply" reason_ttl="63"/>
 <address addr="192.168.2.1" addrtype="ipv4"/>
 <hostnames>
 </hostnames>
@@ -49,76 +42,88 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="80"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="35867"/>
+<portused state="closed" proto="udp" portid="38671"/>
 <osmatch name="Linux 2.6.23 - 2.6.38" accuracy="100" line="52080">
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="2.6.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:2.6</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="1512388" lastboot="Sat May  3 21:59:24 2025"/>
+<uptime seconds="1495946" lastboot="Sun May  4 06:15:51 2025"/>
 <distance value="2"/>
-<tcpsequence index="205" difficulty="Good luck!" values="D51D54DC,D4FFD720,D577FD26,D543FC0A,D60CB102,D55153A9"/>
+<tcpsequence index="196" difficulty="Good luck!" values="8880C36A,883E02D6,889893F9,890F1609,88F4231C,888DE4B8"/>
 <ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
-<tcptssequence class="other" values="16B771EC,16B77205,16B7721E,16B77237,16B77251,16B7726A"/>
-<times srtt="4941" rttvar="2350" to="100000"/>
+<tcptssequence class="other" values="16EA532F,16EA5349,16EA5362,16EA537B,16EA5397,16EA53B0"/>
+<times srtt="12983" rttvar="10351" to="100000"/>
 </host>
-<host starttime="1747821833" endtime="1747821952"><status state="up" reason="echo-reply" reason_ttl="127"/>
-<address addr="192.168.2.4" addrtype="ipv4"/>
+<host starttime="1747835257" endtime="1747835297"><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="192.168.2.2" addrtype="ipv4"/>
 <hostnames>
-<hostname name="yoga.home" type="PTR"/>
+<hostname name="iphone.home" type="PTR"/>
 </hostnames>
-<ports><extraports state="filtered" count="65523">
-<extrareasons reason="no-response" count="65523" proto="tcp" ports="1-134,136-138,140-444,446-5039,5041-5356,5358-7069,7071-7679,7681-23442,23444-49676,49678-57620,57622-59868,59870-61629,61631-65535"/>
+<ports><extraports state="closed" count="65532">
+<extrareasons reason="reset" count="65532" proto="tcp" ports="1-49765,49767-50318,50320-62077,62079-65535"/>
 </extraports>
-<port protocol="tcp" portid="135"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="msrpc" method="table" conf="3"/></port>
-<port protocol="tcp" portid="139"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="netbios-ssn" method="table" conf="3"/></port>
-<port protocol="tcp" portid="445"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="microsoft-ds" method="table" conf="3"/></port>
-<port protocol="tcp" portid="5040"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="unknown" method="table" conf="3"/></port>
-<port protocol="tcp" portid="5357"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="wsdapi" method="table" conf="3"/></port>
-<port protocol="tcp" portid="7070"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="realserver" method="table" conf="3"/></port>
-<port protocol="tcp" portid="7680"><state state="open" reason="syn-ack" reason_ttl="127"/><service name="pando-pub" method="table" conf="3"/></port>
-<port protocol="tcp" portid="23443"><state state="open" reason="syn-ack" reason_ttl="127"/></port>
-<port protocol="tcp" portid="49677"><state state="open" reason="syn-ack" reason_ttl="127"/></port>
-<port protocol="tcp" portid="57621"><state state="open" reason="syn-ack" reason_ttl="127"/></port>
-<port protocol="tcp" portid="59869"><state state="open" reason="syn-ack" reason_ttl="127"/></port>
-<port protocol="tcp" portid="61630"><state state="open" reason="syn-ack" reason_ttl="127"/></port>
+<port protocol="tcp" portid="49766"><state state="open" reason="syn-ack" reason_ttl="63"/></port>
+<port protocol="tcp" portid="50319"><state state="filtered" reason="no-response" reason_ttl="0"/></port>
+<port protocol="tcp" portid="62078"><state state="open" reason="syn-ack" reason_ttl="63"/><service name="iphone-sync" method="table" conf="3"/></port>
 </ports>
-<os><portused state="open" proto="tcp" portid="135"/>
-<osmatch name="FreeBSD 6.2-RELEASE" accuracy="95" line="27735">
-<osclass type="general purpose" vendor="FreeBSD" osfamily="FreeBSD" osgen="6.X" accuracy="95"><cpe>cpe:/o:freebsd:freebsd:6.2</cpe></osclass>
+<os><portused state="open" proto="tcp" portid="49766"/>
+<portused state="closed" proto="tcp" portid="1"/>
+<portused state="closed" proto="udp" portid="30631"/>
+<osmatch name="Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)" accuracy="92" line="3611">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="11.X" accuracy="92"><cpe>cpe:/o:apple:iphone_os:11</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="12.X" accuracy="92"><cpe>cpe:/o:apple:iphone_os:12</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="13.X" accuracy="92"><cpe>cpe:/o:apple:iphone_os:13</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.13.X" accuracy="92"><cpe>cpe:/o:apple:mac_os_x:10.13</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.14.X" accuracy="92"><cpe>cpe:/o:apple:mac_os_x:10.14</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.15.X" accuracy="92"><cpe>cpe:/o:apple:mac_os_x:10.15</cpe></osclass>
 </osmatch>
-<osmatch name="Microsoft Windows 10" accuracy="93" line="69394">
-<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="10" accuracy="93"><cpe>cpe:/o:microsoft:windows_10</cpe></osclass>
+<osmatch name="Apple Mac OS X 10.11 (El Capitan) or iOS 12.4 - 13.0 (Darwin 15.6.0 - 19.0.0)" accuracy="92" line="7503">
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.11.X" accuracy="92"><cpe>cpe:/o:apple:mac_os_x:10.11</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="12.X" accuracy="92"><cpe>cpe:/o:apple:iphone_os:12</cpe></osclass>
 </osmatch>
-<osmatch name="Microsoft Windows Server 2008 or 2008 Beta 3" accuracy="91" line="74530">
-<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="2008" accuracy="91"><cpe>cpe:/o:microsoft:windows_server_2008::beta3</cpe><cpe>cpe:/o:microsoft:windows_server_2008</cpe></osclass>
+<osmatch name="FreeBSD 5.4-RELEASE" accuracy="91" line="27289">
+<osclass type="general purpose" vendor="FreeBSD" osfamily="FreeBSD" osgen="5.X" accuracy="91"><cpe>cpe:/o:freebsd:freebsd:5.4</cpe></osclass>
 </osmatch>
-<osmatch name="Microsoft Windows Server 2008 SP1" accuracy="87" line="75133">
-<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="2008" accuracy="87"><cpe>cpe:/o:microsoft:windows_server_2008::sp1</cpe></osclass>
+<osmatch name="FreeBSD 7.0-STABLE" accuracy="91" line="28419">
+<osclass type="general purpose" vendor="FreeBSD" osfamily="FreeBSD" osgen="7.X" accuracy="91"><cpe>cpe:/o:freebsd:freebsd:7.0</cpe></osclass>
 </osmatch>
-<osmatch name="m0n0wall 1.3b11 - 1.3b15 (FreeBSD 6.3)" accuracy="86" line="27418">
-<osclass type="firewall" vendor="FreeBSD" osfamily="FreeBSD" osgen="6.X" accuracy="86"><cpe>cpe:/o:freebsd:freebsd:6.3</cpe></osclass>
+<osmatch name="Blue Coat proxy server (SGOS 6.3.2.201)" accuracy="90" line="10386">
+<osclass type="proxy server" vendor="Blue Coat" osfamily="SGOS" osgen="6.X" accuracy="90"><cpe>cpe:/o:bluecoat:sgos:6.3.2.201</cpe></osclass>
 </osmatch>
-<osmatch name="Juniper SRX-series firewall (JUNOS 12.1)" accuracy="86" line="41239">
-<osclass type="firewall" vendor="Juniper" osfamily="JUNOS" osgen="12.X" accuracy="86"><cpe>cpe:/o:juniper:junos:12.1</cpe></osclass>
+<osmatch name="Apple Mac OS X 10.5.2 (Leopard) - 10.6.7 (Snow Leopard) or iOS 4.0.1 - 4.2.1 (Darwin 9.2.0 - 10.7.0)" accuracy="90" line="5727">
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.5.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.5</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.6.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.6</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
 </osmatch>
-<osmatch name="Microsoft Windows 10 1703" accuracy="86" line="69874">
-<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="10" accuracy="86"><cpe>cpe:/o:microsoft:windows_10:1703</cpe></osclass>
+<osmatch name="Apple OS X 10.10.2 (Yosemite) - 10.11.1 (El Capitan) or iOS 9 (Darwin 14.1.0 - 15.0.0)" accuracy="90" line="7439">
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.10.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.10</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.11.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.11</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="iOS" osgen="9.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:9</cpe></osclass>
 </osmatch>
-<osmatch name="Microsoft Windows 10 1511 - 1607" accuracy="86" line="69586">
-<osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="10" accuracy="86"><cpe>cpe:/o:microsoft:windows_10</cpe></osclass>
+<osmatch name="Apple Mac OS X 10.7.4 (Lion) (Darwin 11.4.0) or Apple TV (iOS 4.3)" accuracy="89" line="6842">
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.7.X" accuracy="89"><cpe>cpe:/o:apple:mac_os_x:10.7.4</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="89"><cpe>cpe:/o:apple:iphone_os:4.3</cpe></osclass>
 </osmatch>
-<osmatch name="Juniper SRX100-series or SRX200-series firewall (JUNOS 10.4 - 12.1)" accuracy="85" line="41201">
-<osclass type="firewall" vendor="Juniper" osfamily="JUNOS" osgen="10.X" accuracy="85"><cpe>cpe:/o:juniper:junos:10</cpe></osclass>
-<osclass type="firewall" vendor="Juniper" osfamily="JUNOS" osgen="12.X" accuracy="85"><cpe>cpe:/o:juniper:junos:12</cpe></osclass>
+<osmatch name="Apple OS X 10.8 (Mountain Lion) - 10.9 (Mavericks) or iOS 5.1.1 - 6.1.5 (Darwin 12.0.0 - 13.4.0)" accuracy="89" line="7657">
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.8.X" accuracy="89"><cpe>cpe:/o:apple:mac_os_x:10.8</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.9.X" accuracy="89"><cpe>cpe:/o:apple:mac_os_x:10.9</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="89"><cpe>cpe:/o:apple:iphone_os:5</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="89"><cpe>cpe:/o:apple:iphone_os:5</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="6.X" accuracy="89"><cpe>cpe:/o:apple:iphone_os:6</cpe></osclass>
 </osmatch>
+<osmatch name="Apple iPhone mobile phone (iOS 4.3.3)" accuracy="89" line="3869">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="89"><cpe>cpe:/o:apple:iphone_os:4.3.3</cpe></osclass>
+</osmatch>
+<osfingerprint fingerprint="OS:SCAN(V=7.93%E=4%D=5/21%OT=49766%CT=1%CU=30631%PV=Y%DS=2%DC=I%G=Y%TM=682D&#xa;OS:D9A1%P=x86_64-pc-linux-gnu)SEQ(SP=105%GCD=1%ISR=109%TI=Z%CI=RI%II=RI%TS=&#xa;OS:22)OPS(O1=M5B4NW6NNT11SLL%O2=M5B4NW6NNT11SLL%O3=M5B4NW6NNT11%O4=M5B4NW6N&#xa;OS:NT11SLL%O5=M5B4NW6NNT11SLL%O6=M5B4NNT11SLL)WIN(W1=FFFF%W2=FFFF%W3=FFFF%W&#xa;OS:4=FFFF%W5=FFFF%W6=FFFF)ECN(R=Y%DF=Y%T=40%W=FFFF%O=M5B4NW6SLL%CC=N%Q=)T1(&#xa;OS:R=Y%DF=Y%T=40%S=O%A=S+%F=AS%RD=0%Q=)T2(R=N)T3(R=N)T4(R=Y%DF=Y%T=40%W=0%S&#xa;OS:=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=N%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)T6(R&#xa;OS:=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(R=N)U1(R=Y%DF=N%T=40%IPL=38%U&#xa;OS:N=0%RIPL=G%RID=G%RIPCK=G%RUCK=0%RUD=G)IE(R=Y%DFI=S%T=40%CD=S)&#xa;"/>
 </os>
-<uptime seconds="624698" lastboot="Wed May 14 04:34:14 2025"/>
-<tcpsequence index="261" difficulty="Good luck!" values="12A200,919B758D,E73BCCEB,ED9944F7,128693FA,C7A8A541"/>
-<ipidsequence class="Incremental" values="5EC9,5ECA,5ECB,5ECC,5ECD,5ECE"/>
-<tcptssequence class="1000HZ" values="253C223C,253C22A2,253C2304,253C2367,253C23CB,253C2430"/>
-<times srtt="6283" rttvar="2009" to="100000"/>
+<uptime seconds="1" lastboot="Wed May 21 13:48:16 2025"/>
+<distance value="2"/>
+<tcpsequence index="261" difficulty="Good luck!" values="784F6880,9D897B6F,A73AD81A,197B1CFB,EC678E33,3CBDD5F2"/>
+<ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
+<tcptssequence class="other" values="B564FC01,B2414F62,2E9B82BC,B96C9419,2B7932C3,ACEFB1E0"/>
+<times srtt="10040" rttvar="6358" to="100000"/>
 </host>
-<host starttime="1747821833" endtime="1747821950"><status state="up" reason="echo-reply" reason_ttl="64"/>
+<host starttime="1747835257" endtime="1747835287"><status state="up" reason="echo-reply" reason_ttl="64"/>
 <address addr="192.168.2.81" addrtype="ipv4"/>
 <hostnames>
 </hostnames>
@@ -143,20 +148,20 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="22"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="30520"/>
+<portused state="closed" proto="udp" portid="34097"/>
 <osmatch name="Linux 4.15 - 5.6" accuracy="100" line="67238">
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="4.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:4</cpe></osclass>
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:5</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="2241467" lastboot="Fri Apr 25 11:28:05 2025"/>
+<uptime seconds="2254812" lastboot="Fri Apr 25 11:28:05 2025"/>
 <distance value="1"/>
-<tcpsequence index="256" difficulty="Good luck!" values="D7322F47,EF7C6382,A20F9501,D08EE1F0,7B7B2E97,AD7D16DA"/>
+<tcpsequence index="259" difficulty="Good luck!" values="8B15CB14,D4AD6454,48DA4AFE,F82814D,CB3D83AF,E056B434"/>
 <ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
-<tcptssequence class="1000HZ" values="859A0675,859A06D9,859A073D,859A07A1,859A0806,859A086A"/>
-<times srtt="8" rttvar="4" to="100000"/>
+<tcptssequence class="1000HZ" values="86658C11,86658C75,86658CD9,86658D3D,86658DA2,86658E06"/>
+<times srtt="9" rttvar="2" to="100000"/>
 </host>
-<host starttime="1747821833" endtime="1747821950"><status state="up" reason="echo-reply" reason_ttl="63"/>
+<host starttime="1747835257" endtime="1747835287"><status state="up" reason="echo-reply" reason_ttl="63"/>
 <address addr="192.168.2.111" addrtype="ipv4"/>
 <hostnames>
 <hostname name="192.168.2.111" type="PTR"/>
@@ -171,19 +176,19 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="22"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="34886"/>
+<portused state="closed" proto="udp" portid="33380"/>
 <osmatch name="Linux 5.0 - 5.4" accuracy="100" line="68103">
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:5</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="2799609" lastboot="Sat Apr 19 00:25:43 2025"/>
+<uptime seconds="2812954" lastboot="Sat Apr 19 00:25:43 2025"/>
 <distance value="2"/>
-<tcpsequence index="262" difficulty="Good luck!" values="2C8800E6,AAD7FD29,7AC7B7F3,30BFC785,385775A8,85920DF3"/>
+<tcpsequence index="262" difficulty="Good luck!" values="86D72D32,95FE9FCB,7D2C513,74D0530C,E6F04A4D,3A27CAC3"/>
 <ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
-<tcptssequence class="1000HZ" values="A6DE951E,A6DE9582,A6DE95E6,A6DE964B,A6DE96AF,A6DE9713"/>
-<times srtt="68" rttvar="44" to="100000"/>
+<tcptssequence class="1000HZ" values="A7AA1AB9,A7AA1B1D,A7AA1B82,A7AA1BE6,A7AA1C4A,A7AA1CAE"/>
+<times srtt="82" rttvar="47" to="100000"/>
 </host>
-<host starttime="1747821952" endtime="1747821960"><status state="up" reason="echo-reply" reason_ttl="63"/>
+<host starttime="1747835297" endtime="1747835305"><status state="up" reason="echo-reply" reason_ttl="63"/>
 <address addr="192.168.2.254" addrtype="ipv4"/>
 <hostnames>
 </hostnames>
@@ -197,19 +202,19 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="53"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="36452"/>
+<portused state="closed" proto="udp" portid="44395"/>
 <osmatch name="Linux 2.6.32 - 3.13" accuracy="100" line="56601">
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="2.6.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:2.6</cpe></osclass>
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="3.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:3</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="3170017" lastboot="Mon Apr 14 17:32:23 2025"/>
+<uptime seconds="3183361" lastboot="Mon Apr 14 17:32:24 2025"/>
 <distance value="2"/>
-<tcpsequence index="260" difficulty="Good luck!" values="95A47DEC,8CD061ED,915D2CB2,556798D8,FEA8D444,CD4C655F"/>
+<tcpsequence index="262" difficulty="Good luck!" values="9A72851D,3F36ABBF,CDAFDD7C,9DD11441,47A3AB81,46E9A241"/>
 <ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
-<tcptssequence class="1000HZ" values="BCF29915,BCF29979,BCF299DD,BCF29A41,BCF29AA5,BCF29B09"/>
-<times srtt="1653" rttvar="473" to="100000"/>
+<tcptssequence class="1000HZ" values="BDBE3897,BDBE38FB,BDBE3960,BDBE39C3,BDBE3A27,BDBE3A8C"/>
+<times srtt="1636" rttvar="485" to="100000"/>
 </host>
-<runstats><finished time="1747821960" timestr="Wed May 21 10:06:00 2025" summary="Nmap done at Wed May 21 10:06:00 2025; 256 IP addresses (5 hosts up) scanned in 130.31 seconds" elapsed="130.31" exit="success"/><hosts up="5" down="251" total="256"/>
+<runstats><finished time="1747835305" timestr="Wed May 21 13:48:25 2025" summary="Nmap done at Wed May 21 13:48:25 2025; 256 IP addresses (5 hosts up) scanned in 51.74 seconds" elapsed="51.74" exit="success"/><hosts up="5" down="251" total="256"/>
 </runstats>
 </nmaprun>
