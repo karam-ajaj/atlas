@@ -1,151 +1,160 @@
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, initializing network...');
+  initNetworkDashboard();
+});
 
-let network, allData = { nodes: [], edges: [] };
-const apiUrl = "http://192.168.2.81:8889/hosts";
+async function initNetworkDashboard() {
+  const apiUrl = 'http://192.168.2.81:8889/hosts';
+  let raw;
+  try {
+    const resp = await fetch(apiUrl);
+    raw = await resp.json();
+    console.log('Fetched data:', raw);
+  } catch (e) {
+    console.error('Failed to fetch', e);
+    return;
+  }
 
-async function fetchAndBuildNetwork() {
-  const res = await fetch(apiUrl);
-  const data = await res.json();
-  const [normalHosts, dockerHosts] = data;
+  const [normalHosts, dockerHosts] = raw;
+  const nodesArr = [];
+  const edgesArr = [];
+  const subnetMap = new Map();
+  let nextId = 1;
 
-  const nodes = [];
-  const edges = [];
-  let idCounter = 1;
+  // helper to get /24
+  const getSubnet = ip => ip.split('.').slice(0,3).join('.') + '.0';
 
-  const subnetMap = {};
+  function addHost(host, type) {
+    const [ , ip, name, os='', mac='', ports='' ] = host;
+    const subnet = getSubnet(ip);
 
-  function addNode(host, type) {
-    const ip = host[1];
-    const name = host[2];
-    const os = host[3];
-    const mac = host[4];
-    const ports = host[5];
-    const subnet = ip.split('.').slice(0, 3).join('.') + '.0';
-
-    if (!subnetMap[subnet]) {
-      subnetMap[subnet] = `subnet-${subnet}`;
-      nodes.push({
-        id: subnetMap[subnet],
+    // add subnet node if new
+    if (!subnetMap.has(subnet)) {
+      const sid = `subnet-${subnet}`;
+      subnetMap.set(subnet, sid);
+      nodesArr.push({
+        id: sid,
         label: subnet,
-        group: "subnet",
-        value: 1
+        group: 'subnet',
+        shape: 'triangle',
       });
     }
 
-    const nodeId = idCounter++;
-    nodes.push({
-      id: nodeId,
-      label: ip,
-      group: type === "docker" ? "server" : "desktop",
-      title: `
-        <b>${name}</b><br>
-        IP: ${ip}<br>
-        OS: ${os}<br>
-        MAC: ${mac}<br>
-        Ports: ${ports}<br>
-        Type: ${type}
-      `,
-      os, mac, ports, name, type, subnet, ip
+    const nid = nextId++;
+    nodesArr.push({
+      id: nid,
+      label: name || ip,
+      title: `IP: ${ip}<br>OS: ${os}<br>MAC: ${mac}<br>Ports: ${ports}`,
+      group: type === 'docker' ? 'docker' : 'normal',
+      ip, os, mac, ports, subnet
     });
-
-    edges.push({ from: subnetMap[subnet], to: nodeId });
+    edgesArr.push({ from: subnetMap.get(subnet), to: nid });
   }
 
-  normalHosts.forEach(h => addNode(h, "normal"));
-  dockerHosts.forEach(h => addNode(h, "docker"));
+  normalHosts.forEach(h => addHost(h, 'normal'));
+  dockerHosts.forEach(h => addHost(h, 'docker'));
 
-  allData.nodes = new vis.DataSet(nodes);
-  allData.edges = new vis.DataSet(edges);
+  // create DataSets
+  const nodes = new vis.DataSet(nodesArr);
+  const edges = new vis.DataSet(edgesArr);
+  const allData = { nodes, edges };
 
-  renderNetwork();
-  populateFilters();
-}
-
-function renderNetwork() {
-  const container = document.getElementById("mynetwork");
+  // render initial network
+  const container = document.getElementById('mynetwork');
   const options = {
     interaction: { hover: true },
-    nodes: {
-      shape: "dot",
-      size: 12
-    },
+    physics: { stabilization: false },
     groups: {
-      desktop: { shape: "dot", color: "#2B7CE9" },
-      server: { shape: "square", color: "#C5000B" },
-      subnet: { shape: "box", color: "#888" }
+      subnet: { shape: 'triangle', color: '#FF9900' },
+      normal: { shape: 'dot', color: '#2B7CE9' },
+      docker: { shape: 'square', color: '#C5000B' }
     },
-    edges: {
-      smooth: false
-    },
-    physics: {
-      stabilization: false,
-      barnesHut: { gravitationalConstant: -20000 }
-    }
+    nodes: { size: 16 },
+    edges: { smooth: false }
   };
+  const network = new vis.Network(container, allData, options);
 
-  network = new vis.Network(container, allData, options);
+  // populate OS & Subnet filters
+  populateFilterOptions(nodesArr);
 
-  network.on("hoverNode", params => {
-    const node = allData.nodes.get(params.node);
-    document.getElementById("mynetwork").title = node.title;
+  // wire up filter events
+  ['filterType','filterOS','filterSubnet','searchBox'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => applyFilters(allData, network));
+    if (id === 'searchBox')
+      document.getElementById(id).addEventListener('input', () => applyFilters(allData, network));
   });
-  network.on("blurNode", () => {
-    document.getElementById("mynetwork").title = "";
-  });
+
+  // initial filter (show all)
+  applyFilters(allData, network);
 }
 
-function populateFilters() {
+function populateFilterOptions(nodesArr) {
   const osSet = new Set();
   const subnetSet = new Set();
-  const typeSet = new Set();
 
-  allData.nodes.get().forEach(n => {
-    if (n.os) osSet.add(n.os);
-    if (n.subnet) subnetSet.add(n.subnet);
-    if (n.type) typeSet.add(n.type);
+  nodesArr.forEach(n => {
+    if (n.group !== 'subnet') {
+      if (n.os) osSet.add(n.os);
+      if (n.subnet) subnetSet.add(n.subnet);
+    }
   });
 
-  const osSelect = document.getElementById("filter-os");
-  const subnetSelect = document.getElementById("filter-subnet");
-  const typeSelect = document.getElementById("filter-type");
+  const osSelect = document.getElementById('filterOS');
+  const subnetSelect = document.getElementById('filterSubnet');
 
-  function populate(select, values) {
-    select.innerHTML = '<option value="">All</option>';
-    values.forEach(val => {
-      const opt = document.createElement("option");
-      opt.value = val;
-      opt.textContent = val;
-      select.appendChild(opt);
-    });
-  }
+  osSet.forEach(os => {
+    const opt = document.createElement('option');
+    opt.value = os;
+    opt.textContent = os;
+    osSelect.appendChild(opt);
+  });
 
-  populate(osSelect, Array.from(osSet));
-  populate(subnetSelect, Array.from(subnetSet));
-  populate(typeSelect, Array.from(typeSet));
+  subnetSet.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s;
+    subnetSelect.appendChild(opt);
+  });
 }
 
-function applyFilters() {
-  const os = document.getElementById("filter-os").value;
-  const subnet = document.getElementById("filter-subnet").value;
-  const type = document.getElementById("filter-type").value;
+function applyFilters(allData, network) {
+  const type = document.getElementById('filterType').value;
+  const os   = document.getElementById('filterOS').value;
+  const subnet = document.getElementById('filterSubnet').value;
+  const search = document.getElementById('searchBox').value.trim().toLowerCase();
 
-  const visibleNodeIds = allData.nodes.get().filter(n => {
-    return (!os || n.os === os) &&
-           (!subnet || n.subnet === subnet) &&
-           (!type || n.type === type);
+  // filter nodes
+  const visible = allData.nodes.get().filter(n => {
+    if (n.group === 'subnet') return true;    // always keep subnets
+    if (type && n.group !== type) return false;
+    if (os   && n.os !== os) return false;
+    if (subnet && n.subnet !== subnet) return false;
+    if (search) {
+      const text = `${n.label} ${n.ip} ${n.os}`.toLowerCase();
+      if (!text.includes(search)) return false;
+    }
+    return true;
   }).map(n => n.id);
 
-  const edgeIds = allData.edges.get().filter(e => {
-    return visibleNodeIds.includes(e.from) && visibleNodeIds.includes(e.to);
-  }).map(e => e.id);
+  // filter edges
+  const filteredEdges = allData.edges.get().filter(e => 
+    visible.includes(e.from) && visible.includes(e.to)
+  ).map(e => e.id);
 
+  // apply
   network.setData({
-    nodes: new vis.DataSet(allData.nodes.get().filter(n => visibleNodeIds.includes(n.id))),
-    edges: new vis.DataSet(allData.edges.get().filter(e => edgeIds.includes(e.id)))
+    nodes: allData.nodes.get().filter(n => visible.includes(n.id)),
+    edges: allData.edges.get().filter(e => filteredEdges.includes(e.id))
   });
 }
 
-document.getElementById("filter-os").addEventListener("change", applyFilters);
-document.getElementById("filter-subnet").addEventListener("change", applyFilters);
-document.getElementById("filter-type").addEventListener("change", applyFilters);
-
-fetchAndBuildNetwork();
+function exportPNG() {
+  const canvas = document.querySelector('#mynetwork canvas');
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'network.png';
+    a.click();
+  });
+}

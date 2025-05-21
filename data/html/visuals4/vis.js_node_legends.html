@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Infra Dashboard – Vis.js Network</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap">
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --sidebar-bg: #fff;
+      --sidebar-fg: #222;
+      --card-bg: #fff;
+      --accent: #276ef1;
+      --scrollbar: #bbb;
+      --table-bg: #f9f9fa;
+      --table-fg: #222;
+      --table-border: #ccc;
+      --tab-active: #276ef1;
+    }
+    body.dark {
+      --bg: #191c1f;
+      --sidebar-bg: #21242a;
+      --sidebar-fg: #eee;
+      --card-bg: #23272e;
+      --accent: #43a0ff;
+      --scrollbar: #454a51;
+      --table-bg: #24272e;
+      --table-fg: #eee;
+      --table-border: #3a3d44;
+      --tab-active: #43a0ff;
+    }
+    html, body {
+      height: 100%; margin: 0; padding: 0;
+      font-family: 'Roboto', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--sidebar-fg);
+      transition: background 0.3s, color 0.3s;
+    }
+    #main-wrap { display: flex; height: 100vh; }
+    #sidebar {
+      width: 320px; min-width: 240px; max-width: 400px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-fg);
+      border-right: 1.5px solid var(--table-border);
+      box-shadow: 2px 0 4px rgba(0,0,0,0.03);
+      display: flex; flex-direction: column;
+      z-index: 5;
+      transition: background 0.3s, color 0.3s;
+    }
+    #tabs {
+      display: flex; border-bottom: 1.5px solid var(--table-border); padding: 0 0.5em;
+    }
+    .tab-btn {
+      flex: 1 1 0; padding: 1em 0.5em; cursor: pointer; background: none;
+      border: none; color: var(--sidebar-fg); font-weight: bold;
+      font-size: 1.05em; border-bottom: 3px solid transparent;
+      transition: color 0.2s, border-bottom 0.2s;
+    }
+    .tab-btn.active { color: var(--tab-active); border-bottom: 3px solid var(--tab-active); }
+    #sidebar-content {
+      flex: 1 1 0; overflow-y: auto; padding: 1em; background: var(--sidebar-bg);
+    }
+    #controls {
+      display: flex; gap: 10px; align-items: center; padding: 0.8em 1em;
+      background: var(--sidebar-bg); border-bottom: 1.5px solid var(--table-border);
+    }
+    #controls .toggle { margin-left: auto; }
+    .toggle-switch { cursor: pointer; font-size: 1.3em; padding: 4px 10px; color: var(--accent);}
+    .panel-toggle { cursor: pointer; font-size:1.3em; margin-right: 12px; color: var(--accent);}
+    .hidden { display: none !important; }
+    #map-wrap { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+    #mynetwork { width: 100%; height: 55vh; min-height: 360px; border-bottom: 1.5px solid var(--table-border);}
+    #host-table-wrap { flex: 1; background: var(--table-bg); color: var(--table-fg); overflow-y: auto; }
+    #host-table { width: 100%; border-collapse: collapse; font-size: 0.97em;}
+    #host-table th, #host-table td { padding: 0.55em 0.4em; border-bottom: 1px solid var(--table-border);}
+    #host-table th { background: var(--sidebar-bg); position: sticky; top: 0;}
+    #host-table tr.selected { background: var(--accent); color: #fff;}
+    #host-table tr:hover { background: #eaf1ff; }
+    body.dark #host-table tr:hover { background: #212a44; }
+    #host-table::-webkit-scrollbar, #sidebar-content::-webkit-scrollbar {
+      width: 10px; background: var(--scrollbar); border-radius: 6px;
+    }
+    #host-table::-webkit-scrollbar-thumb, #sidebar-content::-webkit-scrollbar-thumb {
+      background: var(--accent); border-radius: 6px;
+    }
+    .json-pretty {
+      background: var(--card-bg); border-radius: 7px; font-family: monospace;
+      font-size: 1em; line-height: 1.45; padding: 0.9em 1em; overflow-x: auto;
+      white-space: pre-wrap; margin: 1em 0; border: 1.5px solid var(--table-border);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      color: var(--sidebar-fg);
+      word-break: break-all;
+    }
+    .json-pretty .json-key   { color: #43a0ff; }
+    .json-pretty .json-value { color: #e2724a; }
+    .json-pretty .json-string { color: #1abf5b;}
+    #filter-panel {
+      display: flex; flex-wrap: wrap; gap: 9px 12px; align-items: center;
+      padding: 0.5em 0.3em 0.7em 0;
+      border-bottom: 1.5px solid var(--table-border);
+      background: var(--sidebar-bg);
+    }
+    #filter-panel label { font-size: 0.98em; }
+    #filter-panel select, #filter-panel input[type="text"] {
+      border-radius: 4px; border: 1px solid var(--table-border);
+      padding: 0.33em 0.5em; font-size: 1em; background: var(--card-bg); color: var(--sidebar-fg);
+      margin-right: 2px;
+    }
+    #legend {
+      display: flex; gap: 12px; margin: 0.5em 0 0.5em 0; align-items: center; flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.97em; }
+    .legend-shape { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+    .triangle { width: 0; height: 0; border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:12px solid; }
+    .vis-panel-hidden { display: none !important; }
+    @media (max-width: 850px) { #sidebar { width: 90vw; min-width: 0; } }
+    @media (max-width: 700px) { #main-wrap { flex-direction: column; } #sidebar { width: 100vw; min-width: 0; max-width: 100vw; border-right: none; border-bottom: 2px solid var(--table-border);} }
+  </style>
+  <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
+  <script src="vis_network.js"></script>
+</head>
+<body class="light">
+  <div id="main-wrap">
+    <div id="sidebar">
+      <div id="controls">
+        <button class="panel-toggle" onclick="togglePanel('map-wrap')" title="Show/Hide Map">🗺️</button>
+        <button class="panel-toggle" onclick="togglePanel('host-table-wrap')" title="Show/Hide Table">📋</button>
+        <button class="toggle-switch" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+      </div>
+      <div id="tabs">
+        <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
+        <button class="tab-btn" onclick="showTab('nodeinfo')">Node Info</button>
+        <button class="tab-btn" onclick="showTab('logs')">Logs</button>
+        <button class="tab-btn" onclick="showTab('settings')">Settings</button>
+      </div>
+      <div id="sidebar-content">
+        <div id="tab-overview">
+          <div id="legend">
+            <div class="legend-item"><div class="legend-shape triangle" style="border-bottom-color:#FF9900"></div> Switch</div>
+            <div class="legend-item"><div class="legend-shape" style="background:#2B7CE9"></div> Desktop</div>
+            <div class="legend-item"><div class="legend-shape" style="background:#5A1E5C"></div> Mobile</div>
+            <div class="legend-item"><div class="legend-shape" style="background:#C5000B"></div> Server</div>
+            <div class="legend-item"><div class="legend-shape" style="background:#109618"></div> Internet</div>
+            <div class="legend-item"><div class="legend-shape" style="background:#276ef1"></div> Docker Host</div>
+            <div class="legend-item"><div class="legend-shape" style="background:#ffe6e6"></div> Normal Host</div>
+          </div>
+          <div id="filter-panel">
+            <label>Type:
+              <select id="type-filter">
+                <option value="all">All</option>
+                <option value="docker">Docker Host</option>
+                <option value="normal">Normal Host</option>
+              </select>
+            </label>
+            <label>OS:
+              <select id="os-filter"><option value="all">All</option></select>
+            </label>
+            <label>Subnet:
+              <select id="subnet-filter"><option value="all">All</option></select>
+            </label>
+            <input type="text" id="searchBox" placeholder="Search name, IP, MAC…" />
+            <label style="margin-left:8px"><input type="checkbox" id="dockerOnly"/> Docker only</label>
+          </div>
+          <div id="host-table-wrap">
+            <table id="host-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>IP</th>
+                  <th>Name</th>
+                  <th>OS</th>
+                  <th>MAC</th>
+                  <th>Ports</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="tab-nodeinfo" class="hidden">
+          <h2 style="margin-top:0;">Node Info</h2>
+          <div id="nodeinfo-content" class="json-pretty">No node selected.</div>
+        </div>
+        <div id="tab-logs" class="hidden"><h2>Logs</h2>
+          <pre>Coming soon: System logs, event logs...</pre>
+        </div>
+        <div id="tab-settings" class="hidden"><h2>Settings</h2>
+          <pre>Coming soon: Customization, save views, etc.</pre>
+        </div>
+      </div>
+    </div>
+    <div id="map-wrap" style="flex:1; min-width:300px; display:flex; flex-direction:column;">
+      <div id="mynetwork"></div>
+    </div>
+  </div>
+  <script>
+    // Sidebar, tabs, modular panels, dark mode toggle
+    let activeTab = "overview";
+    function showTab(tab) {
+      activeTab = tab;
+      ["overview", "nodeinfo", "logs", "settings"].forEach(t=>{
+        document.getElementById("tab-"+t).classList.toggle("hidden", t!==tab);
+        document.querySelector('.tab-btn.'+t)?.classList?.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn=>{
+        if(btn.textContent.toLowerCase().includes(tab)) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+    }
+    function togglePanel(panelId) {
+      document.getElementById(panelId).classList.toggle("vis-panel-hidden");
+    }
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+      localStorage.setItem('theme', document.body.classList.contains("dark") ? "dark" : "light");
+    }
+    // On load: restore theme
+    window.onload = ()=>{
+      if(localStorage.getItem('theme')==="dark") document.body.classList.add("dark");
+      window.initVisNetwork && window.initVisNetwork(); // call network logic
+    };
+  </script>
+</body>
+</html>
