@@ -199,13 +199,24 @@
         <button class="sidebar-tab" data-tab="node">🔎 Node Info</button>
         <button class="sidebar-tab" data-tab="logs">📑 Logs</button>
         <button class="sidebar-tab" data-tab="settings">⚙️ Settings</button>
-        <button class="sidebar-tab" data-tab="stats">📈 Stats</button>
       </div>
-      <div class="sidebar-section active" id="tab-overview">
+      <!-- <div class="sidebar-section active" id="tab-overview">
         <b>Status:</b> <span id="statusMsg">OK</span><hr>
         <b>Total Hosts:</b> <span id="totalHosts">-</span><br>
         <b>Docker Hosts:</b> <span id="dockerHosts">-</span><br>
         <b>Normal Hosts:</b> <span id="normalHosts">-</span>
+        <b>Unique Subnets:</b> <span id="uniqueSubnets">-</span><br>
+        <b>Duplicate IPs:</b> <span id="duplicateIps">-</span>
+      </div> -->
+      <div class="sidebar-section active" id="tab-overview">
+        <b>Network Stats:</b>
+        <ul id="statsList" style="margin-top: 8px; padding-left: 16px;">
+          <li>Total Hosts: <span id="totalHosts">-</span></li>
+          <li>Docker Hosts: <span id="dockerHosts">-</span></li>
+          <li>Normal Hosts: <span id="normalHosts">-</span></li>
+          <li>Unique Subnets: <span id="uniqueSubnets">-</span></li>
+          <li>Duplicate IPs: <span id="duplicateIps">-</span></li>
+        </ul>
       </div>
       <div class="sidebar-section" id="tab-node">
         <b>Selected Node:</b>
@@ -219,16 +230,6 @@
         <b>Settings</b><br>
         <label><input type="checkbox" id="darkSidebar"/> Dark Mode</label><br>
         <button onclick="location.reload()">Reload Dashboard</button>
-      </div>
-      <div class="sidebar-section" id="tab-stats">
-        <b>Network Stats:</b>
-        <ul id="statsList" style="margin-top: 8px; padding-left: 16px;">
-          <li>Total Hosts: <span id="stat-total">-</span></li>
-          <li>Docker Hosts: <span id="stat-docker">-</span></li>
-          <li>Normal Hosts: <span id="stat-normal">-</span></li>
-          <li>Unique Subnets: <span id="stat-subnets">-</span></li>
-          <li>Duplicate IPs: <span id="stat-duplicates">-</span></li>
-        </ul>
       </div>
     </aside>
     <main id="main">
@@ -329,9 +330,9 @@
 
     // Stats & table update (unchanged)
     window.onNetworkDataReady = function(nodes,dC,nC){
-      document.getElementById('totalHosts').textContent = nodes.length;
-      document.getElementById('dockerHosts').textContent = dC;
-      document.getElementById('normalHosts').textContent = nC;
+      // document.getElementById('totalHosts').textContent = nodes.length;
+      // document.getElementById('dockerHosts').textContent = dC;
+      // document.getElementById('normalHosts').textContent = nC;
       const tb = document.querySelector('#hostTable tbody');
       tb.innerHTML = '';
       nodes.forEach(n=>{
@@ -353,11 +354,11 @@
           else ipm[n.ip]=true;
         }
       });
-      document.getElementById('stat-total').textContent = nodes.length;
-      document.getElementById('stat-docker').textContent = dC;
-      document.getElementById('stat-normal').textContent = nC;
-      document.getElementById('stat-subnets').textContent = subs.size;
-      document.getElementById('stat-duplicates').textContent = dupArr.length;
+      document.getElementById('totalHosts').textContent = nodes.length;
+      document.getElementById('dockerHosts').textContent = dC;
+      document.getElementById('normalHosts').textContent = nC;
+      document.getElementById('uniqueSubnets').textContent = subs.size;
+      document.getElementById('duplicateIps').textContent = dupArr.length;
     };
   </script>
 </body>
