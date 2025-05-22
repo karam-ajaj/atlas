@@ -1,106 +1,72 @@
-// vis_network.js
+// data/html/visuals/vis_network.js
 
 // --- CONFIG ---
 const API_URL = window.location.hostname.includes('vnerd.nl')
   ? 'https://atlas-api.vnerd.nl/hosts'
   : 'http://192.168.2.81:8889/hosts';
-// const API_URL = 'http://192.168.2.81:8889/hosts'; // your backend
 
 let network, nodesDS, edgesDS;
-let nodesArr = []; // For table/sidepanel
-let allNodes = [];
-let allEdges = [];
+let nodesArr = [], allEdges = [], allNodes = [];
 
 async function fetchData() {
-  const response = await fetch(API_URL);
-  const data = await response.json();
-  // data[0] = normal hosts, data[1] = docker hosts
-  return data;
+  const resp = await fetch(API_URL);
+  return resp.json(); // [ normalHosts, dockerHosts ]
 }
 
 function getSubnet(ip) {
-  if(!ip || typeof ip !== "string") return "";
+  if (!ip) return '';
   const m = ip.match(/^([\d]+\.[\d]+\.[\d]+)\./);
-  return m ? m[1]+'.0' : "other";
+  return m ? m[1] + '.0' : 'other';
 }
 
 function subnetColor(subnet) {
-  const palette = [
-    "#f39c12", "#16a085", "#e67e22", "#c0392b", "#2980b9",
-    "#8e44ad", "#27ae60", "#d35400", "#2c3e50", "#e84393"
-  ];
-  let sum = 0;
-  for (let i = 0; i < subnet.length; ++i) sum += subnet.charCodeAt(i);
+  const palette = ['#f39c12','#16a085','#e67e22','#c0392b','#2980b9','#8e44ad','#27ae60','#d35400','#2c3e50','#e84393'];
+  let sum = 0; for (let c of subnet) sum += c.charCodeAt(0);
   return palette[sum % palette.length];
 }
 
-function buildNetworkData(data, filters={}) {
-  nodesArr = [];
-  allEdges = [];
-  allNodes = [];
-  let idCounter = 1, dockerCount = 0, normalCount = 0;
-  let subnetMap = {};
+function buildNetworkData(data, filters = {}) {
+  nodesArr = []; allEdges = []; allNodes = [];
+  let idCtr = 1, dockerCount = 0, normalCount = 0;
+  const subnetMap = {};
 
-  function addHost(host, i, type) {
-    let ip = host[1], name = host[2], os = host[3], mac = host[4], ports = host[5];
-    let subnet = getSubnet(ip);
-    if(!subnetMap[subnet]) subnetMap[subnet] = [];
+  function addHost(host, type) {
+    const [ , ip, name, os, mac, ports ] = host;
+    const subnet = getSubnet(ip);
+    subnetMap[subnet] = subnetMap[subnet] || [];
     const node = {
-      id: idCounter++, label: name || ip, ip, name, os, mac, ports,
-      group: type === 'docker' ? 'docker' : 'normal',
-      color: type === 'docker' ? "#40a9ff" : "#ff6666",
-      font: { color: "#fff" },
-      subnet,
-      _raw: host
+      id: idCtr++, label: name||ip, ip, name, os, mac, ports,
+      group: type==='docker'?'docker':'normal',
+      subnet, color: type==='docker'?'#40a9ff':'#ff6666',
+      font:{color:'#fff'}
     };
-    if(filters.dockerOnly && type !== 'docker') return;
-    if(filters.text && ![ip,name,os,mac,ports].join(' ').toLowerCase().includes(filters.text.toLowerCase())) return;
-    if(filters.os && filters.os !== os) return;
-    if(filters.subnet && filters.subnet !== subnet) return;
+    // apply filters
+    if (filters.dockerOnly && node.group!=='docker') return;
+    if (filters.text && ![ip,name,os,mac,ports].join(' ').toLowerCase().includes(filters.text.toLowerCase())) return;
+    if (filters.os && filters.os !== os) return;
+    if (filters.subnet && filters.subnet !== subnet) return;
 
     nodesArr.push(node);
     subnetMap[subnet].push(node.id);
     allNodes.push(node);
-    if(type === 'docker') dockerCount++; else normalCount++;
+    type==='docker'?dockerCount++:normalCount++;
   }
 
-  data[0].forEach((h,i)=>addHost(h,i,'normal'));
-  data[1].forEach((h,i)=>addHost(h,i,'docker'));
+  data[0].forEach(h=>addHost(h,'normal'));
+  data[1].forEach(h=>addHost(h,'docker'));
 
-  let subnetNodes = [];
-  Object.entries(subnetMap).forEach(([subnet,ids]) => {
-    subnetNodes.push({
-      id: 'subnet-'+subnet,
-      label: subnet,
-      group: 'subnet',
-      shape: 'ellipse',
-      color: subnetColor(subnet),
-      font: { color: "#fff", size: 14 },
-      fixed: false,
-      physics: false,
-      subnet: subnet
-    });
-    ids.forEach(id => {
-      allEdges.push({
-        from: 'subnet-'+subnet, to: id,
-        color: { color: subnetColor(subnet), opacity: 0.35 },
-        width: 1,
-        dashes: true
-      });
-    });
-  });
-
-  subnetNodes.forEach(sn => {
-    allEdges.push({
-      from: 0, to: sn.id, width: 2, color: { color:'#888', opacity:0.2 }, dashes:true
-    });
-  });
-
-  allNodes.push({
-    id: 0, label: 'Network Hub', group: 'hub',
-    color: '#ffd600', shape: 'star', size: 36, font: { color: '#000', size: 17 }
-  });
-  allNodes = [...allNodes, ...subnetNodes];
+  // subnet grouping
+  for (let [subnet, ids] of Object.entries(subnetMap)) {
+    const sid = 'subnet-'+subnet;
+    const color = subnetColor(subnet);
+    allNodes.push({ id: sid, label: subnet, group:'subnet', shape:'ellipse', color, font:{color:'#fff'}, physics:false });
+    ids.forEach(id => allEdges.push({ from:sid, to:id, color:{color,opacity:0.35}, dashes:true, width:1 }));
+  }
+  // hub
+  allNodes.push({ id:0,label:'Network Hub',group:'hub',shape:'star',color:'#ffd600',size:36,font:{color:'#000',size:17} });
+  for (let subnet of Object.keys(subnetMap)) {
+    allEdges.push({ from:0, to:'subnet-'+subnet, color:{color:'#888',opacity:0.2}, dashes:true, width:2 });
+  }
 
   return { nodes: allNodes, edges: allEdges, dockerCount, normalCount };
 }
@@ -109,71 +75,74 @@ async function drawVisNetwork(filters={}) {
   const data = await fetchData();
   const { nodes, edges, dockerCount, normalCount } = buildNetworkData(data, filters);
 
-  nodesDS = new vis.DataSet(nodes);
-  edgesDS = new vis.DataSet(edges);
-
-  const container = document.getElementById('mynetwork');
-  container.innerHTML = '';
-  const options = {
-    interaction: { hover: true, tooltipDelay: 150 },
-    nodes: {
-      shape: "dot", size: 21, font: { size: 12, color: "#fff" },
-      borderWidth: 2, shadow: true
-    },
-    edges: {
-      color: { color: '#ccc', highlight: '#40a9ff', hover: '#ff9800' },
-      smooth: { type: 'dynamic' }, shadow: false
-    },
-    groups: {
-      docker: { shape: 'square', color: '#40a9ff' },
-      normal: { shape: 'dot', color: '#ff6666' },
-      subnet: { shape: 'ellipse', color: '#222', font: { color: '#fff' } },
-      hub: { shape: 'star', color: '#ffd600', font: { color: '#000' } }
-    },
-    layout: {
-      improvedLayout: true,
-      hierarchical: false
-    },
-    physics: { barnesHut: { gravitationalConstant: -5000 }, stabilization: false }
-  };
-
-  network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, options);
-
-  if(window.onNetworkDataReady)
-    window.onNetworkDataReady(nodes.filter(n => n.group !== 'subnet' && n.group !== 'hub'), dockerCount, normalCount);
-
-  network.on("hoverNode", params => {
-    const node = nodesDS.get(params.node);
-    if(!node) return;
-    let html = `<b>${node.label||''}</b><br>
-      <small>${node.group==='docker'?'Docker':'Normal'} Host</small><br>
-      <b>IP:</b> ${node.ip||''}<br>
-      <b>OS:</b> ${node.os||''}<br>
-      <b>MAC:</b> ${node.mac||''}<br>
-      <b>Ports:</b> ${node.ports||''}<br>
-      <b>Subnet:</b> ${node.subnet||''}`;
-    network.body.container.title = html.replace(/<br>/g,"\n").replace(/<[^>]*>/g,"");
-  });
-  network.on("blurNode", () => {
-    network.body.container.title = '';
-  });
-
-  network.on("selectNode", params => {
-    const sel = params.nodes[0];
-    const node = nodesDS.get(sel);
-    if(node && window.onNetworkNodeSelect)
-      window.onNetworkNodeSelect(node);
-  });
-  network.on("deselectNode", () => {
-    if(window.onNetworkNodeSelect)
-      window.onNetworkNodeSelect({});
-  });
-
-  window.applyVisFilter = function({dockerOnly,text,os,subnet}){
-    drawVisNetwork({dockerOnly,text,os,subnet});
+  // init or update
+  if (!nodesDS) {
+    nodesDS = new vis.DataSet(nodes);
+    edgesDS = new vis.DataSet(edges);
+    network = new vis.Network(
+      document.getElementById('mynetwork'),
+      { nodes: nodesDS, edges: edgesDS },
+      {
+        interaction:{hover:true,tooltipDelay:150},
+        nodes:{shape:'dot',size:21,font:{size:12,color:'#fff'},borderWidth:2,shadow:true},
+        edges:{color:{color:'#ccc',highlight:'#40a9ff',hover:'#ff9800'},smooth:{type:'dynamic'}},
+        groups:{
+          docker:{shape:'square',color:'#40a9ff'},
+          normal:{shape:'dot',color:'#ff6666'},
+          subnet:{shape:'ellipse',color:'#222',font:{color:'#fff'}},
+          hub:{shape:'star',color:'#ffd600',font:{color:'#000'}}
+        },
+        layout:{improvedLayout:true},
+        physics:{barnesHut:{gravitationalConstant:-5000},stabilization:false}
+      }
+    );
+  } else {
+    nodesDS.clear(); edgesDS.clear();
+    nodesDS.add(nodes); edgesDS.add(edges);
   }
+
+  // sidebar & table update
+  if (window.onNetworkDataReady) 
+    window.onNetworkDataReady(nodes.filter(n=>n.group!=='subnet'&&n.group!=='hub'), dockerCount, normalCount);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  drawVisNetwork();
+// expose filter API
+window.applyVisFilter = drawVisNetwork;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // initial render
+  await drawVisNetwork();
+
+  // gather unique OS & subnets for the dropdowns
+  const raw = await fetchData();
+  const all = buildNetworkData(raw, {});
+  const hosts = all.nodes.filter(n=>n.group==='normal'||n.group==='docker');
+  const uniqueOS = [...new Set(hosts.map(n=>n.os).filter(Boolean))].sort();
+  const uniqueSubnets = [...new Set(hosts.map(n=>n.subnet).filter(Boolean))].sort();
+
+  const osSel = document.getElementById('osFilter');
+  uniqueOS.forEach(os=> osSel.innerHTML += `<option>${os}</option>`);
+
+  const snSel = document.getElementById('subnetFilter');
+  uniqueSubnets.forEach(s=> snSel.innerHTML += `<option value="${s}">${s}</option>`);
+
+  // wire controls
+  document.getElementById('filterDockerOnly').addEventListener('change', () => {
+    window.applyVisFilter({
+      dockerOnly: document.getElementById('filterDockerOnly').checked,
+      text: document.getElementById('textFilter').value.trim(),
+      os: document.getElementById('osFilter').value,
+      subnet: document.getElementById('subnetFilter').value
+    });
+  });
+  ['textFilter','osFilter','subnetFilter'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      window.applyVisFilter({
+        dockerOnly: document.getElementById('filterDockerOnly').checked,
+        text: document.getElementById('textFilter').value.trim(),
+        os: document.getElementById('osFilter').value,
+        subnet: document.getElementById('subnetFilter').value
+      });
+    });
+  });
 });
