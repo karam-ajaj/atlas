@@ -4,7 +4,6 @@
 const API_URL = window.location.hostname.includes('vnerd.nl')
   ? 'https://atlas-api.vnerd.nl/hosts'
   : 'http://192.168.2.81:8889/hosts';
-// const API_URL = 'http://192.168.2.81:8889/hosts'; // your backend
 
 let network, nodesDS, edgesDS;
 let nodesArr = []; // For table/sidepanel
@@ -53,6 +52,7 @@ function buildNetworkData(data, filters={}) {
       subnet,
       _raw: host
     };
+    // ─── Apply our filters ───
     if(filters.dockerOnly && type !== 'docker') return;
     if(filters.text && ![ip,name,os,mac,ports].join(' ').toLowerCase().includes(filters.text.toLowerCase())) return;
     if(filters.os && filters.os !== os) return;
@@ -175,5 +175,45 @@ async function drawVisNetwork(filters={}) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // initial draw
   drawVisNetwork();
+
+  // ─── New filtering setup ───
+  fetchData().then(data => {
+    const { nodes } = buildNetworkData(data, {});
+    const hosts = nodes.filter(n => n.group==='normal' || n.group==='docker');
+
+    // populate OS
+    const osSet = new Set(hosts.map(n=>n.os).filter(Boolean));
+    const osSel = document.getElementById('osFilter');
+    osSet.forEach(os => {
+      const opt = document.createElement('option');
+      opt.value = os; opt.textContent = os;
+      osSel.appendChild(opt);
+    });
+
+    // populate subnets
+    const snSet = new Set(hosts.map(n=>n.subnet).filter(Boolean));
+    const snSel = document.getElementById('subnetFilter');
+    snSet.forEach(sn => {
+      const opt = document.createElement('option');
+      opt.value = sn; opt.textContent = sn;
+      snSel.appendChild(opt);
+    });
+  });
+
+  function applyFilters() {
+    window.applyVisFilter({
+      dockerOnly: document.getElementById('filterDockerOnly').checked,
+      text: document.getElementById('textFilter').value.trim(),
+      os: document.getElementById('osFilter').value,
+      subnet: document.getElementById('subnetFilter').value
+    });
+  }
+
+  // wire events
+  document.getElementById('filterDockerOnly').addEventListener('change', applyFilters);
+  document.getElementById('textFilter').addEventListener('input', applyFilters);
+  document.getElementById('osFilter').addEventListener('change', applyFilters);
+  document.getElementById('subnetFilter').addEventListener('change', applyFilters);
 });
