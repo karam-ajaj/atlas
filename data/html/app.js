@@ -20,7 +20,14 @@
 //     }
 // }
 
-const API_URL = "http://localhost:8889/hosts";
+const apiBase = window.location.hostname.includes('vnerd.nl')
+  ? 'https://atlas-api.vnerd.nl'
+  : 'http://192.168.2.81:8889';
+
+fetch(`${apiBase}/hosts`)
+
+
+// const API_URL = "http://localhost:8889/hosts";
 
 async function fetchHostData() {
     try {

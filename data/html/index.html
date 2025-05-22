@@ -6,7 +6,12 @@
     <title>Network Hosts</title>
     <script>
         function fetchHosts() {
-            fetch('http://192.168.2.81:8889/hosts')
+            const apiBase = window.location.hostname.includes('vnerd.nl')
+  ? 'https://atlas-api.vnerd.nl'
+  : 'http://192.168.2.81:8889';
+
+fetch(`${apiBase}/hosts`)
+
                 .then(response => response.json())
                 .then(data => {
                     const [regularHosts, dockerHosts] = data;

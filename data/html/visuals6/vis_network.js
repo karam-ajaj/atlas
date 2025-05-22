@@ -1,7 +1,10 @@
 // vis_network.js
 
 // --- CONFIG ---
-const API_URL = 'http://192.168.2.81:8889/hosts'; // your backend
+const API_URL = window.location.hostname.includes('vnerd.nl')
+  ? 'https://atlas-api.vnerd.nl/hosts'
+  : 'http://192.168.2.81:8889/hosts';
+// const API_URL = 'http://192.168.2.81:8889/hosts'; // your backend
 
 let network, nodesDS, edgesDS;
 let nodesArr = []; // For table/sidepanel

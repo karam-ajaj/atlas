@@ -1,124 +1,179 @@
-let network, allData = { nodes: new vis.DataSet(), edges: new vis.DataSet() };
+// vis_network.js
+
+// --- CONFIG ---
+const API_URL = window.location.hostname.includes('vnerd.nl')
+  ? 'https://atlas-api.vnerd.nl/hosts'
+  : 'http://192.168.2.81:8889/hosts';
+// const API_URL = 'http://192.168.2.81:8889/hosts'; // your backend
+
+let network, nodesDS, edgesDS;
+let nodesArr = []; // For table/sidepanel
+let allNodes = [];
+let allEdges = [];
 
 async function fetchData() {
-  const response = await fetch('http://192.168.2.81:8889/hosts');
+  const response = await fetch(API_URL);
   const data = await response.json();
-  const nodes = [];
-  const edges = [];
-  const subnets = new Map();
-  let idCounter = 1;
+  // data[0] = normal hosts, data[1] = docker hosts
+  return data;
+}
 
-  const parseSubnet = ip => ip.split('.').slice(0, 3).join('.') + '.0';
+function getSubnet(ip) {
+  if(!ip || typeof ip !== "string") return "";
+  const m = ip.match(/^([\d]+\.[\d]+\.[\d]+)\./);
+  return m ? m[1]+'.0' : "other";
+}
 
-  const addNode = (host, type) => {
-    const id = idCounter++;
-    const ip = host[1];
-    const subnet = parseSubnet(ip);
+function subnetColor(subnet) {
+  const palette = [
+    "#f39c12", "#16a085", "#e67e22", "#c0392b", "#2980b9",
+    "#8e44ad", "#27ae60", "#d35400", "#2c3e50", "#e84393"
+  ];
+  let sum = 0;
+  for (let i = 0; i < subnet.length; ++i) sum += subnet.charCodeAt(i);
+  return palette[sum % palette.length];
+}
+
+function buildNetworkData(data, filters={}) {
+  nodesArr = [];
+  allEdges = [];
+  allNodes = [];
+  let idCounter = 1, dockerCount = 0, normalCount = 0;
+  let subnetMap = {};
+
+  function addHost(host, i, type) {
+    let ip = host[1], name = host[2], os = host[3], mac = host[4], ports = host[5];
+    let subnet = getSubnet(ip);
+    if(!subnetMap[subnet]) subnetMap[subnet] = [];
     const node = {
-      id, label: host[2], title: ip,
-      group: type === 'docker' ? 'server' : 'desktop',
-      ip, os: host[3], mac: host[4], ports: host[5], type, subnet
+      id: idCounter++, label: name || ip, ip, name, os, mac, ports,
+      group: type === 'docker' ? 'docker' : 'normal',
+      color: type === 'docker' ? "#40a9ff" : "#ff6666",
+      font: { color: "#fff" },
+      subnet,
+      _raw: host
     };
-    nodes.push(node);
+    if(filters.dockerOnly && type !== 'docker') return;
+    if(filters.text && ![ip,name,os,mac,ports].join(' ').toLowerCase().includes(filters.text.toLowerCase())) return;
+    if(filters.os && filters.os !== os) return;
+    if(filters.subnet && filters.subnet !== subnet) return;
 
-    if (!subnets.has(subnet)) {
-      const subnetId = 10000 + subnets.size;
-      subnets.set(subnet, subnetId);
-      nodes.push({
-        id: subnetId, label: subnet, group: 'switch',
-        shape: 'triangle', color: '#FF9900', subnet
+    nodesArr.push(node);
+    subnetMap[subnet].push(node.id);
+    allNodes.push(node);
+    if(type === 'docker') dockerCount++; else normalCount++;
+  }
+
+  data[0].forEach((h,i)=>addHost(h,i,'normal'));
+  data[1].forEach((h,i)=>addHost(h,i,'docker'));
+
+  let subnetNodes = [];
+  Object.entries(subnetMap).forEach(([subnet,ids]) => {
+    subnetNodes.push({
+      id: 'subnet-'+subnet,
+      label: subnet,
+      group: 'subnet',
+      shape: 'ellipse',
+      color: subnetColor(subnet),
+      font: { color: "#fff", size: 14 },
+      fixed: false,
+      physics: false,
+      subnet: subnet
+    });
+    ids.forEach(id => {
+      allEdges.push({
+        from: 'subnet-'+subnet, to: id,
+        color: { color: subnetColor(subnet), opacity: 0.35 },
+        width: 1,
+        dashes: true
       });
-    }
-    edges.push({ from: subnets.get(subnet), to: id });
+    });
+  });
+
+  subnetNodes.forEach(sn => {
+    allEdges.push({
+      from: 0, to: sn.id, width: 2, color: { color:'#888', opacity:0.2 }, dashes:true
+    });
+  });
+
+  allNodes.push({
+    id: 0, label: 'Network Hub', group: 'hub',
+    color: '#ffd600', shape: 'star', size: 36, font: { color: '#000', size: 17 }
+  });
+  allNodes = [...allNodes, ...subnetNodes];
+
+  return { nodes: allNodes, edges: allEdges, dockerCount, normalCount };
+}
+
+async function drawVisNetwork(filters={}) {
+  const data = await fetchData();
+  const { nodes, edges, dockerCount, normalCount } = buildNetworkData(data, filters);
+
+  nodesDS = new vis.DataSet(nodes);
+  edgesDS = new vis.DataSet(edges);
+
+  const container = document.getElementById('mynetwork');
+  container.innerHTML = '';
+  const options = {
+    interaction: { hover: true, tooltipDelay: 150 },
+    nodes: {
+      shape: "dot", size: 21, font: { size: 12, color: "#fff" },
+      borderWidth: 2, shadow: true
+    },
+    edges: {
+      color: { color: '#ccc', highlight: '#40a9ff', hover: '#ff9800' },
+      smooth: { type: 'dynamic' }, shadow: false
+    },
+    groups: {
+      docker: { shape: 'square', color: '#40a9ff' },
+      normal: { shape: 'dot', color: '#ff6666' },
+      subnet: { shape: 'ellipse', color: '#222', font: { color: '#fff' } },
+      hub: { shape: 'star', color: '#ffd600', font: { color: '#000' } }
+    },
+    layout: {
+      improvedLayout: true,
+      hierarchical: false
+    },
+    physics: { barnesHut: { gravitationalConstant: -5000 }, stabilization: false }
   };
 
-  data[0].forEach(host => addNode(host, 'normal'));
-  data[1].forEach(host => addNode(host, 'docker'));
+  network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, options);
 
-  allData = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
-  populateFilters(nodes);
-  renderNetwork();
-}
-
-function renderNetwork() {
-  const container = document.getElementById('mynetwork');
-  const selectedType = document.getElementById('filterType').value;
-  const selectedOS = document.getElementById('filterOS').value;
-  const selectedSubnet = document.getElementById('filterSubnet').value;
-
-  const filteredNodes = allData.nodes.get().filter(node => {
-    if (node.group === 'switch') return true;
-    return (!selectedType || node.type === selectedType) &&
-           (!selectedOS || node.os === selectedOS) &&
-           (!selectedSubnet || node.subnet === selectedSubnet);
-  });
-
-  const filteredEdges = allData.edges.get().filter(edge =>
-    filteredNodes.find(n => n.id === edge.from) &&
-    filteredNodes.find(n => n.id === edge.to)
-  );
-
-  network = new vis.Network(container, {
-    nodes: new vis.DataSet(filteredNodes),
-    edges: new vis.DataSet(filteredEdges)
-  }, {
-    interaction: { hover: true },
-    physics: { stabilization: false },
-    groups: {
-      switch: { shape:'triangle', color:'#FF9900' },
-      desktop:{ shape:'dot', color:'#2B7CE9' },
-      server:{ shape:'square', color:'#C5000B' },
-    },
-    nodes: { shape:'dot', size:16 },
-    edges: { font:{ align:'middle' }, smooth:false }
-  });
+  if(window.onNetworkDataReady)
+    window.onNetworkDataReady(nodes.filter(n => n.group !== 'subnet' && n.group !== 'hub'), dockerCount, normalCount);
 
   network.on("hoverNode", params => {
-    const node = allData.nodes.get(params.node);
-    const title = `
-      <b>${node.label}</b><br>
-      Group: ${node.group}<br>
-      IP: ${node.ip}<br>
-      OS: ${node.os}<br>
-      MAC: ${node.mac}<br>
-      Ports: ${node.ports}
-    `;
-    network.canvas.body.container.setAttribute('title', title);
+    const node = nodesDS.get(params.node);
+    if(!node) return;
+    let html = `<b>${node.label||''}</b><br>
+      <small>${node.group==='docker'?'Docker':'Normal'} Host</small><br>
+      <b>IP:</b> ${node.ip||''}<br>
+      <b>OS:</b> ${node.os||''}<br>
+      <b>MAC:</b> ${node.mac||''}<br>
+      <b>Ports:</b> ${node.ports||''}<br>
+      <b>Subnet:</b> ${node.subnet||''}`;
+    network.body.container.title = html.replace(/<br>/g,"\n").replace(/<[^>]*>/g,"");
   });
-
   network.on("blurNode", () => {
-    network.canvas.body.container.removeAttribute('title');
+    network.body.container.title = '';
   });
+
+  network.on("selectNode", params => {
+    const sel = params.nodes[0];
+    const node = nodesDS.get(sel);
+    if(node && window.onNetworkNodeSelect)
+      window.onNetworkNodeSelect(node);
+  });
+  network.on("deselectNode", () => {
+    if(window.onNetworkNodeSelect)
+      window.onNetworkNodeSelect({});
+  });
+
+  window.applyVisFilter = function({dockerOnly,text,os,subnet}){
+    drawVisNetwork({dockerOnly,text,os,subnet});
+  }
 }
 
-function populateFilters(nodes) {
-  const osSet = new Set();
-  const subnetSet = new Set();
-  nodes.forEach(n => {
-    if (n.os) osSet.add(n.os);
-    if (n.subnet) subnetSet.add(n.subnet);
-  });
-
-  const osSelect = document.getElementById('filterOS');
-  const subnetSelect = document.getElementById('filterSubnet');
-  osSelect.innerHTML = '<option value="">All OS</option>';
-  subnetSelect.innerHTML = '<option value="">All Subnets</option>';
-
-  [...osSet].sort().forEach(os => {
-    osSelect.innerHTML += `<option value="${os}">${os}</option>`;
-  });
-  [...subnetSet].sort().forEach(subnet => {
-    subnetSelect.innerHTML += `<option value="${subnet}">${subnet}</option>`;
-  });
-
-  osSelect.onchange = subnetSelect.onchange = document.getElementById('filterType').onchange = renderNetwork;
-}
-
-function exportPNG() {
-  const canvas = document.querySelector('#mynetwork canvas');
-  const dataUrl = canvas.toDataURL('image/png');
-  const a = document.createElement('a');
-  a.href = dataUrl; a.download = 'network.png'; a.click();
-}
-
-fetchData();
+document.addEventListener('DOMContentLoaded', () => {
+  drawVisNetwork();
+});
