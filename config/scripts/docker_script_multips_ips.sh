@@ -35,9 +35,9 @@ while read -r name network ip mac; do
             jq -r '.[0].NetworkSettings.Ports // {} | to_entries[]? | "\(.key) -> \(.value[0].HostIp):\(.value[0].HostPort)"' | paste -sd, -)
         ports=${ports:-no_ports}
 
-        printf "%-15s %-50s %-10s %-30s %-40s\n" "$ip" "$name" "$os" "$mac" "$ports"
+        printf "%-15s %-50s %-10s %-30s %-40s\n" "$ip" "$short_name" "$os" "$mac" "$ports"
     else
-        printf "%-15s %-50s %-10s %-30s %-40s\n" "$ip" "$name" "unknown" "not_found" "no_ports"
+        printf "%-15s %-50s %-10s %-30s %-40s\n" "$ip" "$short_name" "unknown" "not_found" "no_ports"
     fi
 done < "$log_file"
 

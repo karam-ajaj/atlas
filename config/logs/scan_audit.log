@@ -9,3 +9,4 @@
 [2025-05-23T00:14:36+00:00] Detecting default interface and subnet
 [2025-05-23T00:14:36+00:00] Using interface: eth0 (subnet: 172.17.0.2/16)
 [2025-05-23T00:14:36+00:00] Running quick ping scan for MAC addresses
+[2025-05-23T00:23:18+00:00] Cleanup complete, exiting.

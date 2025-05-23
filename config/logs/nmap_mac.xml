@@ -1,20 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE nmaprun>
 <?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
-<!-- Nmap 7.93 scan initiated Fri May 23 00:14:36 2025 as: nmap -sn -oX /config/logs/nmap_mac.xml 172.17.0.2/16 -->
-<nmaprun scanner="nmap" args="nmap -sn -oX /config/logs/nmap_mac.xml 172.17.0.2/16" start="1747959276" startstr="Fri May 23 00:14:36 2025" version="7.93" xmloutputversion="1.05">
+<!-- Nmap 7.93 scan initiated Fri May 23 00:23:22 2025 as: nmap -sn -oX /config/logs/nmap_mac.xml 192.168.2.0/24 -->
+<nmaprun scanner="nmap" args="nmap -sn -oX /config/logs/nmap_mac.xml 192.168.2.0/24" start="1747959802" startstr="Fri May 23 00:23:22 2025" version="7.93" xmloutputversion="1.05">
 <verbose level="0"/>
 <debugging level="0"/>
-<host><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="172.17.0.1" addrtype="ipv4"/>
-<address addr="02:42:32:43:8F:E4" addrtype="mac"/>
+<host><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="192.168.2.1" addrtype="ipv4"/>
 <hostnames>
 </hostnames>
-<times srtt="20" rttvar="3" to="100000"/>
+<times srtt="20529" rttvar="20529" to="102645"/>
 </host>
-<host><status state="up" reason="localhost-response" reason_ttl="0"/>
-<address addr="172.17.0.2" addrtype="ipv4"/>
+<host><status state="up" reason="echo-reply" reason_ttl="127"/>
+<address addr="192.168.2.6" addrtype="ipv4"/>
 <hostnames>
-<hostname name="4246cf41fd8c" type="PTR"/>
+<hostname name="yoga.home" type="PTR"/>
 </hostnames>
+<times srtt="14452" rttvar="14452" to="100000"/>
 </host>
+<host><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="192.168.2.8" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<times srtt="1173" rttvar="5000" to="100000"/>
+</host>
+<host><status state="up" reason="echo-reply" reason_ttl="64"/>
+<address addr="192.168.2.81" addrtype="ipv4"/>
+<hostnames>
+<hostname name="192.168.2.81" type="PTR"/>
+</hostnames>
+<times srtt="26" rttvar="5000" to="100000"/>
+</host>
+<host><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="192.168.2.111" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<times srtt="203" rttvar="5000" to="100000"/>
+</host>
+<host><status state="up" reason="echo-reply" reason_ttl="63"/>
+<address addr="192.168.2.254" addrtype="ipv4"/>
+<hostnames>
+<hostname name="mijnmodem.kpn.home" type="PTR"/>
+</hostnames>
+<times srtt="1353" rttvar="3762" to="100000"/>
+</host>
+<runstats><finished time="1747959806" timestr="Fri May 23 00:23:26 2025" summary="Nmap done at Fri May 23 00:23:26 2025; 256 IP addresses (6 hosts up) scanned in 3.60 seconds" elapsed="3.60" exit="success"/><hosts up="6" down="250" total="256"/>
+</runstats>
+</nmaprun>
