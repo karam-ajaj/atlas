@@ -238,18 +238,7 @@
           <h1>Atlas Infra Map</h1>
           <button id="dark-toggle" title="Toggle dark mode">🌙</button>
         </div>
-        <div class="right">
-          <span id="date"></span>
-        </div>
-      </header>
-      <nav id="panel-bar">
-        <button class="panel-toggle active" data-panel="network">Network Map</button>
-        <button class="panel-toggle active" data-panel="table">Hosts Table</button>
-        <button class="panel-toggle" data-panel="logs">Logs</button>
-      </nav>
-      <section id="panels">
-        <div class="panel" id="panel-network">
-          <!-- Filter Controls -->
+                  <!-- Filter Controls -->
           <div id="visjsControls">
             <label><input type="checkbox" id="filterDockerOnly"/> Docker Only</label>
             <label for="textFilter">Search:</label>
@@ -259,6 +248,15 @@
             <label for="subnetFilter">Subnet:</label>
             <select id="subnetFilter"><option value="">All</option></select>
           </div>
+      </header>
+      <nav id="panel-bar">
+        <button class="panel-toggle active" data-panel="network">Network Map</button>
+        <button class="panel-toggle active" data-panel="table">Hosts Table</button>
+        <button class="panel-toggle" data-panel="logs">Logs</button>
+      </nav>
+      <section id="panels">
+        <div class="panel" id="panel-network">
+
           <div id="mynetwork" style="height:100vh;"></div>
         </div>
         <div id="panel-table" class="panel">

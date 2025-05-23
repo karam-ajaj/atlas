@@ -1,3 +1,4 @@
+10.0.1.81       /coder_coder.1.9gfzd4863p5a11hy6wmcnuxjg           linux      02:42:0a:00:01:51              8443/tcp -> null:null                   
 10.0.0.5        /teleport_teleport.1.489dgxyenratwmdv3a62evv9z     linux      02:42:0a:00:00:05              no_ports                                
 10.0.26.2       /teleport_teleport.1.489dgxyenratwmdv3a62evv9z     linux      02:42:0a:00:1a:02              no_ports                                
 10.0.6.3        /teleport_teleport.1.489dgxyenratwmdv3a62evv9z     linux      02:42:0a:00:06:03              no_ports                                
@@ -43,7 +44,6 @@
 10.0.1.25       /api_aria.1.olg5o3uiy7dxobq4azld22j3o              linux      02:42:0a:00:01:19              80/tcp -> null:null,8080/tcp -> null:null
 10.0.1.36       /api_lcm.1.pm0cmkgf5okbll5symzlnhsag               linux      02:42:0a:00:01:24              80/tcp -> null:null,8080/tcp -> null:null
 10.0.1.27       /api_vc.1.fot2643dp9kpjjmuvsuw7t3j7                linux      02:42:0a:00:01:1b              80/tcp -> null:null,8080/tcp -> null:null
-10.0.1.19       /coder_coder.1.upf5l9kz83hmn7hi7k4jy7hk7           linux      02:42:0a:00:01:13              8443/tcp -> null:null                   
 10.0.1.3        /authelia_authelia.1.8qzlnqsmrvb2a4vego5zcsqvi     linux      02:42:0a:00:01:03              9091/tcp -> null:null                   
 10.0.0.2        /minio_app.1.2klebb73h4cj5i7tspzobb1w5             linux      02:42:0a:00:00:02              9000/tcp -> null:null                   
 10.0.1.7        /minio_app.1.2klebb73h4cj5i7tspzobb1w5             linux      02:42:0a:00:01:07              9000/tcp -> null:null                   
