@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-export function HostsTable() {
+export function HostsTable({ selectedNode }) {
   const [data, setData] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -62,16 +62,51 @@ export function HostsTable() {
     overscan: 10,
   });
 
+  useEffect(() => {
+    if (!selectedNode || !tableContainerRef.current) return;
+    const rowIndex = data.findIndex((row) => row.ip === selectedNode.ip);
+    if (rowIndex >= 0) {
+      const offset = rowVirtualizer.getVirtualItems().find(v => v.index === rowIndex)?.start;
+      if (offset !== undefined) {
+        tableContainerRef.current.scrollTop = offset;
+      }
+    }
+  }, [selectedNode, data, rowVirtualizer]);
+
+  const exportVisibleToCSV = () => {
+    const visibleRows = rowVirtualizer.getVirtualItems().map(v => rows[v.index].original);
+    const csv = [
+      ["IP", "Name", "OS", "Group", "Ports"],
+      ...visibleRows.map(row => [row.ip, row.name, row.os, row.group, row.ports])
+    ].map(e => e.join(",")).join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "visible-hosts.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="p-4 bg-white rounded shadow">
       <h2 className="text-lg font-semibold mb-2">Hosts Table</h2>
-      <input
-        type="text"
-        value={globalFilter ?? ""}
-        onChange={(e) => setGlobalFilter(e.target.value)}
-        placeholder="Search..."
-        className="mb-3 p-2 border w-full"
-      />
+      <div className="flex items-center justify-between mb-2">
+        <input
+          type="text"
+          value={globalFilter ?? ""}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          placeholder="Search..."
+          className="p-2 border w-full mr-2"
+        />
+        <button
+          onClick={exportVisibleToCSV}
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Export
+        </button>
+      </div>
       <div
         ref={tableContainerRef}
         className="h-[70vh] overflow-auto border rounded"
@@ -107,10 +142,11 @@ export function HostsTable() {
           >
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
               const row = rows[virtualRow.index];
+              const isSelected = row.original.ip === selectedNode?.ip;
               return (
                 <tr
                   key={row.id}
-                  className="border-t hover:bg-gray-50"
+                  className={`border-t hover:bg-gray-50 ${isSelected ? 'bg-yellow-100' : ''}`}
                   style={{
                     position: "absolute",
                     top: 0,

@@ -3,11 +3,11 @@ import { NetworkMap } from "./components/NetworkMap";
 import { HostsTable } from "./components/HostsTable";
 import { LogsPanel } from "./components/LogsPanel";
 
-
 const tabs = ["Network Map", "Hosts Table", "Logs"];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("Network Map");
+  const [selectedNode, setSelectedNode] = useState(null);
 
   return (
     <div className="flex h-screen">
@@ -34,8 +34,8 @@ export default function App() {
       </div>
 
       <div className="flex-1 bg-gray-100 p-4 overflow-hidden">
-        {activeTab === "Network Map" && <NetworkMap />}
-        {activeTab === "Hosts Table" && <HostsTable />}
+        {activeTab === "Network Map" && <NetworkMap onNodeSelect={setSelectedNode} />}
+        {activeTab === "Hosts Table" && <HostsTable selectedNode={selectedNode} />}
         {activeTab === "Logs" && <LogsPanel />}
       </div>
     </div>
