@@ -14,13 +14,12 @@ function getHubColor(subnet) {
   return "#9ca3af";
 }
 
-export function NetworkMap({ onNodeSelect, selectedNode }) {
+export function NetworkMap({ onNodeSelect }) {
   const containerRef = useRef(null);
   const networkRef = useRef(null);
   const [error, setError] = useState(null);
-  const [selectedLocalNode, setSelectedLocalNode] = useState(null);
+  const [selectedNode, setSelectedNode] = useState(null);
   const [nodeInfoMap, setNodeInfoMap] = useState({});
-  const [nodeIdMap, setNodeIdMap] = useState({});
 
   useEffect(() => {
     async function fetchData() {
@@ -33,7 +32,6 @@ export function NetworkMap({ onNodeSelect, selectedNode }) {
         const nodes = new DataSet();
         const edges = new DataSet();
         const infoMap = {};
-        const nodeIdMapping = {};
         const subnetMap = new Map();
 
         const getSubnetHubId = (subnet) => `subnet-${subnet}`;
@@ -63,18 +61,14 @@ export function NetworkMap({ onNodeSelect, selectedNode }) {
 
           edges.add({ from: hubId, to: nodeId });
 
-          const nodeObj = {
-            id,
-            ip,
+          infoMap[nodeId] = {
             name,
+            ip,
             os,
             group,
             subnet,
             ports,
           };
-
-          infoMap[nodeId] = nodeObj;
-          nodeIdMapping[`${ip}`] = nodeId;
         };
 
         nonDockerHosts.forEach(([id, ip, name, os, _, ports]) => {
@@ -86,7 +80,6 @@ export function NetworkMap({ onNodeSelect, selectedNode }) {
         });
 
         setNodeInfoMap(infoMap);
-        setNodeIdMap(nodeIdMapping);
 
         const data = { nodes, edges };
         const options = {
@@ -121,10 +114,10 @@ export function NetworkMap({ onNodeSelect, selectedNode }) {
             const nodeId = params.nodes[0];
             if (nodeId && infoMap[nodeId]) {
               const node = infoMap[nodeId];
-              setSelectedLocalNode(node);
+              setSelectedNode(node);
               onNodeSelect?.(node);
             } else {
-              setSelectedLocalNode(null);
+              setSelectedNode(null);
               onNodeSelect?.(null);
             }
           });
@@ -142,20 +135,6 @@ export function NetworkMap({ onNodeSelect, selectedNode }) {
     };
   }, [onNodeSelect]);
 
-  useEffect(() => {
-    if (!selectedNode || !networkRef.current || !nodeIdMap[selectedNode.ip]) return;
-    const nodeId = nodeIdMap[selectedNode.ip];
-    try {
-      networkRef.current.selectNodes([nodeId]);
-      networkRef.current.focus(nodeId, {
-        scale: 1.5,
-        animation: true,
-      });
-    } catch (err) {
-      console.warn("Unable to center node:", nodeId);
-    }
-  }, [selectedNode, nodeIdMap]);
-
   return (
     <div className="relative w-full h-full bg-white border rounded p-4">
       <h2 className="text-lg font-semibold mb-2">Network Map</h2>
@@ -164,7 +143,7 @@ export function NetworkMap({ onNodeSelect, selectedNode }) {
       ) : (
         <>
           <div ref={containerRef} className="w-full h-[80vh] bg-gray-200 rounded" />
-          <SelectedNodePanel node={selectedLocalNode} />
+          <SelectedNodePanel node={selectedNode} />
         </>
       )}
     </div>
