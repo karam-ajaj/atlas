@@ -1,3 +1,4 @@
+172.17.0.2      atlas                                              linux      02:42:ac:11:00:02              80/tcp -> 0.0.0.0:8888,8000/tcp -> 0.0.0.0:8889
 10.0.1.81       coder_coder.1.9gfzd4863p5a11hy6wmcnuxjg            linux      02:42:0a:00:01:51              8443/tcp -> null:null                   
 10.0.0.5        teleport_teleport.1.489dgxyenratwmdv3a62evv9z      linux      02:42:0a:00:00:05              no_ports                                
 10.0.26.2       teleport_teleport.1.489dgxyenratwmdv3a62evv9z      linux      02:42:0a:00:1a:02              no_ports                                
@@ -52,4 +53,3 @@
 10.0.1.11       luai-wordpress_wordpress-luai.1.uuuw2vyhfols2rkn1jdzelpcm linux      02:42:0a:00:01:0b              80/tcp -> null:null                     
 10.0.1.26       api_api.1.id6jw858c8oelboq436nsc9ko                linux      02:42:0a:00:01:1a              80/tcp -> null:null,8080/tcp -> null:null
 10.0.29.4       luai-wordpress_db-luai.1.6wqcw6bbkk1y5ykktjwhptg4g linux      02:42:0a:00:1d:04              3306/tcp -> null:null,33060/tcp -> null:null
-172.17.0.2      atlas                                              linux      02:42:ac:11:00:02              80/tcp -> 0.0.0.0:8888,8000/tcp -> 0.0.0.0:8889
