@@ -3,6 +3,7 @@ import { NetworkMap } from "./components/NetworkMap";
 import { HostsTable } from "./components/HostsTable";
 import { LogsPanel } from "./components/LogsPanel";
 
+
 const tabs = ["Network Map", "Hosts Table", "Logs"];
 
 export default function App() {

@@ -7,8 +7,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-window": "^1.8.11",
     "vis-data": "^7.1.9",
     "vis-network": "^9.1.10"
   },

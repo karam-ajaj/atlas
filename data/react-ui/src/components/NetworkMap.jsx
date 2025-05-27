@@ -7,12 +7,19 @@ function getSubnet(ip) {
   return ip.split(".").slice(0, 3).join(".");
 }
 
+function getHubColor(subnet) {
+  if (subnet.startsWith("192.168")) return "#60a5fa";
+  if (subnet.startsWith("10.")) return "#34d399";
+  if (subnet.startsWith("172.17")) return "#f97316";
+  return "#9ca3af";
+}
+
 export function NetworkMap() {
   const containerRef = useRef(null);
   const networkRef = useRef(null);
   const [error, setError] = useState(null);
-  const [nodesMap, setNodesMap] = useState({});
   const [selectedNode, setSelectedNode] = useState(null);
+  const [nodeInfoMap, setNodeInfoMap] = useState({});
 
   useEffect(() => {
     async function fetchData() {
@@ -21,65 +28,58 @@ export function NetworkMap() {
         const json = await res.json();
 
         const [nonDockerHosts, dockerHosts] = json;
+
         const nodes = new DataSet();
         const edges = new DataSet();
+        const infoMap = {};
         const subnetMap = new Map();
-        const nodeInfoMap = {};
 
         const getSubnetHubId = (subnet) => `subnet-${subnet}`;
 
-        const addHost = (id, ip, name, os, group) => {
+        const addHost = (id, ip, name, os, group, ports = "N/A") => {
           const subnet = getSubnet(ip);
           const nodeId = `${group[0]}-${id}`;
           const hubId = getSubnetHubId(subnet);
 
           if (!subnetMap.has(subnet)) {
             subnetMap.set(subnet, []);
-            const getHubColor = (subnet) => {
-  if (subnet.startsWith("192.168")) return "#60a5fa"; // blue
-  if (subnet.startsWith("10.")) return "#34d399";     // green
-  if (subnet.startsWith("172.17")) return "#f97316";  // orange
-  return "#9ca3af"; // gray
-};
-
-nodes.add({
-  id: hubId,
-  label: `Subnet ${subnet}.x`,
-  shape: "star",
-  color: getHubColor(subnet),
-  font: { size: 14, color: "#000" },
-});
-
+            nodes.add({
+              id: hubId,
+              label: `Subnet ${subnet}.x`,
+              shape: "star",
+              color: getHubColor(subnet),
+              font: { size: 14, color: "#000" },
+            });
           }
 
           nodes.add({
             id: nodeId,
             label: `${name}\n${ip}`,
-            title: os,
+            title: `${os}\nPorts: ${ports}`,
             group,
           });
 
           edges.add({ from: hubId, to: nodeId });
 
-          nodeInfoMap[nodeId] = {
-            id,
+          infoMap[nodeId] = {
             name,
             ip,
             os,
             group,
             subnet,
+            ports,
           };
         };
 
-        nonDockerHosts.forEach(([id, ip, name, os]) => {
-          addHost(id, ip, name, os, "normal");
+        nonDockerHosts.forEach(([id, ip, name, os, _, ports]) => {
+          addHost(id, ip, name, os, "normal", ports);
         });
 
-        dockerHosts.forEach(([id, ip, name, os]) => {
-          addHost(id, ip, name, os, "docker");
+        dockerHosts.forEach(([id, ip, name, os, _mac, ports]) => {
+          addHost(id, ip, name, os, "docker", ports);
         });
 
-        setNodesMap(nodeInfoMap);
+        setNodeInfoMap(infoMap);
 
         const data = { nodes, edges };
         const options = {
@@ -88,8 +88,8 @@ nodes.add({
             stabilization: true,
             barnesHut: {
               gravitationalConstant: -3000,
-              springLength: 120,
-              springConstant: 0.04,
+              springLength: 140,
+              springConstant: 0.05,
             },
           },
           nodes: {
@@ -112,8 +112,8 @@ nodes.add({
           const net = new Network(containerRef.current, data, options);
           net.on("click", (params) => {
             const nodeId = params.nodes[0];
-            if (nodeId && nodeInfoMap[nodeId]) {
-              setSelectedNode(nodeInfoMap[nodeId]);
+            if (nodeId && infoMap[nodeId]) {
+              setSelectedNode(infoMap[nodeId]);
             } else {
               setSelectedNode(null);
             }
