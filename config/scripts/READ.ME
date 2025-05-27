@@ -4,6 +4,7 @@ docker run -d -p 8888:80 -p 8889:8000 --name atlas \
 -v /var/run/docker.sock:/var/run/docker.sock \
 nginx
 
+
 ## URLs
 API
 http://192.168.2.81:8889/hosts
@@ -34,3 +35,23 @@ sqlite3 /config/db/atlas.db "SELECT * FROM hosts;"
 # collect containers infos
 docker inspect $(docker ps -q ) \
 --format='{{ printf "%-50s" .Name}} {{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}'
+
+
+
+-----------------------------------------
+
+new dev react app
+
+upload files to /swarm/data/atlas/react-ui
+cd /swarm/data/atlas/react-ui
+npm install
+npm run build
+
+The output will appear in: /swarm/data/atlas/react-ui/dist/
+
+Copy this into the NGINX volume:
+cp -r dist/* /swarm/data/atlas-dev/html/
+
+mv /swarm/data/atlas/react-ui /swarm/data/atlas-dev/
+
+
