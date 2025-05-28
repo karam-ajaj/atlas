@@ -1,55 +1,55 @@
-172.17.0.2      atlas                                              linux      02:42:ac:11:00:02              80/tcp -> 0.0.0.0:8888,8000/tcp -> 0.0.0.0:8889 172.17.0.1     
-10.0.1.81       coder_coder.1.9gfzd4863p5a11hy6wmcnuxjg            linux      02:42:0a:00:01:51              8443/tcp -> null:null                    unknown        
-10.0.0.5        teleport_teleport.1.489dgxyenratwmdv3a62evv9z      linux      02:42:0a:00:00:05              no_ports                                 172.18.0.1     
-10.0.26.2       teleport_teleport.1.489dgxyenratwmdv3a62evv9z      linux      02:42:0a:00:1a:02              no_ports                                 172.18.0.1     
-10.0.6.3        teleport_teleport.1.489dgxyenratwmdv3a62evv9z      linux      02:42:0a:00:06:03              no_ports                                 172.18.0.1     
-10.0.1.17       teleport_teleport.1.489dgxyenratwmdv3a62evv9z      linux      02:42:0a:00:01:11              no_ports                                 172.18.0.1     
-10.0.17.3       flaresolverr_flaresolverr.1.za0o429c4dpfc8c6exbm5780g linux      02:42:0a:00:11:03              8191/tcp -> null:null,8192/tcp -> null:null unknown        
-10.0.1.34       flaresolverr_flaresolverr.1.za0o429c4dpfc8c6exbm5780g linux      02:42:0a:00:01:22              8191/tcp -> null:null,8192/tcp -> null:null unknown        
-10.0.7.3        tools_tools.1.j34t8nd569xfb97om44zpe1sg            linux      02:42:0a:00:07:03              80/tcp -> null:null                      172.18.0.1     
-10.0.1.28       tools_tools.1.j34t8nd569xfb97om44zpe1sg            linux      02:42:0a:00:01:1c              80/tcp -> null:null                      172.18.0.1     
-10.0.12.3       dockwatch_dockwatch-pxsw01.1.q2wkhaw8hc7wsqav9est2fei6 linux      02:42:0a:00:0c:03              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1     
-10.0.1.33       dockwatch_dockwatch-pxsw01.1.q2wkhaw8hc7wsqav9est2fei6 linux      02:42:0a:00:01:21              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1     
-10.0.4.3        docs_docs.1.vy3fxxqzpq68r1fu0wl5hv0ly              linux      02:42:0a:00:04:03              8000/tcp -> null:null                    172.18.0.1     
-10.0.1.6        docs_docs.1.vy3fxxqzpq68r1fu0wl5hv0ly              linux      02:42:0a:00:01:06              8000/tcp -> null:null                    172.18.0.1     
-10.0.33.3       pdf_pdf.1.fui4cdrn0mdawzwdgeqjjp6qf                linux      02:42:0a:00:21:03              8080/tcp -> null:null                    172.18.0.1     
-10.0.1.4        pdf_pdf.1.fui4cdrn0mdawzwdgeqjjp6qf                linux      02:42:0a:00:01:04              8080/tcp -> null:null                    172.18.0.1     
-10.0.20.3       grav_grav.1.j8ez8ok73u9sml6igxuopk09x              linux      02:42:0a:00:14:03              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1     
-10.0.1.8        grav_grav.1.j8ez8ok73u9sml6igxuopk09x              linux      02:42:0a:00:01:08              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1     
-10.0.21.3       password_vaultwarden.1.uj0ryq496pcowtves88fmff9j   linux      02:42:0a:00:15:03              80/tcp -> null:null                      unknown        
-10.0.1.24       password_vaultwarden.1.uj0ryq496pcowtves88fmff9j   linux      02:42:0a:00:01:18              80/tcp -> null:null                      unknown        
-10.0.10.2       influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc      linux      02:42:0a:00:0a:02              8086/tcp -> null:null                    unknown        
-10.0.22.3       influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc      linux      02:42:0a:00:16:03              8086/tcp -> null:null                    unknown        
-10.0.0.3        influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc      linux      02:42:0a:00:00:03              8086/tcp -> null:null                    unknown        
-10.0.1.14       influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc      linux      02:42:0a:00:01:0e              8086/tcp -> null:null                    unknown        
-10.0.18.3       diskover_diskover.1.0iv1rj6m8c5m0yg4r74wdds6r      linux      02:42:0a:00:12:03              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1     
-10.0.1.10       diskover_diskover.1.0iv1rj6m8c5m0yg4r74wdds6r      linux      02:42:0a:00:01:0a              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1     
-10.0.1.31       wetty_pc01.1.e0pk5bvwi5ww3hkes0yawt1s8             linux      02:42:0a:00:01:1f              3000/tcp -> null:null                    172.18.0.1     
-10.0.25.3       wetty_pc01.1.e0pk5bvwi5ww3hkes0yawt1s8             linux      02:42:0a:00:19:03              3000/tcp -> null:null                    172.18.0.1     
-10.0.19.3       grafana_grafana.1.r583rtebf29fh8zhbnx83kvix        linux      02:42:0a:00:13:03              3000/tcp -> null:null                    172.18.0.1     
-10.0.1.29       grafana_grafana.1.r583rtebf29fh8zhbnx83kvix        linux      02:42:0a:00:01:1d              3000/tcp -> null:null                    172.18.0.1     
-10.0.0.6        sablier_sablier.1.z517njwdp3ns3wvbqvf4odw22        linux      02:42:0a:00:00:06              10000/tcp -> null:null                   OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown
-10.0.2.3        sablier_sablier.1.z517njwdp3ns3wvbqvf4odw22        linux      02:42:0a:00:02:03              10000/tcp -> null:null                   OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown
-10.0.1.20       sablier_sablier.1.z517njwdp3ns3wvbqvf4odw22        linux      02:42:0a:00:01:14              10000/tcp -> null:null                   OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown
-10.0.5.3        portainer_agent.phoi9opu9cpmpasi72bsk15hv.j708xclw3no114gpxt6bbzbsz linux      02:42:0a:00:05:03              no_ports                                 OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown
-10.0.39.6       swarmpit_db.1.zq24ea3g4c13bivhvhrunsimz            linux      02:42:0a:00:27:06              4369/tcp -> null:null,5984/tcp -> null:null,9100/tcp -> null:null unknown        
-10.0.39.3       swarmpit_influxdb.1.7j2yl32cme100fyimrm7ta8xw      linux      02:42:0a:00:27:03              8086/tcp -> null:null                    172.18.0.1     
-10.0.0.4        swarmpit_app.1.b9zrqdv4eka8salmpy8jgigj8           linux      02:42:0a:00:00:04              8080/tcp -> null:null                    unknown        
-10.0.39.4       swarmpit_app.1.b9zrqdv4eka8salmpy8jgigj8           linux      02:42:0a:00:27:04              8080/tcp -> null:null                    unknown        
-10.0.1.15       swarmpit_app.1.b9zrqdv4eka8salmpy8jgigj8           linux      02:42:0a:00:01:0f              8080/tcp -> null:null                    unknown        
-10.0.1.21       homarr_homarr.1.u8hinxde9y3ybhj9szyu152py          linux      02:42:0a:00:01:15              7575/tcp -> null:null                    unknown        
-10.0.1.35       cv_cv.1.99alnrcewvorr5nu4quo794f1                  linux      02:42:0a:00:01:23              80/tcp -> null:null                      unknown        
-10.0.0.7        traefikv3_traefik.1.dwr8n7fas6k7a5uihm0g5q1uq      linux      02:42:0a:00:00:07              80/tcp -> null:null                      172.18.0.1     
-10.0.1.22       traefikv3_traefik.1.dwr8n7fas6k7a5uihm0g5q1uq      linux      02:42:0a:00:01:16              80/tcp -> null:null                      172.18.0.1     
-10.0.1.18       scripts_scripts.1.sgj8m35zsn2b2mx3nfld3ehtp        linux      02:42:0a:00:01:12              80/tcp -> null:null                      unknown        
-10.0.1.25       api_aria.1.olg5o3uiy7dxobq4azld22j3o               linux      02:42:0a:00:01:19              80/tcp -> null:null,8080/tcp -> null:null 172.18.0.1     
-10.0.1.36       api_lcm.1.pm0cmkgf5okbll5symzlnhsag                linux      02:42:0a:00:01:24              80/tcp -> null:null,8080/tcp -> null:null 172.18.0.1     
-10.0.1.27       api_vc.1.fot2643dp9kpjjmuvsuw7t3j7                 linux      02:42:0a:00:01:1b              80/tcp -> null:null,8080/tcp -> null:null 172.18.0.1     
-10.0.1.3        authelia_authelia.1.8qzlnqsmrvb2a4vego5zcsqvi      linux      02:42:0a:00:01:03              9091/tcp -> null:null                    172.18.0.1     
-10.0.0.2        minio_app.1.2klebb73h4cj5i7tspzobb1w5              linux      02:42:0a:00:00:02              9000/tcp -> null:null                    unknown        
-10.0.1.7        minio_app.1.2klebb73h4cj5i7tspzobb1w5              linux      02:42:0a:00:01:07              9000/tcp -> null:null                    unknown        
-10.0.1.5        notifiarr_notifiarr.1.wvchpybyzpi8hfv6fqcktfr2p    linux      02:42:0a:00:01:05              5454/tcp -> null:null                    OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown
-10.0.29.3       luai-wordpress_wordpress-luai.1.uuuw2vyhfols2rkn1jdzelpcm linux      02:42:0a:00:1d:03              80/tcp -> null:null                      unknown        
-10.0.1.11       luai-wordpress_wordpress-luai.1.uuuw2vyhfols2rkn1jdzelpcm linux      02:42:0a:00:01:0b              80/tcp -> null:null                      unknown        
-10.0.1.26       api_api.1.id6jw858c8oelboq436nsc9ko                linux      02:42:0a:00:01:1a              80/tcp -> null:null,8080/tcp -> null:null 172.18.0.1     
-10.0.29.4       luai-wordpress_db-luai.1.6wqcw6bbkk1y5ykktjwhptg4g linux      02:42:0a:00:1d:04              3306/tcp -> null:null,33060/tcp -> null:null unknown        
+172.17.0.2      atlas                                              linux      02:42:ac:11:00:02              80/tcp -> 0.0.0.0:8888,8000/tcp -> 0.0.0.0:8889 172.17.0.1      bridge              
+10.0.1.81       coder_coder.1.9gfzd4863p5a11hy6wmcnuxjg            linux      02:42:0a:00:01:51              8443/tcp -> null:null                    unknown         traefik-public      
+10.0.0.5        teleport_teleport.1.489dgxyenratwmdv3a62evv9z      linux      02:42:0a:00:00:05              no_ports                                 172.18.0.1      ingress             
+10.0.26.2       teleport_teleport.1.489dgxyenratwmdv3a62evv9z      linux      02:42:0a:00:1a:02              no_ports                                 172.18.0.1      librenms_internal   
+10.0.6.3        teleport_teleport.1.489dgxyenratwmdv3a62evv9z      linux      02:42:0a:00:06:03              no_ports                                 172.18.0.1      teleport_internal   
+10.0.1.17       teleport_teleport.1.489dgxyenratwmdv3a62evv9z      linux      02:42:0a:00:01:11              no_ports                                 172.18.0.1      traefik-public      
+10.0.17.3       flaresolverr_flaresolverr.1.za0o429c4dpfc8c6exbm5780g linux      02:42:0a:00:11:03              8191/tcp -> null:null,8192/tcp -> null:null unknown         flaresolverr_internal
+10.0.1.34       flaresolverr_flaresolverr.1.za0o429c4dpfc8c6exbm5780g linux      02:42:0a:00:01:22              8191/tcp -> null:null,8192/tcp -> null:null unknown         traefik-public      
+10.0.7.3        tools_tools.1.j34t8nd569xfb97om44zpe1sg            linux      02:42:0a:00:07:03              80/tcp -> null:null                      172.18.0.1      tools_internal      
+10.0.1.28       tools_tools.1.j34t8nd569xfb97om44zpe1sg            linux      02:42:0a:00:01:1c              80/tcp -> null:null                      172.18.0.1      traefik-public      
+10.0.12.3       dockwatch_dockwatch-pxsw01.1.q2wkhaw8hc7wsqav9est2fei6 linux      02:42:0a:00:0c:03              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1      dockwatch_internal  
+10.0.1.33       dockwatch_dockwatch-pxsw01.1.q2wkhaw8hc7wsqav9est2fei6 linux      02:42:0a:00:01:21              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1      traefik-public      
+10.0.4.3        docs_docs.1.vy3fxxqzpq68r1fu0wl5hv0ly              linux      02:42:0a:00:04:03              8000/tcp -> null:null                    172.18.0.1      docs_internal       
+10.0.1.6        docs_docs.1.vy3fxxqzpq68r1fu0wl5hv0ly              linux      02:42:0a:00:01:06              8000/tcp -> null:null                    172.18.0.1      traefik-public      
+10.0.33.3       pdf_pdf.1.fui4cdrn0mdawzwdgeqjjp6qf                linux      02:42:0a:00:21:03              8080/tcp -> null:null                    172.18.0.1      pdf_internal        
+10.0.1.4        pdf_pdf.1.fui4cdrn0mdawzwdgeqjjp6qf                linux      02:42:0a:00:01:04              8080/tcp -> null:null                    172.18.0.1      traefik-public      
+10.0.20.3       grav_grav.1.j8ez8ok73u9sml6igxuopk09x              linux      02:42:0a:00:14:03              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1      grav_internal       
+10.0.1.8        grav_grav.1.j8ez8ok73u9sml6igxuopk09x              linux      02:42:0a:00:01:08              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1      traefik-public      
+10.0.21.3       password_vaultwarden.1.uj0ryq496pcowtves88fmff9j   linux      02:42:0a:00:15:03              80/tcp -> null:null                      unknown         password_internal   
+10.0.1.24       password_vaultwarden.1.uj0ryq496pcowtves88fmff9j   linux      02:42:0a:00:01:18              80/tcp -> null:null                      unknown         traefik-public      
+10.0.10.2       influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc      linux      02:42:0a:00:0a:02              8086/tcp -> null:null                    unknown         cloudbeaver_internal
+10.0.22.3       influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc      linux      02:42:0a:00:16:03              8086/tcp -> null:null                    unknown         influxdb_internal   
+10.0.0.3        influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc      linux      02:42:0a:00:00:03              8086/tcp -> null:null                    unknown         ingress             
+10.0.1.14       influxdb_influxdb.1.lvmtbccsgnpw6bidarjr4oigc      linux      02:42:0a:00:01:0e              8086/tcp -> null:null                    unknown         traefik-public      
+10.0.18.3       diskover_diskover.1.0iv1rj6m8c5m0yg4r74wdds6r      linux      02:42:0a:00:12:03              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1      diskover_internal   
+10.0.1.10       diskover_diskover.1.0iv1rj6m8c5m0yg4r74wdds6r      linux      02:42:0a:00:01:0a              443/tcp -> null:null,80/tcp -> null:null 172.18.0.1      traefik-public      
+10.0.1.31       wetty_pc01.1.e0pk5bvwi5ww3hkes0yawt1s8             linux      02:42:0a:00:01:1f              3000/tcp -> null:null                    172.18.0.1      traefik-public      
+10.0.25.3       wetty_pc01.1.e0pk5bvwi5ww3hkes0yawt1s8             linux      02:42:0a:00:19:03              3000/tcp -> null:null                    172.18.0.1      wetty_internal      
+10.0.19.3       grafana_grafana.1.r583rtebf29fh8zhbnx83kvix        linux      02:42:0a:00:13:03              3000/tcp -> null:null                    172.18.0.1      grafana_internal    
+10.0.1.29       grafana_grafana.1.r583rtebf29fh8zhbnx83kvix        linux      02:42:0a:00:01:1d              3000/tcp -> null:null                    172.18.0.1      traefik-public      
+10.0.0.6        sablier_sablier.1.z517njwdp3ns3wvbqvf4odw22        linux      02:42:0a:00:00:06              10000/tcp -> null:null                   OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown ingress             
+10.0.2.3        sablier_sablier.1.z517njwdp3ns3wvbqvf4odw22        linux      02:42:0a:00:02:03              10000/tcp -> null:null                   OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown sablier_internal    
+10.0.1.20       sablier_sablier.1.z517njwdp3ns3wvbqvf4odw22        linux      02:42:0a:00:01:14              10000/tcp -> null:null                   OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown traefik-public      
+10.0.5.3        portainer_agent.phoi9opu9cpmpasi72bsk15hv.j708xclw3no114gpxt6bbzbsz linux      02:42:0a:00:05:03              no_ports                                 OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown portainer_portainer-internal
+10.0.39.6       swarmpit_db.1.zq24ea3g4c13bivhvhrunsimz            linux      02:42:0a:00:27:06              4369/tcp -> null:null,5984/tcp -> null:null,9100/tcp -> null:null unknown         swarmpit_swarmpit-network
+10.0.39.3       swarmpit_influxdb.1.7j2yl32cme100fyimrm7ta8xw      linux      02:42:0a:00:27:03              8086/tcp -> null:null                    172.18.0.1      swarmpit_swarmpit-network
+10.0.0.4        swarmpit_app.1.b9zrqdv4eka8salmpy8jgigj8           linux      02:42:0a:00:00:04              8080/tcp -> null:null                    unknown         ingress             
+10.0.39.4       swarmpit_app.1.b9zrqdv4eka8salmpy8jgigj8           linux      02:42:0a:00:27:04              8080/tcp -> null:null                    unknown         swarmpit_swarmpit-network
+10.0.1.15       swarmpit_app.1.b9zrqdv4eka8salmpy8jgigj8           linux      02:42:0a:00:01:0f              8080/tcp -> null:null                    unknown         traefik-public      
+10.0.1.21       homarr_homarr.1.u8hinxde9y3ybhj9szyu152py          linux      02:42:0a:00:01:15              7575/tcp -> null:null                    unknown         traefik-public      
+10.0.1.35       cv_cv.1.99alnrcewvorr5nu4quo794f1                  linux      02:42:0a:00:01:23              80/tcp -> null:null                      unknown         traefik-public      
+10.0.0.7        traefikv3_traefik.1.dwr8n7fas6k7a5uihm0g5q1uq      linux      02:42:0a:00:00:07              80/tcp -> null:null                      172.18.0.1      ingress             
+10.0.1.22       traefikv3_traefik.1.dwr8n7fas6k7a5uihm0g5q1uq      linux      02:42:0a:00:01:16              80/tcp -> null:null                      172.18.0.1      traefik-public      
+10.0.1.18       scripts_scripts.1.sgj8m35zsn2b2mx3nfld3ehtp        linux      02:42:0a:00:01:12              80/tcp -> null:null                      unknown         traefik-public      
+10.0.1.25       api_aria.1.olg5o3uiy7dxobq4azld22j3o               linux      02:42:0a:00:01:19              80/tcp -> null:null,8080/tcp -> null:null 172.18.0.1      traefik-public      
+10.0.1.36       api_lcm.1.pm0cmkgf5okbll5symzlnhsag                linux      02:42:0a:00:01:24              80/tcp -> null:null,8080/tcp -> null:null 172.18.0.1      traefik-public      
+10.0.1.27       api_vc.1.fot2643dp9kpjjmuvsuw7t3j7                 linux      02:42:0a:00:01:1b              80/tcp -> null:null,8080/tcp -> null:null 172.18.0.1      traefik-public      
+10.0.1.3        authelia_authelia.1.8qzlnqsmrvb2a4vego5zcsqvi      linux      02:42:0a:00:01:03              9091/tcp -> null:null                    172.18.0.1      traefik-public      
+10.0.0.2        minio_app.1.2klebb73h4cj5i7tspzobb1w5              linux      02:42:0a:00:00:02              9000/tcp -> null:null                    unknown         ingress             
+10.0.1.7        minio_app.1.2klebb73h4cj5i7tspzobb1w5              linux      02:42:0a:00:01:07              9000/tcp -> null:null                    unknown         traefik-public      
+10.0.1.5        notifiarr_notifiarr.1.wvchpybyzpi8hfv6fqcktfr2p    linux      02:42:0a:00:01:05              5454/tcp -> null:null                    OCI runtime exec failed: exec failed: unable to start container process: exec: "sh": executable file not found in $PATH: unknown traefik-public      
+10.0.29.3       luai-wordpress_wordpress-luai.1.uuuw2vyhfols2rkn1jdzelpcm linux      02:42:0a:00:1d:03              80/tcp -> null:null                      unknown         luai-wordpress_internal
+10.0.1.11       luai-wordpress_wordpress-luai.1.uuuw2vyhfols2rkn1jdzelpcm linux      02:42:0a:00:01:0b              80/tcp -> null:null                      unknown         traefik-public      
+10.0.1.26       api_api.1.id6jw858c8oelboq436nsc9ko                linux      02:42:0a:00:01:1a              80/tcp -> null:null,8080/tcp -> null:null 172.18.0.1      traefik-public      
+10.0.29.4       luai-wordpress_db-luai.1.6wqcw6bbkk1y5ykktjwhptg4g linux      02:42:0a:00:1d:04              3306/tcp -> null:null,33060/tcp -> null:null unknown         luai-wordpress_internal

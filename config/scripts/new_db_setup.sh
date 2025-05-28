@@ -16,7 +16,8 @@ db_file1="/config/db/atlas.db"
         os_details TEXT,
         mac_address TEXT,
         open_ports TEXT,
-        next_hop TEXT
+        next_hop TEXT,
+        network_name TEXT
     );
     CREATE TABLE IF NOT EXISTS docker_hosts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +26,8 @@ db_file1="/config/db/atlas.db"
         os_details TEXT,
         mac_address TEXT,
         open_ports TEXT,
-        next_hop TEXT
+        next_hop TEXT,
+        network_name TEXT
     );
     CREATE TABLE IF NOT EXISTS logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

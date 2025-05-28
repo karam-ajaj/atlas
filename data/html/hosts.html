@@ -30,6 +30,7 @@ fetch(`${apiBase}/hosts`)
                             <td>${host[4]}</td>
                             <td>${host[5]}</td>
                             <td>${host[6]}</td>
+                            <td>${host[7]}</td>
                         `;
                         regularTable.appendChild(row);
                     });
@@ -45,6 +46,7 @@ fetch(`${apiBase}/hosts`)
                             <td>${host[4]}</td>
                             <td>${host[5]}</td>
                             <td>${host[6]}</td>
+                            <td>${host[7]}</td>
                         `;
                         dockerTable.appendChild(row);
                     });
@@ -69,6 +71,7 @@ fetch(`${apiBase}/hosts`)
                 <th>MAC Address</th>
                 <th>Open Ports</th>
                 <th>Next hup</th>
+                <th>Network Name</th>
             </tr>
         </thead>
         <tbody id="regularHostsTable">
@@ -87,6 +90,7 @@ fetch(`${apiBase}/hosts`)
                 <th>MAC Address</th>
                 <th>Open Ports</th>
                 <th>Next hup</th>
+                <th>Network Name</th>
             </tr>
         </thead>
         <tbody id="dockerHostsTable">
