@@ -1,8 +1,8 @@
 Filesystem                         Size  Used Avail Use% Mounted on
-overlay                            195G   87G  101G  47% /
+overlay                            195G   84G  103G  45% /
 tmpfs                               64M     0   64M   0% /dev
 shm                                 64M     0   64M   0% /dev/shm
-/dev/mapper/ubuntu--vg-ubuntu--lv  195G   87G  101G  47% /config
+/dev/mapper/ubuntu--vg-ubuntu--lv  195G   84G  103G  45% /config
 tmpfs                              5.8G  3.5M  5.8G   1% /run/docker.sock
 tmpfs                               30G     0   30G   0% /proc/acpi
 tmpfs                               30G     0   30G   0% /proc/scsi

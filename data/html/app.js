@@ -60,6 +60,7 @@ function renderTable(data, tableId) {
             <td>${os || "Unknown"}</td>
             <td>${mac || "Unknown"}</td>
             <td>${ports || "Unknown"}</td>
+            <td>${nextHup || "Unknown"}</td>
         `;
 
         tbody.appendChild(row);
