@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Network } from "vis-network";
 import { DataSet } from "vis-data";
 import { SelectedNodePanel } from "./SelectedNodePanel";
+import { NetworkSettingsPanel } from "./NetworkSettingsPanel";
+
 
 function getSubnet(ip) {
   return ip.split(".").slice(0, 3).join(".");
@@ -28,7 +30,7 @@ export function NetworkMap() {
   const [filters, setFilters] = useState({ subnet: "", group: "", name: "" });
   const [rawData, setRawData] = useState({ nonDockerHosts: [], dockerHosts: [] });
   const [selectedSubnet, setSelectedSubnet] = useState(null);
-
+  const [layoutStyle, setLayoutStyle] = useState("default");
 
   useEffect(() => {
     async function fetchData() {
@@ -55,20 +57,19 @@ export function NetworkMap() {
     const nexthopLinks = new Set();
 
     const ensureSubnetHub = (subnet, networkName = null) => {
-  const hubId = getHubId(subnet);
-  if (!subnetMap.has(subnet)) {
-    subnetMap.set(subnet, []);
-    nodes.add({
-      id: hubId,
-      label: networkName ? `${networkName}` : `${subnet}.x`,
-      shape: "box",
-      color: getHubColor(subnet),
-      font: { size: 14, color: "#000" },
-    });
-  }
-  return hubId;
-};
-
+      const hubId = getHubId(subnet);
+      if (!subnetMap.has(subnet)) {
+        subnetMap.set(subnet, []);
+        nodes.add({
+          id: hubId,
+          label: networkName ? `${networkName}` : `${subnet}.x`,
+          shape: "box",
+          color: getHubColor(subnet),
+          font: { size: 14, color: "#000" },
+        });
+      }
+      return hubId;
+    };
 
     const addHost = (id, ip, name, os, group, ports = "N/A", nexthop = "unknown", network_name) => {
       const subnet = getSubnet(ip);
@@ -82,7 +83,6 @@ export function NetworkMap() {
       if (!matchFilters) return;
 
       const hubId = ensureSubnetHub(subnet, network_name);
-
 
       nodes.add({
         id: nodeId,
@@ -134,9 +134,23 @@ export function NetworkMap() {
 
     setNodeInfoMap(infoMap);
 
+    const layoutConfig =
+      layoutStyle === "hierarchical"
+        ? {
+            hierarchical: {
+              direction: "UD",
+              sortMethod: "hubsize",
+            },
+          }
+        : layoutStyle === "circular"
+        ? {
+            randomSeed: 2,
+          }
+        : { improvedLayout: true };
+
     const data = { nodes, edges };
     const options = {
-      layout: { improvedLayout: true },
+      layout: layoutConfig,
       physics: {
         stabilization: true,
         barnesHut: {
@@ -168,11 +182,10 @@ export function NetworkMap() {
             setSelectedRoute(null);
             setSelectedSubnet(null);
           } else if (nodeId?.startsWith("subnet-")) {
-  setSelectedSubnet({
-    subnet: nodeId.replace("subnet-", ""),
-    label: nodes.get(nodeId)?.label,
-  });
-           
+            setSelectedSubnet({
+              subnet: nodeId.replace("subnet-", ""),
+              label: nodes.get(nodeId)?.label,
+            });
             setSelectedNode(null);
             setSelectedRoute(null);
           }
@@ -190,12 +203,25 @@ export function NetworkMap() {
       });
       networkRef.current = net;
     }
-  }, [rawData, filters]);
+  }, [rawData, filters, layoutStyle]);
 
   return (
     <div className="relative w-full h-full bg-white border rounded p-4">
       <h2 className="text-lg font-semibold mb-2">Network Map</h2>
+
+      {/* Layout Selector */}
       <div className="flex space-x-4 mb-4">
+        <select
+          value={layoutStyle}
+          onChange={(e) => setLayoutStyle(e.target.value)}
+          className="border p-1 rounded"
+        >
+          <option value="default">Default Layout</option>
+          <option value="hierarchical">Hierarchical</option>
+          <option value="circular">Circular</option>
+        </select>
+
+        {/* Existing filters */}
         <input
           type="text"
           placeholder="Filter by name"
