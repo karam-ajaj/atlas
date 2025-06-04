@@ -51,6 +51,7 @@ while IFS= read -r line; do
     next_hop=$(echo "$line" | awk '{print $(NF-1)}')
     network_name=$(echo "$line" | awk '{print $NF}')
 
+
     sqlite3 "$db_file" <<EOF
 INSERT OR IGNORE INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name)
 VALUES ('$ip', '$name', '$os_details', '$mac_address', '$open_ports', '$next_hop', '$network_name');

@@ -1,10 +1,56 @@
-# Nmap 7.93 scan initiated Wed May 28 18:16:24 2025 as: nmap -A -O -T4 -oN /config/logs/nmap_quick_scan.log -iL /config/logs/live_hosts.txt
-Nmap scan report for 192.168.2.1
-Host is up (0.0078s latency).
+# Nmap 7.93 scan initiated Wed Jun  4 15:46:46 2025 as: nmap -A -O -T4 -oN /config/logs/nmap_quick_scan.log -iL /config/logs/live_hosts.txt
+Nmap scan report for 192.168.2.7
+Host is up (0.0066s latency).
+Not shown: 998 closed tcp ports (reset)
+PORT     STATE SERVICE VERSION
+80/tcp   open  http    Mitel SIP DEC VoIP phone http config
+| http-title: Internet Radio 4.x
+|_Requested resource was /web/index.html
+8080/tcp open  upnp
+|_http-title: Did not follow redirect to http://192.168.2.7/web/index.html
+|_http-server-header: POSIX, UPnP/1.0, Intel MicroStack/1.0.2777
+| fingerprint-strings: 
+|   FourOhFourRequest: 
+|     HTTP/1.1 404 File Not Found
+|     Server: POSIX, UPnP/1.0, Intel MicroStack/1.0.2777
+|     Content-Length: 0
+|   GetRequest: 
+|     HTTP/1.1 301 Moved Permanently
+|     Server: POSIX, UPnP/1.0, Intel MicroStack/1.0.2777
+|     Content-Type: text/html
+|     Location: http://192.168.2.7/web/index.html
+|_    <html><body><p>Your browser should automatically redirect you.<br> If not, please click <a href="http://192.168.2.7/web/index.html">here</a>.</p></body></html>
+1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
+SF-Port8080-TCP:V=7.93%I=7%D=6/4%Time=68406A6D%P=x86_64-pc-linux-gnu%r(Get
+SF:Request,13B,"HTTP/1\.1\x20301\x20Moved\x20Permanently\r\nServer:\x20POS
+SF:IX,\x20UPnP/1\.0,\x20Intel\x20MicroStack/1\.0\.2777\r\nContent-Type:\x2
+SF:0text/html\r\nLocation:\x20http://192\.168\.2\.7/web/index\.html\r\n\r\
+SF:n<html><body><p>Your\x20browser\x20should\x20automatically\x20redirect\
+SF:x20you\.<br>\x20If\x20not,\x20please\x20click\x20<a\x20href=\"http://19
+SF:2\.168\.2\.7/web/index\.html\">here</a>\.</p></body></html>")%r(FourOhF
+SF:ourRequest,66,"HTTP/1\.1\x20404\x20File\x20Not\x20Found\r\nServer:\x20P
+SF:OSIX,\x20UPnP/1\.0,\x20Intel\x20MicroStack/1\.0\.2777\r\nContent-Length
+SF::\x200\r\n\r\n");
+Device type: media device|webcam|WAP|printer
+Running (JUST GUESSING): Frontier Silicon embedded (93%), Leica embedded (93%), Novatel embedded (93%), Olympus embedded (90%), Canon embedded (89%), iDirect embedded (86%)
+OS CPE: cpe:/h:novatel:mifi_4620l cpe:/h:olympus:stylus_sh-2 cpe:/h:canon:imageclass_mf212w
+Aggressive OS guesses: Frontier Silicon internet radio (93%), Leica T camera (93%), Novatel MiFi 4620L WAP (93%), Olympus Stylus SH-2 camera (90%), Canon imageCLASS MF212w printer (89%), Novatel MiFi 2200 3G WAP or iDirect Evolution X1 satellite router (86%)
+No exact OS matches for host (test conditions non-ideal).
+Network Distance: 2 hops
+Service Info: Device: VoIP phone
+
+TRACEROUTE (using port 1723/tcp)
+HOP RTT     ADDRESS
+-   Hop 1 is the same as for 192.168.2.13
+2   6.98 ms philipstapr802.home (192.168.2.7)
+
+Nmap scan report for re200-1.home (192.168.2.13)
+Host is up (0.0059s latency).
 Not shown: 999 closed tcp ports (reset)
 PORT   STATE SERVICE VERSION
 80/tcp open  http    TP-LINK RE200 WAP http config
-|_http-title: Login Incorrect
+|_http-server-header: Router Webserver
+|_http-title: Site doesn't have a title (text/html).
 Device type: general purpose
 Running: Linux 2.6.X
 OS CPE: cpe:/o:linux:linux_kernel:2.6
@@ -12,202 +58,13 @@ OS details: Linux 2.6.23 - 2.6.38
 Network Distance: 2 hops
 Service Info: Device: WAP; CPE: cpe:/h:tp-link:re200
 
-TRACEROUTE (using port 8888/tcp)
-HOP RTT      ADDRESS
-1   0.01 ms  172.17.0.1
-2   14.89 ms 192.168.2.1 (192.168.2.1)
-
-Nmap scan report for yoga.home (192.168.2.4)
-Host is up (0.065s latency).
-Not shown: 995 filtered tcp ports (no-response)
-PORT     STATE SERVICE         VERSION
-135/tcp  open  msrpc           Microsoft Windows RPC
-139/tcp  open  netbios-ssn     Microsoft Windows netbios-ssn
-445/tcp  open  microsoft-ds?
-5357/tcp open  http            Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
-|_http-server-header: Microsoft-HTTPAPI/2.0
-|_http-title: Service Unavailable
-7070/tcp open  ssl/realserver?
-|_ssl-date: TLS randomness does not represent time
-| ssl-cert: Subject: commonName=AnyDesk Client
-| Not valid before: 2024-08-03T15:28:03
-|_Not valid after:  2074-07-22T15:28:03
-Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
-Device type: phone|media device|general purpose
-Running (JUST GUESSING): Apple iOS 4.X|6.X|5.X (86%), Apple OS X 10.8.X|10.9.X (85%)
-OS CPE: cpe:/o:apple:iphone_os:4 cpe:/o:apple:iphone_os:6 cpe:/o:apple:iphone_os:5 cpe:/o:apple:mac_os_x:10.8 cpe:/o:apple:mac_os_x:10.9
-Aggressive OS guesses: Apple iOS 4.3.1 - 4.3.5 (86%), Apple iOS 6 (86%), Apple OS X 10.8 (Mountain Lion) - 10.9 (Mavericks) or iOS 5.0.1 - 5.1.1 (Darwin 11.0.0 - 13.2.0) (85%)
-No exact OS matches for host (test conditions non-ideal).
-Network Distance: 3 hops
-Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
-
-Host script results:
-|_nbstat: NetBIOS name: YOGA, NetBIOS user: <unknown>, NetBIOS MAC: 089df47456b2 (Intel Corporate)
-| smb2-security-mode: 
-|   311: 
-|_    Message signing enabled but not required
-| smb2-time: 
-|   date: 2025-05-28T18:18:39
-|_  start_date: N/A
-
-TRACEROUTE (using port 445/tcp)
+TRACEROUTE (using port 995/tcp)
 HOP RTT     ADDRESS
--   Hop 1 is the same as for 192.168.2.1
-2   ...
-3   5.54 ms yoga.home (192.168.2.4)
+1   0.01 ms 172.17.0.1
+2   4.26 ms re200-1.home (192.168.2.13)
 
-Nmap scan report for 192.168.2.8
-Host is up (0.0014s latency).
-Not shown: 996 closed tcp ports (reset)
-PORT     STATE SERVICE    VERSION
-111/tcp  open  rpcbind    2-4 (RPC #100000)
-| rpcinfo: 
-|   program version    port/proto  service
-|   100000  2,3,4        111/tcp   rpcbind
-|   100000  2,3,4        111/udp   rpcbind
-|   100000  3,4          111/tcp6  rpcbind
-|   100000  3,4          111/udp6  rpcbind
-|   100003  2,3,4       2049/tcp   nfs
-|   100003  2,3,4       2049/tcp6  nfs
-|   100003  2,3,4       2049/udp   nfs
-|   100003  2,3,4       2049/udp6  nfs
-|   100005  1,2,3      39461/tcp   mountd
-|   100005  1,2,3      44601/tcp6  mountd
-|   100005  1,2,3      49410/udp6  mountd
-|   100005  1,2,3      58586/udp   mountd
-|   100011  1,2          719/tcp   rquotad
-|   100011  1,2          719/tcp6  rquotad
-|   100011  1,2          719/udp   rquotad
-|   100011  1,2          719/udp6  rquotad
-|   100021  1,3,4      32983/tcp   nlockmgr
-|   100021  1,3,4      46717/tcp6  nlockmgr
-|   100021  1,3,4      52243/udp   nlockmgr
-|   100021  1,3,4      56043/udp6  nlockmgr
-|   100024  1          43582/udp6  status
-|   100024  1          51339/tcp6  status
-|   100024  1          54152/tcp   status
-|   100024  1          57615/udp   status
-|   100227  2,3         2049/tcp   nfs_acl
-|   100227  2,3         2049/tcp6  nfs_acl
-|   100227  2,3         2049/udp   nfs_acl
-|_  100227  2,3         2049/udp6  nfs_acl
-1234/tcp open  ssh        OpenSSH 9.8 (protocol 2.0)
-| ssh-hostkey: 
-|   2048 2c355319f62a8be1b714da6c83e3e89c (RSA)
-|   256 9977c9c6e0043293a2a5e04adee9f99d (ECDSA)
-|_  256 2c242bf32a836a2ad9bb5d08ae2e3a99 (ED25519)
-2049/tcp open  nfs        2-4 (RPC #100003)
-8080/tcp open  http-proxy
-| fingerprint-strings: 
-|   GetRequest: 
-|     HTTP/1.1 200 OK
-|     Date: Wed, 28 May 2025 18:16:46 GMT
-|     Server: 
-|     X-Frame-Options: SAMEORIGIN
-|     Content-Security-Policy: script-src 'self' 'unsafe-inline' 'unsafe-eval' ; object-src 'self' ; worker-src 'self' blob:
-|     Content-type: text/html; charset=UTF-8
-|     Last-modified: Tue, 19 Nov 2024 20:49:46 GMT
-|     Accept-Ranges: bytes
-|     Content-length: 580
-|     Vary: Accept-Encoding
-|     X-XSS-Protection: 1; mode=block
-|     Strict-Transport-Security: max-age=0
-|     X-Content-Type-Options: nosniff
-|     Connection: close
-|     <html style="background:#007cef">
-|     <head>
-|     <meta http-equiv="expires" content="0">
-|     <script type='text/javascript'>
-|     pr=(document.location.protocol == 'https:') ? 'https' : 'http';
-|     pt=(location.port == '') ? '' : ':' + location.port;
-|     redirect_suffix = "/redirect.html?count="+Math.random();
-|     if(location.hostname.indexOf(':') == -1)
-|     location.href=pr+"://"+location.hostname+pt+redirect_suffix;
-|     else //could be
-|   HTTPOptions: 
-|     HTTP/1.1 501 Not Implemented
-|     Date: Wed, 28 May 2025 18:16:46 GMT
-|     Server: 
-|     X-Frame-Options: SAMEORIGIN
-|     Content-Security-Policy: script-src 'self' 'unsafe-inline' 'unsafe-eval' ; object-src 'self' ; worker-src 'self' blob:
-|     Content-type: text/html
-|     Last-modified: Wed, 28 May 2025 18:16:46 GMT
-|     Accept-Ranges: bytes
-|     X-XSS-Protection: 1; mode=block
-|     Strict-Transport-Security: max-age=0
-|     X-Content-Type-Options: nosniff
-|     Connection: close
-|     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-|     <html xmlns="http://www.w3.org/1999/xhtml">
-|     <head>
-|     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-|     <meta http-equiv="Cache-Control" content="no-cache" />
-|     <meta http-equiv="Pragma" content="no-cache" />
-|     <meta http-equiv="Expires" content="-1" />
-|     <link rel="shortcut icon" href="/images/favicon.gif" type="image/gif" />
-|_    <lin
-|_http-server-header: <empty>
-| http-robots.txt: 2 disallowed entries 
-|_/cgi-bin/ /*.html$
-|_http-title: Site doesn't have a title (text/html; charset=UTF-8).
-|_http-open-proxy: Proxy might be redirecting requests
-1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
-SF-Port8080-TCP:V=7.93%I=7%D=5/28%Time=68375311%P=x86_64-pc-linux-gnu%r(Ge
-SF:tRequest,42F,"HTTP/1\.1\x20200\x20OK\r\nDate:\x20Wed,\x2028\x20May\x202
-SF:025\x2018:16:46\x20GMT\r\nServer:\x20\x20\r\nX-Frame-Options:\x20SAMEOR
-SF:IGIN\r\nContent-Security-Policy:\x20script-src\x20'self'\x20'unsafe-inl
-SF:ine'\x20'unsafe-eval'\x20;\x20object-src\x20'self'\x20;\x20worker-src\x
-SF:20'self'\x20blob:\r\nContent-type:\x20text/html;\x20charset=UTF-8\r\nLa
-SF:st-modified:\x20Tue,\x2019\x20Nov\x202024\x2020:49:46\x20GMT\r\nAccept-
-SF:Ranges:\x20bytes\r\nContent-length:\x20580\r\nVary:\x20Accept-Encoding\
-SF:r\nX-XSS-Protection:\x201;\x20mode=block\r\nStrict-Transport-Security:\
-SF:x20max-age=0\r\nX-Content-Type-Options:\x20nosniff\r\nConnection:\x20cl
-SF:ose\r\n\r\n<html\x20style=\"background:#007cef\">\n<head>\n<meta\x20htt
-SF:p-equiv=\"expires\"\x20content=\"0\">\n<script\x20type='text/javascript
-SF:'>\npr=\(document\.location\.protocol\x20==\x20'https:'\)\x20\?\x20'htt
-SF:ps'\x20:\x20'http';\npt=\(location\.port\x20==\x20''\)\x20\?\x20''\x20:
-SF:\x20':'\x20\+\x20location\.port;\nredirect_suffix\x20=\x20\"/redirect\.
-SF:html\?count=\"\+Math\.random\(\);\nif\(location\.hostname\.indexOf\(':'
-SF:\)\x20==\x20-1\)\n{\nlocation\.href=pr\+\"://\"\+location\.hostname\+pt
-SF:\+redirect_suffix;\n}\nelse\t//could\x20be\x20")%r(HTTPOptions,1C48,"HT
-SF:TP/1\.1\x20501\x20Not\x20Implemented\r\nDate:\x20Wed,\x2028\x20May\x202
-SF:025\x2018:16:46\x20GMT\r\nServer:\x20\x20\r\nX-Frame-Options:\x20SAMEOR
-SF:IGIN\r\nContent-Security-Policy:\x20script-src\x20'self'\x20'unsafe-inl
-SF:ine'\x20'unsafe-eval'\x20;\x20object-src\x20'self'\x20;\x20worker-src\x
-SF:20'self'\x20blob:\r\nContent-type:\x20text/html\r\nLast-modified:\x20We
-SF:d,\x2028\x20May\x202025\x2018:16:46\x20GMT\r\nAccept-Ranges:\x20bytes\r
-SF:\nX-XSS-Protection:\x201;\x20mode=block\r\nStrict-Transport-Security:\x
-SF:20max-age=0\r\nX-Content-Type-Options:\x20nosniff\r\nConnection:\x20clo
-SF:se\r\n\r\n\n<!DOCTYPE\x20html\x20PUBLIC\x20\"-//W3C//DTD\x20XHTML\x201\
-SF:.0\x20Strict//EN\"\x20\"http://www\.w3\.org/TR/xhtml1/DTD/xhtml1-strict
-SF:\.dtd\">\n<html\x20xmlns=\"http://www\.w3\.org/1999/xhtml\">\n<head>\n<
-SF:meta\x20http-equiv=\"Content-Type\"\x20content=\"text/html;\x20charset=
-SF:utf-8\"\x20/>\n<meta\x20http-equiv=\"Cache-Control\"\x20content=\"no-ca
-SF:che\"\x20/>\n<meta\x20http-equiv=\"Pragma\"\x20content=\"no-cache\"\x20
-SF:/>\n<meta\x20http-equiv=\"Expires\"\x20content=\"-1\"\x20/>\n<link\x20r
-SF:el=\"shortcut\x20icon\"\x20href=\"/images/favicon\.gif\"\x20type=\"imag
-SF:e/gif\"\x20/>\n<lin");
-No exact OS matches for host (If you know what OS is running on it, see https://nmap.org/submit/ ).
-TCP/IP fingerprint:
-OS:SCAN(V=7.93%E=4%D=5/28%OT=111%CT=1%CU=37870%PV=Y%DS=2%DC=T%G=Y%TM=683753
-OS:AA%P=x86_64-pc-linux-gnu)SEQ(SP=106%GCD=1%ISR=10B%TI=Z%CI=I%II=I%TS=7)OP
-OS:S(O1=M5B4ST11NW9%O2=M5B4ST11NW9%O3=M5B4NNT11NW9%O4=M5B4ST11NW9%O5=M5B4ST
-OS:11NW9%O6=M5B4ST11)WIN(W1=7120%W2=7120%W3=7120%W4=7120%W5=7120%W6=7120)EC
-OS:N(R=Y%DF=Y%T=40%W=7210%O=M5B4NNSNW9%CC=Y%Q=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=
-OS:AS%RD=0%Q=)T2(R=N)T3(R=N)T4(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(
-OS:R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%
-OS:F=R%O=%RD=0%Q=)T7(R=N)U1(R=Y%DF=N%T=40%IPL=164%UN=0%RIPL=G%RID=G%RIPCK=G
-OS:%RUCK=G%RUD=G)IE(R=Y%DFI=N%T=40%CD=S)
-
-Network Distance: 2 hops
-
-TRACEROUTE (using port 5900/tcp)
-HOP RTT     ADDRESS
--   Hop 1 is the same as for 192.168.2.1
-2   1.79 ms 192.168.2.8
-
-Nmap scan report for 192.168.2.81 (192.168.2.81)
-Host is up (0.0000080s latency).
+Nmap scan report for 192.168.2.81
+Host is up (0.0000090s latency).
 Not shown: 992 closed tcp ports (reset)
 PORT     STATE SERVICE        VERSION
 22/tcp   open  ssh            OpenSSH 8.9p1 Ubuntu 3ubuntu0.13 (Ubuntu Linux; protocol 2.0)
@@ -225,9 +82,9 @@ PORT     STATE SERVICE        VERSION
 |_  100000  3,4          111/udp6  rpcbind
 443/tcp  open  ssl/http       Golang net/http server (Go-IPFS json-rpc or InfluxDB API)
 | ssl-cert: Subject: commonName=TRAEFIK DEFAULT CERT
-| Subject Alternative Name: DNS:0cb76f34f2659ce40bfe3ac190c57ce7.5582d458a7587f7846cd1152ace856ac.traefik.default
-| Not valid before: 2025-05-28T14:59:23
-|_Not valid after:  2026-05-28T14:59:23
+| Subject Alternative Name: DNS:3f30db4fa52c9911d2de7f65ec1dc121.c50073b71ccdf65ae723c61dea432154.traefik.default
+| Not valid before: 2025-06-04T15:14:41
+|_Not valid after:  2026-06-04T15:14:41
 |_http-title: Site doesn't have a title (text/plain; charset=utf-8).
 888/tcp  open  accessbuilder?
 | fingerprint-strings: 
@@ -239,13 +96,13 @@ PORT     STATE SERVICE        VERSION
 |     X-Content-Type-Options: nosniff
 |     Content-Length: 0
 |     Server: http-kit
-|     Date: Wed, 28 May 2025 18:17:19 GMT
+|     Date: Wed, 04 Jun 2025 15:47:26 GMT
 |   GetRequest: 
 |     HTTP/1.1 200 OK
 |     Content-Type: text/html
 |     Content-Length: 2599
 |     Server: http-kit
-|     Date: Wed, 28 May 2025 18:16:49 GMT
+|     Date: Wed, 04 Jun 2025 15:46:56 GMT
 |     <!DOCTYPE html>
 |     <html lang="en">
 |     <head>
@@ -265,7 +122,7 @@ PORT     STATE SERVICE        VERSION
 |     Allow: GET,OPTIONS
 |     Content-Length: 0
 |     Server: http-kit
-|     Date: Wed, 28 May 2025 18:16:49 GMT
+|     Date: Wed, 04 Jun 2025 15:46:56 GMT
 |   SIPOptions: 
 |     HTTP/1.1 404 Not Found
 |     Content-Type: application/octet-stream
@@ -274,13 +131,13 @@ PORT     STATE SERVICE        VERSION
 |     X-Content-Type-Options: nosniff
 |     Content-Length: 0
 |     Server: http-kit
-|_    Date: Wed, 28 May 2025 18:17:24 GMT
+|_    Date: Wed, 04 Jun 2025 15:47:31 GMT
 3389/tcp open  ssl/http       Golang net/http server (Go-IPFS json-rpc or InfluxDB API)
-|_http-title: Site doesn't have a title (text/plain; charset=utf-8).
 | ssl-cert: Subject: commonName=TRAEFIK DEFAULT CERT
-| Subject Alternative Name: DNS:0cb76f34f2659ce40bfe3ac190c57ce7.5582d458a7587f7846cd1152ace856ac.traefik.default
-| Not valid before: 2025-05-28T14:59:23
-|_Not valid after:  2026-05-28T14:59:23
+| Subject Alternative Name: DNS:3f30db4fa52c9911d2de7f65ec1dc121.c50073b71ccdf65ae723c61dea432154.traefik.default
+| Not valid before: 2025-06-04T15:14:41
+|_Not valid after:  2026-06-04T15:14:41
+|_http-title: Site doesn't have a title (text/plain; charset=utf-8).
 8888/tcp open  http           nginx 1.27.3
 |_http-server-header: nginx/1.27.3
 |_http-title: Atlas React UI
@@ -300,85 +157,85 @@ PORT     STATE SERVICE        VERSION
 |     Strict-Transport-Security: max-age=31536000; includeSubDomains
 |     Vary: Origin
 |     X-Amz-Id-2: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8
-|     X-Amz-Request-Id: 1843C3A89571BC1C
+|     X-Amz-Request-Id: 1845E18AD3F649E3
 |     X-Content-Type-Options: nosniff
 |     X-Xss-Protection: 1; mode=block
-|     Date: Wed, 28 May 2025 18:16:49 GMT
+|     Date: Wed, 04 Jun 2025 15:46:56 GMT
 |     <?xml version="1.0" encoding="UTF-8"?>
-|     <Error><Code>InvalidRequest</Code><Message>Invalid Request (invalid argument)</Message><Resource>/</Resource><RequestId>1843C3A89571BC1C</RequestId><HostId>dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8</HostId></Error>
+|     <Error><Code>InvalidRequest</Code><Message>Invalid Request (invalid argument)</Message><Resource>/</Resource><RequestId>1845E18AD3F649E3</RequestId><HostId>dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8</HostId></Error>
 |   HTTPOptions: 
 |     HTTP/1.0 200 OK
 |     Vary: Origin
-|     Date: Wed, 28 May 2025 18:16:49 GMT
+|     Date: Wed, 04 Jun 2025 15:46:56 GMT
 |_    Content-Length: 0
 2 services unrecognized despite returning data. If you know the service/version, please submit the following fingerprints at https://nmap.org/cgi-bin/submit.cgi?new-service :
 ==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============
-SF-Port888-TCP:V=7.93%I=7%D=5/28%Time=68375311%P=x86_64-pc-linux-gnu%r(Get
-SF:Request,AA0,"HTTP/1\.1\x20200\x20OK\r\nContent-Type:\x20text/html\r\nCo
-SF:ntent-Length:\x202599\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x2028\x20
-SF:May\x202025\x2018:16:49\x20GMT\r\n\r\n<!DOCTYPE\x20html>\n<html\x20lang
-SF:=\"en\">\n<head>\n\x20\x20\x20\x20<title>swarmpit</title>\n\x20\x20\x20
-SF:\x20<meta\x20charset=\"utf-8\"\x20/>\n\x20\x20\x20\x20<meta\x20name=\"v
-SF:iewport\"\x20content=\"width=device-width,initial-scale=1,maximum-scale
-SF:=1,user-scalable=0\"\x20/>\n\x20\x20\x20\x20<meta\x20name=\"description
-SF:\"\x20content=\"Lightweight\x20Docker\x20Swarm\x20management\x20UI\"\x2
-SF:0/>\n\x20\x20\x20\x20<meta\x20name=\"theme-color\"\x20content=\"#65519f
-SF:\"\x20/>\n\x20\x20\x20\x20<link\x20rel=\"apple-touch-icon\"\x20sizes=\"
-SF:180x180\"\x20href=\"icon/apple-touch-icon\.png\?v=2\"\x20/>\n\x20\x20\x
-SF:20\x20<link\x20rel=\"icon\"\x20type=\"image/png\"\x20sizes=\"32x32\"\x2
-SF:0href=\"icon/favicon-32x32\.png\?v=2\"\x20/>\n\x20\x20\x20\x20<link\x20
-SF:rel=\"icon\"\x20type=\"image/png\"\x20sizes=\"16x16\"\x20href=\"icon/fa
-SF:vicon-16x16\.png\?v=2\"\x20/>\n\x20\x20\x20\x20<link\x20rel=\"mask-icon
-SF:\"\x20href=\"icon/safari-pinned-tab\.svg\?v=2\"\x20color=\"#5bbad5\"\x2
-SF:0/>\n\x20\x20\x20\x20<link\x20rel=\"manifest\"\x20href=\"manifest\.json
-SF:\"\x20/>\n\x20\x20\x20\x20<link\x20rel=\"stylesheet\"\x20href=\"css/rc-
-SF:slider")%r(HTTPOptions,71,"HTTP/1\.1\x20200\x20OK\r\nAllow:\x20GET,OPTI
-SF:ONS\r\nContent-Length:\x200\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x20
-SF:28\x20May\x202025\x2018:16:49\x20GMT\r\n\r\n")%r(RTSPRequest,71,"HTTP/1
-SF:\.1\x20200\x20OK\r\nAllow:\x20GET,OPTIONS\r\nContent-Length:\x200\r\nSe
-SF:rver:\x20http-kit\r\nDate:\x20Wed,\x2028\x20May\x202025\x2018:16:49\x20
-SF:GMT\r\n\r\n")%r(FourOhFourRequest,EB,"HTTP/1\.1\x20404\x20Not\x20Found\
-SF:r\nContent-Type:\x20application/octet-stream\r\nX-Xss-Protection:\x201;
-SF:\x20mode=block\r\nX-Frame-Options:\x20SAMEORIGIN\r\nX-Content-Type-Opti
-SF:ons:\x20nosniff\r\nContent-Length:\x200\r\nServer:\x20http-kit\r\nDate:
-SF:\x20Wed,\x2028\x20May\x202025\x2018:17:19\x20GMT\r\n\r\n")%r(SIPOptions
-SF:,EB,"HTTP/1\.1\x20404\x20Not\x20Found\r\nContent-Type:\x20application/o
-SF:ctet-stream\r\nX-Xss-Protection:\x201;\x20mode=block\r\nX-Frame-Options
-SF::\x20SAMEORIGIN\r\nX-Content-Type-Options:\x20nosniff\r\nContent-Length
-SF::\x200\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x2028\x20May\x202025\x20
-SF:18:17:24\x20GMT\r\n\r\n");
+SF-Port888-TCP:V=7.93%I=7%D=6/4%Time=68406A70%P=x86_64-pc-linux-gnu%r(GetR
+SF:equest,AA0,"HTTP/1\.1\x20200\x20OK\r\nContent-Type:\x20text/html\r\nCon
+SF:tent-Length:\x202599\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x2004\x20J
+SF:un\x202025\x2015:46:56\x20GMT\r\n\r\n<!DOCTYPE\x20html>\n<html\x20lang=
+SF:\"en\">\n<head>\n\x20\x20\x20\x20<title>swarmpit</title>\n\x20\x20\x20\
+SF:x20<meta\x20charset=\"utf-8\"\x20/>\n\x20\x20\x20\x20<meta\x20name=\"vi
+SF:ewport\"\x20content=\"width=device-width,initial-scale=1,maximum-scale=
+SF:1,user-scalable=0\"\x20/>\n\x20\x20\x20\x20<meta\x20name=\"description\
+SF:"\x20content=\"Lightweight\x20Docker\x20Swarm\x20management\x20UI\"\x20
+SF:/>\n\x20\x20\x20\x20<meta\x20name=\"theme-color\"\x20content=\"#65519f\
+SF:"\x20/>\n\x20\x20\x20\x20<link\x20rel=\"apple-touch-icon\"\x20sizes=\"1
+SF:80x180\"\x20href=\"icon/apple-touch-icon\.png\?v=2\"\x20/>\n\x20\x20\x2
+SF:0\x20<link\x20rel=\"icon\"\x20type=\"image/png\"\x20sizes=\"32x32\"\x20
+SF:href=\"icon/favicon-32x32\.png\?v=2\"\x20/>\n\x20\x20\x20\x20<link\x20r
+SF:el=\"icon\"\x20type=\"image/png\"\x20sizes=\"16x16\"\x20href=\"icon/fav
+SF:icon-16x16\.png\?v=2\"\x20/>\n\x20\x20\x20\x20<link\x20rel=\"mask-icon\
+SF:"\x20href=\"icon/safari-pinned-tab\.svg\?v=2\"\x20color=\"#5bbad5\"\x20
+SF:/>\n\x20\x20\x20\x20<link\x20rel=\"manifest\"\x20href=\"manifest\.json\
+SF:"\x20/>\n\x20\x20\x20\x20<link\x20rel=\"stylesheet\"\x20href=\"css/rc-s
+SF:lider")%r(HTTPOptions,71,"HTTP/1\.1\x20200\x20OK\r\nAllow:\x20GET,OPTIO
+SF:NS\r\nContent-Length:\x200\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x200
+SF:4\x20Jun\x202025\x2015:46:56\x20GMT\r\n\r\n")%r(RTSPRequest,71,"HTTP/1\
+SF:.1\x20200\x20OK\r\nAllow:\x20GET,OPTIONS\r\nContent-Length:\x200\r\nSer
+SF:ver:\x20http-kit\r\nDate:\x20Wed,\x2004\x20Jun\x202025\x2015:46:56\x20G
+SF:MT\r\n\r\n")%r(FourOhFourRequest,EB,"HTTP/1\.1\x20404\x20Not\x20Found\r
+SF:\nContent-Type:\x20application/octet-stream\r\nX-Xss-Protection:\x201;\
+SF:x20mode=block\r\nX-Frame-Options:\x20SAMEORIGIN\r\nX-Content-Type-Optio
+SF:ns:\x20nosniff\r\nContent-Length:\x200\r\nServer:\x20http-kit\r\nDate:\
+SF:x20Wed,\x2004\x20Jun\x202025\x2015:47:26\x20GMT\r\n\r\n")%r(SIPOptions,
+SF:EB,"HTTP/1\.1\x20404\x20Not\x20Found\r\nContent-Type:\x20application/oc
+SF:tet-stream\r\nX-Xss-Protection:\x201;\x20mode=block\r\nX-Frame-Options:
+SF:\x20SAMEORIGIN\r\nX-Content-Type-Options:\x20nosniff\r\nContent-Length:
+SF:\x200\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x2004\x20Jun\x202025\x201
+SF:5:47:31\x20GMT\r\n\r\n");
 ==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============
-SF-Port9000-TCP:V=7.93%I=7%D=5/28%Time=68375311%P=x86_64-pc-linux-gnu%r(Ge
-SF:nericLines,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20t
-SF:ext/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x
-SF:20Request")%r(GetRequest,2B0,"HTTP/1\.0\x20400\x20Bad\x20Request\r\nAcc
-SF:ept-Ranges:\x20bytes\r\nContent-Length:\x20276\r\nContent-Type:\x20appl
-SF:ication/xml\r\nServer:\x20MinIO\r\nStrict-Transport-Security:\x20max-ag
-SF:e=31536000;\x20includeSubDomains\r\nVary:\x20Origin\r\nX-Amz-Id-2:\x20d
-SF:d9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8\r\nX-Am
-SF:z-Request-Id:\x201843C3A89571BC1C\r\nX-Content-Type-Options:\x20nosniff
-SF:\r\nX-Xss-Protection:\x201;\x20mode=block\r\nDate:\x20Wed,\x2028\x20May
-SF:\x202025\x2018:16:49\x20GMT\r\n\r\n<\?xml\x20version=\"1\.0\"\x20encodi
-SF:ng=\"UTF-8\"\?>\n<Error><Code>InvalidRequest</Code><Message>Invalid\x20
-SF:Request\x20\(invalid\x20argument\)</Message><Resource>/</Resource><Requ
-SF:estId>1843C3A89571BC1C</RequestId><HostId>dd9025bab4ad464b049177c95eb6e
-SF:bf374d3b3fd1af9251148b658df7ac2e3e8</HostId></Error>")%r(HTTPOptions,59
-SF:,"HTTP/1\.0\x20200\x20OK\r\nVary:\x20Origin\r\nDate:\x20Wed,\x2028\x20M
-SF:ay\x202025\x2018:16:49\x20GMT\r\nContent-Length:\x200\r\n\r\n")%r(RTSPR
-SF:equest,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/
-SF:plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Re
-SF:quest")%r(Help,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\
-SF:x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20B
-SF:ad\x20Request")%r(SSLSessionReq,67,"HTTP/1\.1\x20400\x20Bad\x20Request\
-SF:r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20clos
-SF:e\r\n\r\n400\x20Bad\x20Request")%r(TerminalServerCookie,67,"HTTP/1\.1\x
-SF:20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-
-SF:8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request")%r(TLSSessionRe
-SF:q,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain
-SF:;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request
-SF:")%r(Kerberos,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x
+SF-Port9000-TCP:V=7.93%I=7%D=6/4%Time=68406A70%P=x86_64-pc-linux-gnu%r(Gen
+SF:ericLines,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20te
+SF:xt/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x2
+SF:0Request")%r(GetRequest,2B0,"HTTP/1\.0\x20400\x20Bad\x20Request\r\nAcce
+SF:pt-Ranges:\x20bytes\r\nContent-Length:\x20276\r\nContent-Type:\x20appli
+SF:cation/xml\r\nServer:\x20MinIO\r\nStrict-Transport-Security:\x20max-age
+SF:=31536000;\x20includeSubDomains\r\nVary:\x20Origin\r\nX-Amz-Id-2:\x20dd
+SF:9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8\r\nX-Amz
+SF:-Request-Id:\x201845E18AD3F649E3\r\nX-Content-Type-Options:\x20nosniff\
+SF:r\nX-Xss-Protection:\x201;\x20mode=block\r\nDate:\x20Wed,\x2004\x20Jun\
+SF:x202025\x2015:46:56\x20GMT\r\n\r\n<\?xml\x20version=\"1\.0\"\x20encodin
+SF:g=\"UTF-8\"\?>\n<Error><Code>InvalidRequest</Code><Message>Invalid\x20R
+SF:equest\x20\(invalid\x20argument\)</Message><Resource>/</Resource><Reque
+SF:stId>1845E18AD3F649E3</RequestId><HostId>dd9025bab4ad464b049177c95eb6eb
+SF:f374d3b3fd1af9251148b658df7ac2e3e8</HostId></Error>")%r(HTTPOptions,59,
+SF:"HTTP/1\.0\x20200\x20OK\r\nVary:\x20Origin\r\nDate:\x20Wed,\x2004\x20Ju
+SF:n\x202025\x2015:46:56\x20GMT\r\nContent-Length:\x200\r\n\r\n")%r(RTSPRe
+SF:quest,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/p
+SF:lain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Req
+SF:uest")%r(Help,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x
 SF:20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Ba
-SF:d\x20Request");
+SF:d\x20Request")%r(SSLSessionReq,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r
+SF:\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close
+SF:\r\n\r\n400\x20Bad\x20Request")%r(TerminalServerCookie,67,"HTTP/1\.1\x2
+SF:0400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8
+SF:\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request")%r(TLSSessionReq
+SF:,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;
+SF:\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request"
+SF:)%r(Kerberos,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x2
+SF:0text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad
+SF:\x20Request");
 Device type: general purpose
 Running: Linux 4.X|5.X
 OS CPE: cpe:/o:linux:linux_kernel:4 cpe:/o:linux:linux_kernel:5
@@ -386,12 +243,12 @@ OS details: Linux 4.15 - 5.6
 Network Distance: 1 hop
 Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
-TRACEROUTE (using port 5900/tcp)
+TRACEROUTE (using port 1723/tcp)
 HOP RTT     ADDRESS
-1   0.01 ms 192.168.2.81 (192.168.2.81)
+1   0.02 ms 192.168.2.81
 
-Nmap scan report for 192.168.2.111
-Host is up (0.00015s latency).
+Nmap scan report for device-2.home (192.168.2.111)
+Host is up (0.00014s latency).
 Not shown: 997 closed tcp ports (reset)
 PORT     STATE SERVICE VERSION
 22/tcp   open  ssh     OpenSSH 9.2p1 Debian 2+deb12u2 (protocol 2.0)
@@ -408,50 +265,44 @@ PORT     STATE SERVICE VERSION
 3128/tcp open  http    Proxmox Virtual Environment REST API 3.0
 |_http-title: Site doesn't have a title.
 |_http-server-header: pve-api-daemon/3.0
-No exact OS matches for host (If you know what OS is running on it, see https://nmap.org/submit/ ).
-TCP/IP fingerprint:
-OS:SCAN(V=7.93%E=4%D=5/28%OT=22%CT=1%CU=44023%PV=Y%DS=2%DC=T%G=Y%TM=683753A
-OS:A%P=x86_64-pc-linux-gnu)SEQ(SP=FB%GCD=1%ISR=110%TI=Z%CI=Z%II=I%TS=A)OPS(
-OS:O1=M5B4ST11NW7%O2=M5B4ST11NW7%O3=M5B4NNT11NW7%O4=M5B4ST11NW7%O5=M5B4ST11
-OS:NW7%O6=M5B4ST11)WIN(W1=FE88%W2=FE88%W3=FE88%W4=FE88%W5=FE88%W6=FE88)ECN(
-OS:R=Y%DF=Y%T=40%W=FAF0%O=M5B4NNSNW7%CC=Y%Q=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=AS
-OS:%RD=0%Q=)T2(R=N)T3(R=N)T4(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=
-OS:Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=
-OS:R%O=%RD=0%Q=)T7(R=N)U1(R=Y%DF=N%T=40%IPL=164%UN=0%RIPL=G%RID=G%RIPCK=G%R
-OS:UCK=G%RUD=G)IE(R=Y%DFI=N%T=40%CD=S)
-
+Device type: general purpose
+Running: Linux 5.X
+OS CPE: cpe:/o:linux:linux_kernel:5
+OS details: Linux 5.0 - 5.4
 Network Distance: 2 hops
 Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
-TRACEROUTE (using port 8888/tcp)
+TRACEROUTE (using port 1723/tcp)
 HOP RTT     ADDRESS
--   Hop 1 is the same as for 192.168.2.1
-2   0.20 ms 192.168.2.111 (192.168.2.111)
+-   Hop 1 is the same as for 192.168.2.13
+2   0.09 ms device-2.home (192.168.2.111)
 
-Nmap scan report for mijnmodem.kpn.home (192.168.2.254)
-Host is up (0.0015s latency).
-Not shown: 996 closed tcp ports (reset)
-PORT      STATE    SERVICE VERSION
-53/tcp    open     domain  Unbound
+Nmap scan report for 192.168.2.254
+Host is up (0.0020s latency).
+Not shown: 992 filtered tcp ports (no-response)
+PORT      STATE  SERVICE VERSION
+53/tcp    open   domain  dnsmasq 2.89
 | dns-nsid: 
-|   NSID: rec-inc-pv013-1 (7265632d696e632d70763031332d31)
-|_  id.server: rec-inc-pv013-1
-80/tcp    open     http    Mini web server 1.0 (ZTE ZXV10 W300 ADSL router http config)
-|_http-title: &#72;&#51;&#54;&#57;&#65;
-|_http-server-header: Mini web server 1.0 ZTE corp 2005.
-443/tcp   filtered https
-52869/tcp open     upnp    Portable SDK for UPnP devices 1.6.18 (UPnP 1.0)
+|_  bind.version: dnsmasq-2.89
+80/tcp    open   http    Octoshape P2P streaming web service
+|_http-title: KPN WebUI
+631/tcp   open   ipp?
+|_http-title: Not Found - CUPS v2.3.3
+50000/tcp closed ibm-db2
+50001/tcp closed unknown
+50002/tcp closed iiimsf
+50003/tcp closed unknown
+50006/tcp closed unknown
 Device type: general purpose
-Running: Linux 2.6.X|3.X
-OS CPE: cpe:/o:linux:linux_kernel:2.6 cpe:/o:linux:linux_kernel:3
-OS details: Linux 2.6.32 - 3.13
+Running: Linux 3.X|4.X
+OS CPE: cpe:/o:linux:linux_kernel:3 cpe:/o:linux:linux_kernel:4
+OS details: Linux 3.10 - 4.11
 Network Distance: 2 hops
-Service Info: OSs: Linux 2.4.17, Linux; Device: broadband router; CPE: cpe:/h:zte:zxv10_w300, cpe:/o:montavista:linux_kernel:2.4.17, cpe:/o:linux:linux_kernel
 
-TRACEROUTE (using port 8888/tcp)
+TRACEROUTE (using port 50001/tcp)
 HOP RTT     ADDRESS
--   Hop 1 is the same as for 192.168.2.1
-2   1.76 ms mijnmodem.kpn.home (192.168.2.254)
+-   Hop 1 is the same as for 192.168.2.13
+2   2.17 ms mijnmodem.kpn (192.168.2.254)
 
 OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Wed May 28 18:19:22 2025 -- 6 IP addresses (6 hosts up) scanned in 178.55 seconds
+# Nmap done at Wed Jun  4 15:49:05 2025 -- 5 IP addresses (5 hosts up) scanned in 139.30 seconds

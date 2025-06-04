@@ -41,6 +41,11 @@ while read -r name network ip mac; do
     fi
 done < "$log_file"
 
+#     # delete table
+#     sqlite3 "$db_file" <<EOF
+# DROP TABLE IF EXISTS docker_hosts;
+# EOF
+
 # Insert data into SQLite database
 while IFS= read -r line; do
     # Parse the line into fields (assuming whitespace-separated)

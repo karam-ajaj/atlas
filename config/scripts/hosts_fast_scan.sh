@@ -37,7 +37,7 @@ db_file="/config/db/atlas.db"
 
 
 ## create tables
-/config/scripts/db_setup.sh
+# /config/scripts/db_setup.sh
 
 # Read the Nmap log and extract values line by line
 while IFS= read -r line; do
