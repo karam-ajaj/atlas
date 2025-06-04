@@ -1,42 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE nmaprun>
 <?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
-<!-- Nmap 7.93 scan initiated Wed Jun  4 15:44:53 2025 as: nmap -sn -oX /config/logs/nmap_mac.xml 192.168.2.0/24 -->
-<nmaprun scanner="nmap" args="nmap -sn -oX /config/logs/nmap_mac.xml 192.168.2.0/24" start="1749051893" startstr="Wed Jun  4 15:44:53 2025" version="7.93" xmloutputversion="1.05">
+<!-- Nmap 7.93 scan initiated Wed Jun  4 16:44:19 2025 as: nmap -sn -oX /config/logs/nmap_mac.xml  -->
+<nmaprun scanner="nmap" args="nmap -sn -oX /config/logs/nmap_mac.xml " start="1749055459" startstr="Wed Jun  4 16:44:19 2025" version="7.93" xmloutputversion="1.05">
 <verbose level="0"/>
 <debugging level="0"/>
-<host><status state="up" reason="echo-reply" reason_ttl="59"/>
-<address addr="192.168.2.7" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-<times srtt="6213" rttvar="6213" to="100000"/>
-</host>
-<host><status state="up" reason="echo-reply" reason_ttl="63"/>
-<address addr="192.168.2.13" addrtype="ipv4"/>
-<hostnames>
-<hostname name="re200-1.home" type="PTR"/>
-</hostnames>
-<times srtt="16962" rttvar="16962" to="100000"/>
-</host>
-<host><status state="up" reason="echo-reply" reason_ttl="64"/>
-<address addr="192.168.2.81" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-<times srtt="16" rttvar="5000" to="100000"/>
-</host>
-<host><status state="up" reason="echo-reply" reason_ttl="63"/>
-<address addr="192.168.2.111" addrtype="ipv4"/>
-<hostnames>
-<hostname name="device-2.home" type="PTR"/>
-</hostnames>
-<times srtt="132" rttvar="5000" to="100000"/>
-</host>
-<host><status state="up" reason="echo-reply" reason_ttl="63"/>
-<address addr="192.168.2.254" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-<times srtt="3868" rttvar="4221" to="100000"/>
-</host>
-<runstats><finished time="1749051897" timestr="Wed Jun  4 15:44:57 2025" summary="Nmap done at Wed Jun  4 15:44:57 2025; 256 IP addresses (5 hosts up) scanned in 3.59 seconds" elapsed="3.59" exit="success"/><hosts up="5" down="251" total="256"/>
+<runstats><finished time="1749055459" timestr="Wed Jun  4 16:44:19 2025" summary="Nmap done at Wed Jun  4 16:44:19 2025; 0 IP addresses (0 hosts up) scanned in 0.00 seconds" elapsed="0.00" exit="success"/><hosts up="0" down="0" total="0"/>
 </runstats>
 </nmaprun>

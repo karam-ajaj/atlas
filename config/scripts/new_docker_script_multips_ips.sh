@@ -52,9 +52,36 @@ while IFS= read -r line; do
     network_name=$(echo "$line" | awk '{print $NF}')
 
 
-    sqlite3 "$db_file" <<EOF
-INSERT OR IGNORE INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name)
+#     sqlite3 "$db_file" <<EOF
+# INSERT OR IGNORE INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name)
+# VALUES ('$ip', '$name', '$os_details', '$mac_address', '$open_ports', '$next_hop', '$network_name');
+# EOF
+
+existing=$(sqlite3 "$db_file" "SELECT COUNT(*) FROM docker_hosts WHERE ip = '$ip';")
+
+if [ "$existing" -eq 0 ]; then
+  sqlite3 "$db_file" <<EOF
+INSERT INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name)
 VALUES ('$ip', '$name', '$os_details', '$mac_address', '$open_ports', '$next_hop', '$network_name');
 EOF
+else
+  sqlite3 "$db_file" <<EOF
+UPDATE docker_hosts
+SET name = '$name',
+    os_details = '$os_details',
+    mac_address = '$mac_address',
+    open_ports = '$open_ports',
+    next_hop = '$next_hop',
+    network_name = '$network_name'
+WHERE ip = '$ip'
+  AND (name != '$name'
+    OR os_details != '$os_details'
+    OR mac_address != '$mac_address'
+    OR open_ports != '$open_ports'
+    OR next_hop != '$next_hop'
+    OR network_name != '$network_name');
+EOF
+fi
+
 
 done < "$hosts_file"

@@ -1,33 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE nmaprun>
 <?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
-<!-- Nmap 7.93 scan initiated Wed Jun  4 15:44:57 2025 as: nmap -O -sS -p- -oX /config/logs/nmap_full.xml 192.168.2.0/24 -->
-<nmaprun scanner="nmap" args="nmap -O -sS -p- -oX /config/logs/nmap_full.xml 192.168.2.0/24" start="1749051897" startstr="Wed Jun  4 15:44:57 2025" version="7.93" xmloutputversion="1.05">
+<!-- Nmap 7.93 scan initiated Wed Jun  4 16:44:19 2025 as: nmap -O -sS -p- -oX /config/logs/nmap_full.xml  -->
+<nmaprun scanner="nmap" args="nmap -O -sS -p- -oX /config/logs/nmap_full.xml " start="1749055459" startstr="Wed Jun  4 16:44:19 2025" version="7.93" xmloutputversion="1.05">
 <scaninfo type="syn" protocol="tcp" numservices="65535" services="1-65535"/>
 <verbose level="0"/>
 <debugging level="0"/>
-<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.7" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-</hosthint>
-<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.13" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-</hosthint>
-<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.81" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-</hosthint>
-<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.111" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-</hosthint>
-<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.254" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-</hosthint>
+<runstats><finished time="1749055459" timestr="Wed Jun  4 16:44:19 2025" summary="Nmap done at Wed Jun  4 16:44:19 2025; 0 IP addresses (0 hosts up) scanned in 0.11 seconds" elapsed="0.11" exit="success"/><hosts up="0" down="0" total="0"/>
+</runstats>
+</nmaprun>

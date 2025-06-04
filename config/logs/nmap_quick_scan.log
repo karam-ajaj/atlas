@@ -1,56 +1,56 @@
-# Nmap 7.93 scan initiated Wed Jun  4 15:46:46 2025 as: nmap -A -O -T4 -oN /config/logs/nmap_quick_scan.log -iL /config/logs/live_hosts.txt
+# Nmap 7.93 scan initiated Wed Jun  4 16:55:37 2025 as: nmap -A -O -T4 -oN /config/logs/nmap_quick_scan.log -iL /config/logs/live_hosts.txt
+Nmap scan report for 192.168.2.2
+Host is up (0.032s latency).
+All 1000 scanned ports on 192.168.2.2 are in ignored states.
+Not shown: 1000 closed tcp ports (reset)
+Too many fingerprints match this host to give specific OS details
+Network Distance: 2 hops
+
+TRACEROUTE (using port 23/tcp)
+HOP RTT      ADDRESS
+1   0.01 ms  172.17.0.1
+2   94.51 ms sanaa-s-s23-fe.home (192.168.2.2)
+
+Nmap scan report for a14-alkhas-b-amer.home (192.168.2.6)
+Host is up (0.0037s latency).
+All 1000 scanned ports on a14-alkhas-b-amer.home (192.168.2.6) are in ignored states.
+Not shown: 1000 closed tcp ports (reset)
+Too many fingerprints match this host to give specific OS details
+Network Distance: 2 hops
+
+TRACEROUTE (using port 23/tcp)
+HOP RTT     ADDRESS
+-   Hop 1 is the same as for 192.168.2.2
+2   3.79 ms a14-alkhas-b-amer.home (192.168.2.6)
+
 Nmap scan report for 192.168.2.7
-Host is up (0.0066s latency).
+Host is up (0.0043s latency).
 Not shown: 998 closed tcp ports (reset)
-PORT     STATE SERVICE VERSION
-80/tcp   open  http    Mitel SIP DEC VoIP phone http config
+PORT     STATE    SERVICE    VERSION
+80/tcp   open     http       Mitel SIP DEC VoIP phone http config
 | http-title: Internet Radio 4.x
 |_Requested resource was /web/index.html
-8080/tcp open  upnp
-|_http-title: Did not follow redirect to http://192.168.2.7/web/index.html
-|_http-server-header: POSIX, UPnP/1.0, Intel MicroStack/1.0.2777
-| fingerprint-strings: 
-|   FourOhFourRequest: 
-|     HTTP/1.1 404 File Not Found
-|     Server: POSIX, UPnP/1.0, Intel MicroStack/1.0.2777
-|     Content-Length: 0
-|   GetRequest: 
-|     HTTP/1.1 301 Moved Permanently
-|     Server: POSIX, UPnP/1.0, Intel MicroStack/1.0.2777
-|     Content-Type: text/html
-|     Location: http://192.168.2.7/web/index.html
-|_    <html><body><p>Your browser should automatically redirect you.<br> If not, please click <a href="http://192.168.2.7/web/index.html">here</a>.</p></body></html>
-1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
-SF-Port8080-TCP:V=7.93%I=7%D=6/4%Time=68406A6D%P=x86_64-pc-linux-gnu%r(Get
-SF:Request,13B,"HTTP/1\.1\x20301\x20Moved\x20Permanently\r\nServer:\x20POS
-SF:IX,\x20UPnP/1\.0,\x20Intel\x20MicroStack/1\.0\.2777\r\nContent-Type:\x2
-SF:0text/html\r\nLocation:\x20http://192\.168\.2\.7/web/index\.html\r\n\r\
-SF:n<html><body><p>Your\x20browser\x20should\x20automatically\x20redirect\
-SF:x20you\.<br>\x20If\x20not,\x20please\x20click\x20<a\x20href=\"http://19
-SF:2\.168\.2\.7/web/index\.html\">here</a>\.</p></body></html>")%r(FourOhF
-SF:ourRequest,66,"HTTP/1\.1\x20404\x20File\x20Not\x20Found\r\nServer:\x20P
-SF:OSIX,\x20UPnP/1\.0,\x20Intel\x20MicroStack/1\.0\.2777\r\nContent-Length
-SF::\x200\r\n\r\n");
+8080/tcp filtered http-proxy
 Device type: media device|webcam|WAP|printer
-Running (JUST GUESSING): Frontier Silicon embedded (93%), Leica embedded (93%), Novatel embedded (93%), Olympus embedded (90%), Canon embedded (89%), iDirect embedded (86%)
+Running (JUST GUESSING): Frontier Silicon embedded (93%), Leica embedded (93%), Novatel embedded (93%), Olympus embedded (93%), Canon embedded (90%), iDirect embedded (86%)
 OS CPE: cpe:/h:novatel:mifi_4620l cpe:/h:olympus:stylus_sh-2 cpe:/h:canon:imageclass_mf212w
-Aggressive OS guesses: Frontier Silicon internet radio (93%), Leica T camera (93%), Novatel MiFi 4620L WAP (93%), Olympus Stylus SH-2 camera (90%), Canon imageCLASS MF212w printer (89%), Novatel MiFi 2200 3G WAP or iDirect Evolution X1 satellite router (86%)
+Aggressive OS guesses: Frontier Silicon internet radio (93%), Leica T camera (93%), Novatel MiFi 4620L WAP (93%), Olympus Stylus SH-2 camera (93%), Canon imageCLASS MF212w printer (90%), Novatel MiFi 2200 3G WAP or iDirect Evolution X1 satellite router (86%)
 No exact OS matches for host (test conditions non-ideal).
 Network Distance: 2 hops
 Service Info: Device: VoIP phone
 
-TRACEROUTE (using port 1723/tcp)
+TRACEROUTE (using port 23/tcp)
 HOP RTT     ADDRESS
--   Hop 1 is the same as for 192.168.2.13
-2   6.98 ms philipstapr802.home (192.168.2.7)
+-   Hop 1 is the same as for 192.168.2.2
+2   5.24 ms 192.168.2.7
 
 Nmap scan report for re200-1.home (192.168.2.13)
-Host is up (0.0059s latency).
+Host is up (0.0064s latency).
 Not shown: 999 closed tcp ports (reset)
 PORT   STATE SERVICE VERSION
 80/tcp open  http    TP-LINK RE200 WAP http config
-|_http-server-header: Router Webserver
 |_http-title: Site doesn't have a title (text/html).
+|_http-server-header: Router Webserver
 Device type: general purpose
 Running: Linux 2.6.X
 OS CPE: cpe:/o:linux:linux_kernel:2.6
@@ -58,14 +58,14 @@ OS details: Linux 2.6.23 - 2.6.38
 Network Distance: 2 hops
 Service Info: Device: WAP; CPE: cpe:/h:tp-link:re200
 
-TRACEROUTE (using port 995/tcp)
+TRACEROUTE (using port 23/tcp)
 HOP RTT     ADDRESS
-1   0.01 ms 172.17.0.1
-2   4.26 ms re200-1.home (192.168.2.13)
+-   Hop 1 is the same as for 192.168.2.2
+2   6.20 ms re200-1.home (192.168.2.13)
 
 Nmap scan report for 192.168.2.81
-Host is up (0.0000090s latency).
-Not shown: 992 closed tcp ports (reset)
+Host is up (0.000010s latency).
+Not shown: 991 closed tcp ports (reset)
 PORT     STATE SERVICE        VERSION
 22/tcp   open  ssh            OpenSSH 8.9p1 Ubuntu 3ubuntu0.13 (Ubuntu Linux; protocol 2.0)
 | ssh-hostkey: 
@@ -82,9 +82,9 @@ PORT     STATE SERVICE        VERSION
 |_  100000  3,4          111/udp6  rpcbind
 443/tcp  open  ssl/http       Golang net/http server (Go-IPFS json-rpc or InfluxDB API)
 | ssl-cert: Subject: commonName=TRAEFIK DEFAULT CERT
-| Subject Alternative Name: DNS:3f30db4fa52c9911d2de7f65ec1dc121.c50073b71ccdf65ae723c61dea432154.traefik.default
-| Not valid before: 2025-06-04T15:14:41
-|_Not valid after:  2026-06-04T15:14:41
+| Subject Alternative Name: DNS:6791426140ee93c89a7ce1cac512a34f.e8050851d0247945e6dc7190534e03d1.traefik.default
+| Not valid before: 2025-06-04T16:55:31
+|_Not valid after:  2026-06-04T16:55:31
 |_http-title: Site doesn't have a title (text/plain; charset=utf-8).
 888/tcp  open  accessbuilder?
 | fingerprint-strings: 
@@ -96,13 +96,13 @@ PORT     STATE SERVICE        VERSION
 |     X-Content-Type-Options: nosniff
 |     Content-Length: 0
 |     Server: http-kit
-|     Date: Wed, 04 Jun 2025 15:47:26 GMT
+|     Date: Wed, 04 Jun 2025 16:56:18 GMT
 |   GetRequest: 
 |     HTTP/1.1 200 OK
 |     Content-Type: text/html
 |     Content-Length: 2599
 |     Server: http-kit
-|     Date: Wed, 04 Jun 2025 15:46:56 GMT
+|     Date: Wed, 04 Jun 2025 16:55:48 GMT
 |     <!DOCTYPE html>
 |     <html lang="en">
 |     <head>
@@ -122,7 +122,7 @@ PORT     STATE SERVICE        VERSION
 |     Allow: GET,OPTIONS
 |     Content-Length: 0
 |     Server: http-kit
-|     Date: Wed, 04 Jun 2025 15:46:56 GMT
+|     Date: Wed, 04 Jun 2025 16:55:48 GMT
 |   SIPOptions: 
 |     HTTP/1.1 404 Not Found
 |     Content-Type: application/octet-stream
@@ -131,12 +131,14 @@ PORT     STATE SERVICE        VERSION
 |     X-Content-Type-Options: nosniff
 |     Content-Length: 0
 |     Server: http-kit
-|_    Date: Wed, 04 Jun 2025 15:47:31 GMT
+|_    Date: Wed, 04 Jun 2025 16:56:23 GMT
+900/tcp  open  http           Gophish httpd
+|_http-title: Portainer
 3389/tcp open  ssl/http       Golang net/http server (Go-IPFS json-rpc or InfluxDB API)
 | ssl-cert: Subject: commonName=TRAEFIK DEFAULT CERT
-| Subject Alternative Name: DNS:3f30db4fa52c9911d2de7f65ec1dc121.c50073b71ccdf65ae723c61dea432154.traefik.default
-| Not valid before: 2025-06-04T15:14:41
-|_Not valid after:  2026-06-04T15:14:41
+| Subject Alternative Name: DNS:6791426140ee93c89a7ce1cac512a34f.e8050851d0247945e6dc7190534e03d1.traefik.default
+| Not valid before: 2025-06-04T16:55:31
+|_Not valid after:  2026-06-04T16:55:31
 |_http-title: Site doesn't have a title (text/plain; charset=utf-8).
 8888/tcp open  http           nginx 1.27.3
 |_http-server-header: nginx/1.27.3
@@ -157,23 +159,23 @@ PORT     STATE SERVICE        VERSION
 |     Strict-Transport-Security: max-age=31536000; includeSubDomains
 |     Vary: Origin
 |     X-Amz-Id-2: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8
-|     X-Amz-Request-Id: 1845E18AD3F649E3
+|     X-Amz-Request-Id: 1845E54CF0D00469
 |     X-Content-Type-Options: nosniff
 |     X-Xss-Protection: 1; mode=block
-|     Date: Wed, 04 Jun 2025 15:46:56 GMT
+|     Date: Wed, 04 Jun 2025 16:55:48 GMT
 |     <?xml version="1.0" encoding="UTF-8"?>
-|     <Error><Code>InvalidRequest</Code><Message>Invalid Request (invalid argument)</Message><Resource>/</Resource><RequestId>1845E18AD3F649E3</RequestId><HostId>dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8</HostId></Error>
+|     <Error><Code>InvalidRequest</Code><Message>Invalid Request (invalid argument)</Message><Resource>/</Resource><RequestId>1845E54CF0D00469</RequestId><HostId>dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8</HostId></Error>
 |   HTTPOptions: 
 |     HTTP/1.0 200 OK
 |     Vary: Origin
-|     Date: Wed, 04 Jun 2025 15:46:56 GMT
+|     Date: Wed, 04 Jun 2025 16:55:48 GMT
 |_    Content-Length: 0
 2 services unrecognized despite returning data. If you know the service/version, please submit the following fingerprints at https://nmap.org/cgi-bin/submit.cgi?new-service :
 ==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============
-SF-Port888-TCP:V=7.93%I=7%D=6/4%Time=68406A70%P=x86_64-pc-linux-gnu%r(GetR
+SF-Port888-TCP:V=7.93%I=7%D=6/4%Time=68407A94%P=x86_64-pc-linux-gnu%r(GetR
 SF:equest,AA0,"HTTP/1\.1\x20200\x20OK\r\nContent-Type:\x20text/html\r\nCon
 SF:tent-Length:\x202599\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x2004\x20J
-SF:un\x202025\x2015:46:56\x20GMT\r\n\r\n<!DOCTYPE\x20html>\n<html\x20lang=
+SF:un\x202025\x2016:55:48\x20GMT\r\n\r\n<!DOCTYPE\x20html>\n<html\x20lang=
 SF:\"en\">\n<head>\n\x20\x20\x20\x20<title>swarmpit</title>\n\x20\x20\x20\
 SF:x20<meta\x20charset=\"utf-8\"\x20/>\n\x20\x20\x20\x20<meta\x20name=\"vi
 SF:ewport\"\x20content=\"width=device-width,initial-scale=1,maximum-scale=
@@ -191,21 +193,21 @@ SF:/>\n\x20\x20\x20\x20<link\x20rel=\"manifest\"\x20href=\"manifest\.json\
 SF:"\x20/>\n\x20\x20\x20\x20<link\x20rel=\"stylesheet\"\x20href=\"css/rc-s
 SF:lider")%r(HTTPOptions,71,"HTTP/1\.1\x20200\x20OK\r\nAllow:\x20GET,OPTIO
 SF:NS\r\nContent-Length:\x200\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x200
-SF:4\x20Jun\x202025\x2015:46:56\x20GMT\r\n\r\n")%r(RTSPRequest,71,"HTTP/1\
+SF:4\x20Jun\x202025\x2016:55:48\x20GMT\r\n\r\n")%r(RTSPRequest,71,"HTTP/1\
 SF:.1\x20200\x20OK\r\nAllow:\x20GET,OPTIONS\r\nContent-Length:\x200\r\nSer
-SF:ver:\x20http-kit\r\nDate:\x20Wed,\x2004\x20Jun\x202025\x2015:46:56\x20G
+SF:ver:\x20http-kit\r\nDate:\x20Wed,\x2004\x20Jun\x202025\x2016:55:48\x20G
 SF:MT\r\n\r\n")%r(FourOhFourRequest,EB,"HTTP/1\.1\x20404\x20Not\x20Found\r
 SF:\nContent-Type:\x20application/octet-stream\r\nX-Xss-Protection:\x201;\
 SF:x20mode=block\r\nX-Frame-Options:\x20SAMEORIGIN\r\nX-Content-Type-Optio
 SF:ns:\x20nosniff\r\nContent-Length:\x200\r\nServer:\x20http-kit\r\nDate:\
-SF:x20Wed,\x2004\x20Jun\x202025\x2015:47:26\x20GMT\r\n\r\n")%r(SIPOptions,
+SF:x20Wed,\x2004\x20Jun\x202025\x2016:56:18\x20GMT\r\n\r\n")%r(SIPOptions,
 SF:EB,"HTTP/1\.1\x20404\x20Not\x20Found\r\nContent-Type:\x20application/oc
 SF:tet-stream\r\nX-Xss-Protection:\x201;\x20mode=block\r\nX-Frame-Options:
 SF:\x20SAMEORIGIN\r\nX-Content-Type-Options:\x20nosniff\r\nContent-Length:
 SF:\x200\r\nServer:\x20http-kit\r\nDate:\x20Wed,\x2004\x20Jun\x202025\x201
-SF:5:47:31\x20GMT\r\n\r\n");
+SF:6:56:23\x20GMT\r\n\r\n");
 ==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============
-SF-Port9000-TCP:V=7.93%I=7%D=6/4%Time=68406A70%P=x86_64-pc-linux-gnu%r(Gen
+SF-Port9000-TCP:V=7.93%I=7%D=6/4%Time=68407A94%P=x86_64-pc-linux-gnu%r(Gen
 SF:ericLines,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20te
 SF:xt/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x2
 SF:0Request")%r(GetRequest,2B0,"HTTP/1\.0\x20400\x20Bad\x20Request\r\nAcce
@@ -213,15 +215,15 @@ SF:pt-Ranges:\x20bytes\r\nContent-Length:\x20276\r\nContent-Type:\x20appli
 SF:cation/xml\r\nServer:\x20MinIO\r\nStrict-Transport-Security:\x20max-age
 SF:=31536000;\x20includeSubDomains\r\nVary:\x20Origin\r\nX-Amz-Id-2:\x20dd
 SF:9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8\r\nX-Amz
-SF:-Request-Id:\x201845E18AD3F649E3\r\nX-Content-Type-Options:\x20nosniff\
+SF:-Request-Id:\x201845E54CF0D00469\r\nX-Content-Type-Options:\x20nosniff\
 SF:r\nX-Xss-Protection:\x201;\x20mode=block\r\nDate:\x20Wed,\x2004\x20Jun\
-SF:x202025\x2015:46:56\x20GMT\r\n\r\n<\?xml\x20version=\"1\.0\"\x20encodin
+SF:x202025\x2016:55:48\x20GMT\r\n\r\n<\?xml\x20version=\"1\.0\"\x20encodin
 SF:g=\"UTF-8\"\?>\n<Error><Code>InvalidRequest</Code><Message>Invalid\x20R
 SF:equest\x20\(invalid\x20argument\)</Message><Resource>/</Resource><Reque
-SF:stId>1845E18AD3F649E3</RequestId><HostId>dd9025bab4ad464b049177c95eb6eb
+SF:stId>1845E54CF0D00469</RequestId><HostId>dd9025bab4ad464b049177c95eb6eb
 SF:f374d3b3fd1af9251148b658df7ac2e3e8</HostId></Error>")%r(HTTPOptions,59,
 SF:"HTTP/1\.0\x20200\x20OK\r\nVary:\x20Origin\r\nDate:\x20Wed,\x2004\x20Ju
-SF:n\x202025\x2015:46:56\x20GMT\r\nContent-Length:\x200\r\n\r\n")%r(RTSPRe
+SF:n\x202025\x2016:55:48\x20GMT\r\nContent-Length:\x200\r\n\r\n")%r(RTSPRe
 SF:quest,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/p
 SF:lain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Req
 SF:uest")%r(Help,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x
@@ -243,12 +245,12 @@ OS details: Linux 4.15 - 5.6
 Network Distance: 1 hop
 Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
-TRACEROUTE (using port 1723/tcp)
+TRACEROUTE (using port 23/tcp)
 HOP RTT     ADDRESS
-1   0.02 ms 192.168.2.81
+1   0.01 ms device-1.home (192.168.2.81)
 
 Nmap scan report for device-2.home (192.168.2.111)
-Host is up (0.00014s latency).
+Host is up (0.00011s latency).
 Not shown: 997 closed tcp ports (reset)
 PORT     STATE SERVICE VERSION
 22/tcp   open  ssh     OpenSSH 9.2p1 Debian 2+deb12u2 (protocol 2.0)
@@ -272,13 +274,13 @@ OS details: Linux 5.0 - 5.4
 Network Distance: 2 hops
 Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
-TRACEROUTE (using port 1723/tcp)
+TRACEROUTE (using port 23/tcp)
 HOP RTT     ADDRESS
--   Hop 1 is the same as for 192.168.2.13
-2   0.09 ms device-2.home (192.168.2.111)
+-   Hop 1 is the same as for 192.168.2.2
+2   0.14 ms device-2.home (192.168.2.111)
 
 Nmap scan report for 192.168.2.254
-Host is up (0.0020s latency).
+Host is up (0.0021s latency).
 Not shown: 992 filtered tcp ports (no-response)
 PORT      STATE  SERVICE VERSION
 53/tcp    open   domain  dnsmasq 2.89
@@ -293,16 +295,14 @@ PORT      STATE  SERVICE VERSION
 50002/tcp closed iiimsf
 50003/tcp closed unknown
 50006/tcp closed unknown
-Device type: general purpose
-Running: Linux 3.X|4.X
-OS CPE: cpe:/o:linux:linux_kernel:3 cpe:/o:linux:linux_kernel:4
-OS details: Linux 3.10 - 4.11
+Aggressive OS guesses: Linux 3.10 - 4.11 (98%), Linux 3.2 - 4.9 (96%), Linux 4.4 (93%), Linux 2.6.32 - 3.13 (93%), Linux 5.1 (93%), Linux 2.6.22 - 2.6.36 (91%), Linux 2.6.32 - 2.6.39 (91%), Linux 2.6.37 (91%), DD-WRT v24 or v30 (Linux 3.10) (91%), Linux 2.6.39 (91%)
+No exact OS matches for host (test conditions non-ideal).
 Network Distance: 2 hops
 
-TRACEROUTE (using port 50001/tcp)
+TRACEROUTE (using port 50000/tcp)
 HOP RTT     ADDRESS
--   Hop 1 is the same as for 192.168.2.13
-2   2.17 ms mijnmodem.kpn (192.168.2.254)
+-   Hop 1 is the same as for 192.168.2.2
+2   1.77 ms 192.168.2.254
 
 OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Wed Jun  4 15:49:05 2025 -- 5 IP addresses (5 hosts up) scanned in 139.30 seconds
+# Nmap done at Wed Jun  4 16:57:37 2025 -- 8 IP addresses (7 hosts up) scanned in 120.48 seconds

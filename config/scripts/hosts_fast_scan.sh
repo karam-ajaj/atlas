@@ -51,13 +51,36 @@ while IFS= read -r line; do
     open_ports="Unknown"
 
     # Insert if the IP does not exist
-    sqlite3 /config/db/atlas.db <<EOF
+#     sqlite3 /config/db/atlas.db <<EOF
+# INSERT INTO hosts (ip, name, os_details, mac_address, open_ports)
+# SELECT '$ip', '$name', '$os_details', '$mac_address', '$open_ports'
+# WHERE NOT EXISTS (
+#     SELECT 1 FROM hosts WHERE ip = '$ip'
+# );
+# EOF
+
+existing=$(sqlite3 "$db_file" "SELECT COUNT(*) FROM hosts WHERE ip = '$ip';")
+
+if [ "$existing" -eq 0 ]; then
+  sqlite3 "$db_file" <<EOF
 INSERT INTO hosts (ip, name, os_details, mac_address, open_ports)
-SELECT '$ip', '$name', '$os_details', '$mac_address', '$open_ports'
-WHERE NOT EXISTS (
-    SELECT 1 FROM hosts WHERE ip = '$ip'
-);
+VALUES ('$ip', '$name', '$os_details', '$mac_address', '$open_ports');
 EOF
+else
+  sqlite3 "$db_file" <<EOF
+UPDATE hosts
+SET name = '$name',
+    os_details = '$os_details',
+    mac_address = '$mac_address',
+    open_ports = '$open_ports'
+WHERE ip = '$ip'
+  AND (name != '$name'
+    OR os_details != '$os_details'
+    OR mac_address != '$mac_address'
+    OR open_ports != '$open_ports');
+EOF
+fi
+
 
 done < "$input_file"
 
