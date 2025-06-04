@@ -3,7 +3,7 @@ overlay                            195G   86G  101G  47% /
 tmpfs                               64M     0   64M   0% /dev
 shm                                 64M     0   64M   0% /dev/shm
 /dev/mapper/ubuntu--vg-ubuntu--lv  195G   86G  101G  47% /config
-tmpfs                              5.9G  3.4M  5.9G   1% /run/docker.sock
+tmpfs                              5.9G  3.1M  5.9G   1% /run/docker.sock
 tmpfs                               30G     0   30G   0% /proc/acpi
 tmpfs                               30G     0   30G   0% /proc/scsi
 tmpfs                               30G     0   30G   0% /sys/firmware

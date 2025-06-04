@@ -39,16 +39,16 @@ while read -r name network ip mac; do
             end' | paste -sd, -)
         ports=${ports:-no_ports}
 
-        # Try Docker network inspect
+        # Get Docker network gateway
         nexthop=$(docker network inspect "$network" 2>/dev/null |
             grep -B 5 "\"$ip\"" | grep '"Gateway":' | awk -F '"' '{print $4}')
 
-        # Try fallback inside container
-        if [[ -z "$nexthop" || "$nexthop" == "null" ]]; then
-            nexthop=$(docker exec "$container_id" sh -c "ip route | awk '/default/ {print \$3}'" 2>&1)
+        # Force fallback for Docker internal default gateways
+        if [[ -z "$nexthop" || "$nexthop" == "null" || "$nexthop" =~ ^172\.1[6-9]\.0\.1$ || "$nexthop" =~ ^172\.2[0-9]\.0\.1$ || "$nexthop" =~ ^172\.3[0-1]\.0\.1$ ]]; then
+            nexthop=$(docker info --format '{{.Swarm.NodeAddr}}' 2>/dev/null)
 
-            # Clean errors and use fallback
-            if [[ "$nexthop" == *"not found"* || "$nexthop" == *"OCI runtime"* || "$nexthop" == *"exec failed"* || -z "$nexthop" ]]; then
+            # Clean fallback errors
+            if [[ "$nexthop" == *"not found"* || "$nexthop" == *"error"* || -z "$nexthop" ]]; then
                 nexthop="${gateway_cache[$network]}"
                 nexthop=${nexthop:-unavailable}
             fi
