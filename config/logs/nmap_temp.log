@@ -2,10 +2,10 @@
 Nmap scan report for 192.168.2.2
   -> Too many fingerprints match this host to give specific OS details
 
-Nmap scan report for a14-alkhas-b-amer.home (192.168.2.6)
-  -> Too many fingerprints match this host to give specific OS details
+Nmap scan report for lgwebostv.home (192.168.2.5)
 
-Nmap scan report for 192.168.2.7
+Nmap scan report for 192.168.2.6
+  -> Too many fingerprints match this host to give specific OS details
 
 Nmap scan report for re200-1.home (192.168.2.13)
   -> OS details: Linux 2.6.23 - 2.6.38
@@ -14,6 +14,5 @@ Nmap scan report for 192.168.2.81
   -> OS details: Linux 4.15 - 5.6
 
 Nmap scan report for device-2.home (192.168.2.111)
-  -> OS details: Linux 5.0 - 5.4
 
 Nmap scan report for 192.168.2.254

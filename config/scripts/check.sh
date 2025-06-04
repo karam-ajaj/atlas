@@ -11,4 +11,10 @@
 
 # find hosts
 ./hosts_fast_scan.sh
-# ./hosts_deep_scan_macs.sh
+./hosts_deep_scan_macs.sh
+
+
+# export the path
+export PYTHONPATH=/config
+# start in the background and save to log file
+uvicorn scripts.app:app --host 0.0.0.0 --port 8000 > /config/logs/uvicorn.log 2>&1 &

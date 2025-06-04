@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS hosts (
     mac_address TEXT,
     open_ports TEXT,
     next_hop TEXT,
-    network_name TEXT
+    network_name TEXT,
+    last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS docker_hosts (
@@ -24,7 +25,8 @@ CREATE TABLE IF NOT EXISTS docker_hosts (
     mac_address TEXT,
     open_ports TEXT,
     next_hop TEXT,
-    network_name TEXT
+    network_name TEXT,
+    last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS logs (

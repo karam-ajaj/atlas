@@ -14,8 +14,12 @@ nmap -sn "$subnet" -oX /config/logs/nmap_mac.xml
 # Full scan with OS + ports
 nmap -O -sS -p- "$subnet" -oX /config/logs/nmap_full.xml
 
-# Create DB table if not exists
+# Ensure DB table exists
 /config/scripts/db_setup.sh
+
+# Ensure 'deleted' column exists
+sqlite3 /config/db/atlas.db "PRAGMA table_info(hosts);" | grep -q 'deleted' || \
+sqlite3 /config/db/atlas.db "ALTER TABLE hosts ADD COLUMN deleted BOOLEAN DEFAULT 0;"
 
 # Parse and write to DB + log
 python3 <<EOF
@@ -42,9 +46,12 @@ conn = sqlite3.connect(db_file)
 cur = conn.cursor()
 
 index = 1
+current_ips = []
+
 for host in hosts:
     addr = host.find("address[@addrtype='ipv4']")
     ip = addr.get("addr") if addr is not None else "Unknown"
+    current_ips.append(ip)
 
     hostname_elem = host.find(".//hostnames/hostname")
     hostname = hostname_elem.get("name") if hostname_elem is not None else "NoName"
@@ -60,25 +67,60 @@ for host in hosts:
     open_ports = ",".join(ports) if ports else "Unknown"
 
     mac = mac_map.get(ip, "Unknown")
-
-    # Append to log
     output.append([index, ip, hostname, os_name, mac, open_ports])
 
-    # Insert into DB
+    # Reactivate deleted entries if reappeared
     cur.execute("""
-    INSERT INTO hosts (ip, name, os_details, mac_address, open_ports)
-    SELECT ?, ?, ?, ?, ?
+    UPDATE hosts
+    SET deleted = 0,
+        name = ?,
+        os_details = ?,
+        mac_address = ?,
+        open_ports = ?,
+        last_seen = CURRENT_TIMESTAMP
+    WHERE ip = ?
+      AND deleted = 1
+    """, (hostname, os_name, mac, open_ports, ip))
+
+    # Insert new entries
+    cur.execute("""
+    INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, last_seen, deleted)
+    SELECT ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 0
     WHERE NOT EXISTS (
         SELECT 1 FROM hosts WHERE ip = ?
     )
     """, (ip, hostname, os_name, mac, open_ports, ip))
 
+    # Update existing entries if changed
+    cur.execute("""
+    UPDATE hosts
+    SET name = ?,
+        os_details = ?,
+        mac_address = ?,
+        open_ports = ?,
+        last_seen = CURRENT_TIMESTAMP
+    WHERE ip = ?
+      AND deleted = 0
+      AND (name != ?
+           OR os_details != ?
+           OR mac_address != ?
+           OR open_ports != ?)
+    """, (hostname, os_name, mac, open_ports, ip, hostname, os_name, mac, open_ports))
+
     index += 1
+
+# Soft-delete hosts that are no longer visible
+placeholders = ', '.join('?' for _ in current_ips)
+cur.execute(f"""
+UPDATE hosts
+SET deleted = 1, last_seen = CURRENT_TIMESTAMP
+WHERE ip NOT IN ({placeholders})
+""", current_ips)
 
 conn.commit()
 conn.close()
 
-# Write to hosts.log
+# Write final results to log
 with open(log_file, "w") as f:
     f.write("[\n")
     for entry in output[:-1]:
@@ -87,11 +129,4 @@ with open(log_file, "w") as f:
 
 EOF
 
-echo "Full data inserted into database and written to hosts.log."
-
-# Start FastAPI app
-export PYTHONPATH=/config
-uvicorn scripts.app:app --host 0.0.0.0 --port 8000 > /config/logs/uvicorn.log 2>&1 &
-
-# Save disk usage
-df -h > /config/logs/df.log
+echo "Scan results synced to database with soft-delete tracking."

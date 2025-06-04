@@ -66,9 +66,9 @@ EOF
 
 done < "$hosts_file"
 
-# Start server
-export PYTHONPATH=/config
-uvicorn scripts.docker:app --host 0.0.0.0 --port 8000 > /config/logs/uvicorn.log 2>&1 &
+# # Start server
+# export PYTHONPATH=/config
+# uvicorn scripts.docker:app --host 0.0.0.0 --port 8000 > /config/logs/uvicorn.log 2>&1 &
 
 # Log disk usage
 df -h > /config/logs/df.log

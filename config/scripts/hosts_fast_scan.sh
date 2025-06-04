@@ -63,8 +63,8 @@ existing=$(sqlite3 "$db_file" "SELECT COUNT(*) FROM hosts WHERE ip = '$ip';")
 
 if [ "$existing" -eq 0 ]; then
   sqlite3 "$db_file" <<EOF
-INSERT INTO hosts (ip, name, os_details, mac_address, open_ports)
-VALUES ('$ip', '$name', '$os_details', '$mac_address', '$open_ports');
+INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen)
+VALUES ('$ip', '$name', '$os_details', '$mac_address', '$open_ports', '$next_hop', '$network_name', CURRENT_TIMESTAMP);
 EOF
 else
   sqlite3 "$db_file" <<EOF
@@ -72,14 +72,30 @@ UPDATE hosts
 SET name = '$name',
     os_details = '$os_details',
     mac_address = '$mac_address',
-    open_ports = '$open_ports'
+    open_ports = '$open_ports',
+    next_hop = '$next_hop',
+    network_name = '$network_name',
+    last_seen = CURRENT_TIMESTAMP
 WHERE ip = '$ip'
   AND (name != '$name'
     OR os_details != '$os_details'
     OR mac_address != '$mac_address'
-    OR open_ports != '$open_ports');
+    OR open_ports != '$open_ports'
+    OR next_hop != '$next_hop'
+    OR network_name != '$network_name')
+    OR last_seen != CURRENT_TIMESTAMP;
 EOF
 fi
+
+
+# Step: Remove stale hosts from DB
+current_ips=$(grep "Host:" "$input_file" | awk '{print $2}' | sort | uniq | tr '\n' ',' | sed 's/,$//')
+
+sqlite3 "$db_file" <<EOF
+DELETE FROM hosts
+WHERE ip NOT IN ($(echo "'$current_ips'" | sed "s/,/','/g"));
+EOF
+
 
 
 done < "$input_file"
@@ -107,10 +123,10 @@ echo "Data inserted into the database successfully."
 #     conn.close()
 #     return rows
 
-# export the path
-export PYTHONPATH=/config
-# start in the background and save to log file
-uvicorn scripts.app:app --host 0.0.0.0 --port 8000 > /config/logs/uvicorn.log 2>&1 &
+# # export the path
+# export PYTHONPATH=/config
+# # start in the background and save to log file
+# uvicorn scripts.app:app --host 0.0.0.0 --port 8000 > /config/logs/uvicorn.log 2>&1 &
 
 # cd /config/scripts
 # uvicorn app:app --host 0.0.0.0 --port 8000 > /config/logs/uvicorn.log 2>&1 &

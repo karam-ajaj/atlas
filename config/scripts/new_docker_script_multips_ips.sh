@@ -4,7 +4,9 @@ log_file="/config/logs/docker.log"
 hosts_file="/config/logs/docker_hosts.log"
 db_file="/config/db/atlas.db"
 
-# Function to extract container details
+declare -A gateway_cache
+
+# Function to extract container network info
 extract_container_info() {
     docker inspect "$1" | jq -r '
         .[0].Name as $name |
@@ -13,11 +15,12 @@ extract_container_info() {
     '
 }
 
+# Collect container info
 docker ps -q | while read -r container_id; do
     extract_container_info "$container_id"
 done > "$log_file"
 
-# Process log file
+# Generate host info
 exec > "$hosts_file"
 while read -r name network ip mac; do
     short_name="${name##/}"
@@ -29,50 +32,58 @@ while read -r name network ip mac; do
         os=${os:-unknown}
 
         ports=$(docker inspect "$container_id" |
-            jq -r '.[0].NetworkSettings.Ports // {} | to_entries[]? | "\(.key) -> \(.value[0].HostIp):\(.value[0].HostPort)"' | paste -sd, -)
+            jq -r '.[0].NetworkSettings.Ports // {} | to_entries[]? |
+            if .value[0].HostIp == null or .value[0].HostPort == null
+            then "\(.key) (internal)"
+            else "\(.key) -> \(.value[0].HostIp):\(.value[0].HostPort)"
+            end' | paste -sd, -)
         ports=${ports:-no_ports}
 
-        nexthop=$(docker exec "$container_id" sh -c "ip route | awk '/default/ {print \$3}'" 2>/dev/null)
-        nexthop=${nexthop:-unknown}
+        # Try Docker network inspect
+        nexthop=$(docker network inspect "$network" 2>/dev/null |
+            grep -B 5 "\"$ip\"" | grep '"Gateway":' | awk -F '"' '{print $4}')
 
-        printf "%-15s %-50s %-10s %-30s %-40s %-15s %-20s\n" "$ip" "$short_name" "$os" "$mac" "$ports" "$nexthop" "$network"
+        # Try fallback inside container
+        if [[ -z "$nexthop" || "$nexthop" == "null" ]]; then
+            nexthop=$(docker exec "$container_id" sh -c "ip route | awk '/default/ {print \$3}'" 2>&1)
+
+            # Clean errors and use fallback
+            if [[ "$nexthop" == *"not found"* || "$nexthop" == *"OCI runtime"* || "$nexthop" == *"exec failed"* || -z "$nexthop" ]]; then
+                nexthop="${gateway_cache[$network]}"
+                nexthop=${nexthop:-unavailable}
+            fi
+        fi
+
+        # Cache the result
+        if [[ "$nexthop" != "unavailable" ]]; then
+            gateway_cache["$network"]=$nexthop
+        fi
+
+        printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$ip" "$short_name" "$os" "$mac" "$ports" "$nexthop" "$network"
     else
-        printf "%-15s %-50s %-10s %-30s %-40s %-15s %-20s\n" "$ip" "$short_name" "unknown" "not_found" "no_ports" "unknown" "$network"
+        printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$ip" "$short_name" "unknown" "not_found" "no_ports" "unavailable" "$network"
     fi
 done < "$log_file"
 
-# Insert into DB
-while IFS= read -r line; do
-    ip=$(echo "$line" | awk '{print $1}')
-    name=$(echo "$line" | awk '{print $2}')
-    os_details=$(echo "$line" | awk '{print $3}')
-    mac_address=$(echo "$line" | awk '{print $4}')
-    open_ports=$(echo "$line" | awk '{$1=$2=$3=$4=$NF=""; print $0}' | sed 's/^[ \t]*//' | sed 's/[ \t]*$//')
-    next_hop=$(echo "$line" | awk '{print $(NF-1)}')
-    network_name=$(echo "$line" | awk '{print $NF}')
+# Insert/update database
+while IFS=$'\t' read -r ip name os_details mac_address open_ports next_hop network_name; do
+    existing=$(sqlite3 "$db_file" "SELECT COUNT(*) FROM docker_hosts WHERE ip = '$ip';")
 
-
-#     sqlite3 "$db_file" <<EOF
-# INSERT OR IGNORE INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name)
-# VALUES ('$ip', '$name', '$os_details', '$mac_address', '$open_ports', '$next_hop', '$network_name');
-# EOF
-
-existing=$(sqlite3 "$db_file" "SELECT COUNT(*) FROM docker_hosts WHERE ip = '$ip';")
-
-if [ "$existing" -eq 0 ]; then
-  sqlite3 "$db_file" <<EOF
-INSERT INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name)
-VALUES ('$ip', '$name', '$os_details', '$mac_address', '$open_ports', '$next_hop', '$network_name');
+    if [ "$existing" -eq 0 ]; then
+        sqlite3 "$db_file" <<EOF
+INSERT INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen)
+VALUES ('$ip', '$name', '$os_details', '$mac_address', '$open_ports', '$next_hop', '$network_name', CURRENT_TIMESTAMP);
 EOF
-else
-  sqlite3 "$db_file" <<EOF
+    else
+        sqlite3 "$db_file" <<EOF
 UPDATE docker_hosts
 SET name = '$name',
     os_details = '$os_details',
     mac_address = '$mac_address',
     open_ports = '$open_ports',
     next_hop = '$next_hop',
-    network_name = '$network_name'
+    network_name = '$network_name',
+    last_seen = CURRENT_TIMESTAMP
 WHERE ip = '$ip'
   AND (name != '$name'
     OR os_details != '$os_details'
@@ -81,7 +92,12 @@ WHERE ip = '$ip'
     OR next_hop != '$next_hop'
     OR network_name != '$network_name');
 EOF
-fi
-
-
+    fi
 done < "$hosts_file"
+
+# Remove stale records
+current_ips=$(cut -f1 "$hosts_file" | sort | uniq | tr '\n' ',' | sed 's/,$//')
+sqlite3 "$db_file" <<EOF
+DELETE FROM docker_hosts
+WHERE ip NOT IN ($(echo "'$current_ips'" | sed "s/,/','/g"));
+EOF
