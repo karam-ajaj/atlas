@@ -14,17 +14,14 @@ nmap -sn "$subnet" -oX /config/logs/nmap_mac.xml
 # Full scan with OS + ports
 nmap -O -sS -p- "$subnet" -oX /config/logs/nmap_full.xml
 
-# Ensure DB table exists
+# Create DB table if not exists
 /config/scripts/db_setup.sh
-
-# Ensure 'deleted' column exists
-sqlite3 /config/db/atlas.db "PRAGMA table_info(hosts);" | grep -q 'deleted' || \
-sqlite3 /config/db/atlas.db "ALTER TABLE hosts ADD COLUMN deleted BOOLEAN DEFAULT 0;"
 
 # Parse and write to DB + log
 python3 <<EOF
 import sqlite3
 from lxml import etree
+import subprocess
 
 mac_tree = etree.parse("/config/logs/nmap_mac.xml")
 mac_map = {}
@@ -38,16 +35,22 @@ xml_file = "/config/logs/nmap_full.xml"
 log_file = "/config/logs/hosts.log"
 db_file = "/config/db/atlas.db"
 
-tree = etree.parse(xml_file)
-hosts = tree.xpath("//host")
-output = []
-
 conn = sqlite3.connect(db_file)
 cur = conn.cursor()
 
-index = 1
+# Ensure deleted column exists
+cur.execute("PRAGMA table_info(hosts);")
+columns = [col[1] for col in cur.fetchall()]
+if "deleted" not in columns:
+    cur.execute("ALTER TABLE hosts ADD COLUMN deleted BOOLEAN DEFAULT 0;")
+
+# Parse hosts
+output = []
+tree = etree.parse(xml_file)
+hosts = tree.xpath("//host")
 current_ips = []
 
+index = 1
 for host in hosts:
     addr = host.find("address[@addrtype='ipv4']")
     ip = addr.get("addr") if addr is not None else "Unknown"
@@ -67,60 +70,56 @@ for host in hosts:
     open_ports = ",".join(ports) if ports else "Unknown"
 
     mac = mac_map.get(ip, "Unknown")
-    output.append([index, ip, hostname, os_name, mac, open_ports])
 
-    # Reactivate deleted entries if reappeared
+    # Next hop
+    try:
+        result = subprocess.check_output(
+            f"traceroute -m 2 -n {ip} | tail -n +2 | head -n1 | awk '{{print $2}}'",
+            shell=True, timeout=3, stderr=subprocess.DEVNULL)
+        nexthop = result.decode().strip()
+        if not nexthop or nexthop == "*":
+            nexthop = "unavailable"
+    except Exception:
+        nexthop = "unavailable"
+
+    output.append([index, ip, hostname, os_name, mac, open_ports, nexthop])
+
+    # Reactivate if previously deleted
     cur.execute("""
-    UPDATE hosts
-    SET deleted = 0,
-        name = ?,
-        os_details = ?,
-        mac_address = ?,
-        open_ports = ?,
-        last_seen = CURRENT_TIMESTAMP
-    WHERE ip = ?
-      AND deleted = 1
+        UPDATE hosts
+        SET deleted = 0,
+            name = ?, os_details = ?, mac_address = ?, open_ports = ?, last_seen = CURRENT_TIMESTAMP
+        WHERE ip = ? AND deleted = 1
     """, (hostname, os_name, mac, open_ports, ip))
 
-    # Insert new entries
+    # Insert if new
     cur.execute("""
-    INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, last_seen, deleted)
-    SELECT ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 0
-    WHERE NOT EXISTS (
-        SELECT 1 FROM hosts WHERE ip = ?
-    )
-    """, (ip, hostname, os_name, mac, open_ports, ip))
+        INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, last_seen)
+        SELECT ?,?,?,?,?,?,CURRENT_TIMESTAMP
+        WHERE NOT EXISTS (SELECT 1 FROM hosts WHERE ip = ?)
+    """, (ip, hostname, os_name, mac, open_ports, nexthop, ip))
 
-    # Update existing entries if changed
+    # Update if changed
     cur.execute("""
-    UPDATE hosts
-    SET name = ?,
-        os_details = ?,
-        mac_address = ?,
-        open_ports = ?,
-        last_seen = CURRENT_TIMESTAMP
-    WHERE ip = ?
-      AND deleted = 0
-      AND (name != ?
-           OR os_details != ?
-           OR mac_address != ?
-           OR open_ports != ?)
-    """, (hostname, os_name, mac, open_ports, ip, hostname, os_name, mac, open_ports))
+        UPDATE hosts
+        SET name = ?, os_details = ?, mac_address = ?, open_ports = ?, next_hop = ?, last_seen = CURRENT_TIMESTAMP
+        WHERE ip = ? AND (
+            name != ? OR os_details != ? OR mac_address != ? OR open_ports != ? OR next_hop != ?)
+    """, (hostname, os_name, mac, open_ports, nexthop, ip, hostname, os_name, mac, open_ports, nexthop))
 
     index += 1
 
-# Soft-delete hosts that are no longer visible
+# Soft-delete stale hosts
 placeholders = ', '.join('?' for _ in current_ips)
 cur.execute(f"""
-UPDATE hosts
-SET deleted = 1, last_seen = CURRENT_TIMESTAMP
-WHERE ip NOT IN ({placeholders})
+    UPDATE hosts SET deleted = 1, last_seen = CURRENT_TIMESTAMP
+    WHERE ip NOT IN ({placeholders})
 """, current_ips)
 
 conn.commit()
 conn.close()
 
-# Write final results to log
+# Write to log
 with open(log_file, "w") as f:
     f.write("[\n")
     for entry in output[:-1]:
@@ -129,4 +128,4 @@ with open(log_file, "w") as f:
 
 EOF
 
-echo "Scan results synced to database with soft-delete tracking."
+echo "Host scan completed and data inserted."

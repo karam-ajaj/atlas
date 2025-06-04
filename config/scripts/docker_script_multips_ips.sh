@@ -55,14 +55,29 @@ while IFS= read -r line; do
     mac_address=$(echo "$line" | awk '{print $4}')
     open_ports=$(echo "$line" | awk '{$1=$2=$3=$4=""; print $0}' | sed 's/^[ \t]*//')
 
-    # Insert into database only if IP doesn't already exist
-    sqlite3 "$db_file" <<EOF
-INSERT INTO docker_hosts (ip, name, os_details, mac_address, open_ports)
-SELECT '$ip', '$name', '$os_details', '$mac_address', '$open_ports'
+    # Insert new or update existing
+sqlite3 "$db_file" <<EOF
+INSERT INTO docker_hosts (ip, name, os_details, mac_address, open_ports, last_seen)
+SELECT '$ip', '$name', '$os_details', '$mac_address', '$open_ports', CURRENT_TIMESTAMP
 WHERE NOT EXISTS (
     SELECT 1 FROM docker_hosts WHERE ip = '$ip'
 );
 EOF
+
+sqlite3 "$db_file" <<EOF
+UPDATE docker_hosts
+SET name = '$name',
+    os_details = '$os_details',
+    mac_address = '$mac_address',
+    open_ports = '$open_ports',
+    last_seen = CURRENT_TIMESTAMP
+WHERE ip = '$ip'
+  AND (name != '$name'
+    OR os_details != '$os_details'
+    OR mac_address != '$mac_address'
+    OR open_ports != '$open_ports');
+EOF
+
 
 done < "$hosts_file"
 

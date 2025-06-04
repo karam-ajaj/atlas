@@ -9,8 +9,10 @@
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.9",
+    "date-fns": "^4.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-spinners": "^0.17.0",
     "react-window": "^1.8.11",
     "vis-data": "^7.1.9",
     "vis-network": "^9.1.10"

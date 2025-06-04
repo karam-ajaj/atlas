@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
+import { formatDistanceToNow, parseISO } from "date-fns";
+
 import {
   useReactTable,
   getCoreRowModel,
@@ -17,16 +19,18 @@ export function HostsTable({ selectedNode }) {
       .then((res) => res.json())
       .then(([normal, docker]) => {
         const flatten = (arr, group) =>
-          arr.map(([id, ip, name, os, _, ports, nexthop, network_name]) => ({
+          arr.map(([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) => ({
             id: `${group[0]}-${id}`,
             ip,
             name,
             os,
+            mac,
             group,
             ports,
             nexthop,
             network_name,
             subnet: ip.split(".").slice(0, 3).join("."),
+            last_seen,
           }));
         setData([...flatten(normal, "normal"), ...flatten(docker, "docker")]);
       });
@@ -36,11 +40,22 @@ export function HostsTable({ selectedNode }) {
   { accessorKey: "name", header: "Name", meta: { width: "w-64" } },
   { accessorKey: "ip", header: "IP", meta: { width: "w-36" } },
   { accessorKey: "os", header: "OS", meta: { width: "w-24" } },
+  { accessorKey: "mac", header: "MAC", meta: { width: "w-48" } },
   { accessorKey: "group", header: "Group", meta: { width: "w-24" } },
   { accessorKey: "ports", header: "Ports", meta: { width: "w-96" } },
   { accessorKey: "nexthop", header: "Next Hop", meta: { width: "w-36" } },
   { accessorKey: "subnet", header: "Subnet", meta: { width: "w-32" } },
   { accessorKey: "network_name", header: "Network", meta: { width: "w-48" } },
+  {
+  accessorKey: "last_seen",
+  header: "Last Seen",
+  meta: { width: "w-48" },
+  cell: ({ getValue }) => {
+    const raw = getValue();
+    if (!raw) return "Unknown";
+    return formatDistanceToNow(parseISO(raw), { addSuffix: true });
+  },
+}
 ], []);
 
 

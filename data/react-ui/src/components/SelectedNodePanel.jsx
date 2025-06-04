@@ -17,6 +17,8 @@ export function SelectedNodePanel({ node, route, subnet }) {
           <p><strong>Group:</strong> {node.group}</p>
           <p><strong>Subnet:</strong> {node.subnet}</p>
           <p><strong>Ports:</strong> {node.ports}</p>
+          <p><strong>MAC:</strong> {node.mac}</p>
+          <p><strong>Last Seen:</strong> {node.last_seen}</p>
         </div>
       )}
       {route && (

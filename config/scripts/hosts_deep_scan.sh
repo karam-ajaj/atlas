@@ -1,59 +1,63 @@
 #!/bin/bash
 
 # Prep environment
-# /config/scripts/install.sh
 uname -a > /config/logs/uname.log
 ifconfig | grep inet > /config/logs/ip.log
 arp -a > /config/logs/arp.log
 
-# Detect network
+# Detect subnet
 subnet=$(traceroute google.com | grep " 2 " | grep -oP '\d{1,3}\.\d{1,3}\.\d{1,3}\.' | sed 's/$/0\/24/')
 
-## scan MACs
+# Quick scan to collect MACs
 nmap -sn "$subnet" -oX /config/logs/nmap_mac.xml
 
-# Full nmap scan with OS detection and all ports
-# nmap -O -oX -sS -p- "$subnet" -oX /config/logs/nmap_full.xml
+# Full scan with OS + ports
 nmap -O -sS -p- "$subnet" -oX /config/logs/nmap_full.xml
 
-
-
 # Create DB table if not exists
-/config/scripts/db_setup.sh
+# /config/scripts/db_setup.sh
 
-# Parse XML and write JSON-style log + DB insert
+# Parse and write to DB + log
 python3 <<EOF
 import sqlite3
+import subprocess
 from lxml import etree
+import re
 
-# Paths
-mac_xml = "/config/logs/nmap_mac.xml"
-full_xml = "/config/logs/nmap_full.xml"
-log_file = "/config/logs/hosts.log"
-db_file = "/config/db/atlas.db"
+# Detect gateway (next hop)
+try:
+    traceroute_output = subprocess.check_output(["traceroute", "-n", "8.8.8.8"], stderr=subprocess.DEVNULL).decode()
+    match = re.search(r"^ 1\s+(\d{1,3}(?:\.\d{1,3}){3})", traceroute_output, re.MULTILINE)
+    inferred_nexthop = match.group(1) if match else "unavailable"
+except Exception:
+    inferred_nexthop = "unavailable"
 
-# Parse MAC scan
-mac_tree = etree.parse(mac_xml)
-mac_hosts = mac_tree.xpath("//host")
+mac_tree = etree.parse("/config/logs/nmap_mac.xml")
 mac_map = {}
-for host in mac_hosts:
+for host in mac_tree.xpath("//host"):
     ip_elem = host.find("address[@addrtype='ipv4']")
     mac_elem = host.find("address[@addrtype='mac']")
     if ip_elem is not None and mac_elem is not None:
         mac_map[ip_elem.get("addr")] = mac_elem.get("addr")
 
-# Parse full scan
-full_tree = etree.parse(full_xml)
-hosts = full_tree.xpath("//host")
+xml_file = "/config/logs/nmap_full.xml"
+log_file = "/config/logs/hosts.log"
+db_file = "/config/db/atlas.db"
+
+tree = etree.parse(xml_file)
+hosts = tree.xpath("//host")
+output = []
 
 conn = sqlite3.connect(db_file)
 cur = conn.cursor()
-output = []
+
 index = 1
+current_ips = []
 
 for host in hosts:
     addr = host.find("address[@addrtype='ipv4']")
     ip = addr.get("addr") if addr is not None else "Unknown"
+    current_ips.append(ip)
 
     hostname_elem = host.find(".//hostnames/hostname")
     hostname = hostname_elem.get("name") if hostname_elem is not None else "NoName"
@@ -70,36 +74,46 @@ for host in hosts:
 
     mac = mac_map.get(ip, "Unknown")
 
-    # Append to output
-    output.append([index, ip, hostname, os_name, mac, open_ports])
-
-    # Insert into DB
-    cur.execute("""
-    INSERT INTO hosts (ip, name, os_details, mac_address, open_ports)
-    SELECT ?, ?, ?, ?, ?
-    WHERE NOT EXISTS (SELECT 1 FROM hosts WHERE ip = ?)
-    """, (ip, hostname, os_name, mac, open_ports, ip))
-
+    # Append full record
+    output.append([index, ip, hostname, os_name, mac, open_ports, inferred_nexthop])
     index += 1
+
+# Track deleted hosts
+placeholders = ', '.join('?' for _ in current_ips)
+cur.execute(f"""
+UPDATE hosts
+SET deleted = 1
+WHERE ip NOT IN ({placeholders})
+""", current_ips)
+
+# Insert/update live records
+for record in output:
+    _, ip, name, os_details, mac_address, open_ports, next_hop = record
+
+    cur.execute("""
+    INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, last_seen, deleted)
+    SELECT ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 0
+    WHERE NOT EXISTS (SELECT 1 FROM hosts WHERE ip = ?)
+    """, (ip, name, os_details, mac_address, open_ports, next_hop, ip))
+
+    cur.execute("""
+    UPDATE hosts
+    SET name = ?, os_details = ?, mac_address = ?, open_ports = ?, next_hop = ?, last_seen = CURRENT_TIMESTAMP, deleted = 0
+    WHERE ip = ?
+      AND (name != ? OR os_details != ? OR mac_address != ? OR open_ports != ? OR next_hop != ?)
+    """, (name, os_details, mac_address, open_ports, next_hop, ip,
+          name, os_details, mac_address, open_ports, next_hop))
 
 conn.commit()
 conn.close()
 
-# Write to log
+# Log output
 with open(log_file, "w") as f:
     f.write("[\n")
-    for i, entry in enumerate(output):
-        sep = "," if i < len(output) - 1 else ""
-        f.write(f"  {entry}{sep}\n")
-    f.write("]\n")
+    for entry in output[:-1]:
+        f.write(f"  {entry},\n")
+    f.write(f"  {output[-1]}\n]")
+
 EOF
 
-
-echo "Full data inserted into database and written to hosts.log."
-
-# Start FastAPI app
-export PYTHONPATH=/config
-uvicorn scripts.app:app --host 0.0.0.0 --port 8000 > /config/logs/uvicorn.log 2>&1 &
-
-# Save disk usage
-df -h > /config/logs/df.log
+echo "Scan complete. Hosts stored with next hop inferred."

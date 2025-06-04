@@ -3,8 +3,9 @@ import { NetworkMap } from "./components/NetworkMap";
 import { HostsTable } from "./components/HostsTable";
 import { LogsPanel } from "./components/LogsPanel";
 import { useNetworkStats } from "./hooks/useNetworkStats";
+import { ScriptsPanel } from "./components/ScriptsPanel";
 
-const tabs = ["Network Map", "Hosts Table", "Logs"];
+const tabs = ["Network Map", "Hosts Table", "Logs", "Scripts"];
 
 function Sidebar({ activeTab, setActiveTab }) {
   const stats = useNetworkStats();
@@ -52,6 +53,7 @@ export default function App() {
           <HostsTable selectedNode={selectedNode} onSelectNode={setSelectedNode} />
         )}
         {activeTab === "Logs" && <LogsPanel />}
+        {activeTab === "Scripts" && <ScriptsPanel />}
       </div>
     </div>
   );

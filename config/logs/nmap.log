@@ -1,8 +1,10 @@
-# Nmap 7.93 scan initiated Wed Jun  4 18:48:19 2025 as: nmap -sn -oG /config/logs/nmap.log 192.168.2.0/24
-Host: 192.168.2.4 ()	Status: Up
+# Nmap 7.93 scan initiated Wed Jun  4 20:19:10 2025 as: nmap -sn -oG /config/logs/nmap.log 192.168.2.0/24
+Host: 192.168.2.2 ()	Status: Up
+Host: 192.168.2.4 (device-8.home)	Status: Up
+Host: 192.168.2.5 ()	Status: Up
 Host: 192.168.2.6 (a14-alkhas-b-amer.home)	Status: Up
 Host: 192.168.2.13 ()	Status: Up
 Host: 192.168.2.81 (device-1.home)	Status: Up
 Host: 192.168.2.111 ()	Status: Up
 Host: 192.168.2.254 (mijnmodem.kpn)	Status: Up
-# Nmap done at Wed Jun  4 18:48:44 2025 -- 256 IP addresses (6 hosts up) scanned in 25.40 seconds
+# Nmap done at Wed Jun  4 20:19:33 2025 -- 256 IP addresses (8 hosts up) scanned in 23.11 seconds

@@ -71,7 +71,7 @@ export function NetworkMap() {
       return hubId;
     };
 
-    const addHost = (id, ip, name, os, group, ports = "N/A", nexthop = "unknown", network_name) => {
+    const addHost = (id, ip, name, os, group, ports, mac = "", nexthop, network_name, last_seen = "") => {
       const subnet = getSubnet(ip);
       const nodeId = `${group[0]}-${id}`;
 
@@ -100,8 +100,10 @@ export function NetworkMap() {
         group,
         subnet,
         ports,
+        mac,
         nexthop,
         network_name,
+        last_seen,
       };
 
       if (nexthop && nexthop !== "unknown" && nexthop.includes(".")) {
@@ -125,12 +127,15 @@ export function NetworkMap() {
       }
     };
 
-    rawData.nonDockerHosts.forEach(([id, ip, name, os, _, ports, nexthop, network_name]) =>
-      addHost(id, ip, name, os, "normal", ports, nexthop, network_name)
-    );
-    rawData.dockerHosts.forEach(([id, ip, name, os, _mac, ports, nexthop, network_name]) =>
-      addHost(id, ip, name, os, "docker", ports, nexthop, network_name)
-    );
+    rawData.nonDockerHosts.forEach(([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
+  addHost(id, ip, name, os, "normal", ports, mac, nexthop, network_name, last_seen)
+);
+
+rawData.dockerHosts.forEach(([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
+  addHost(id, ip, name, os, "docker", ports, mac, nexthop, network_name, last_seen)
+);
+
+
 
     setNodeInfoMap(infoMap);
 
