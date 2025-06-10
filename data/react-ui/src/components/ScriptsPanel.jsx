@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../apiConfig";
 
 const scripts = [
   { label: "Fast Host Scan", key: "scan-hosts-fast" },
@@ -18,7 +19,7 @@ export function ScriptsPanel() {
     setError("");
 
     try {
-      const res = await fetch(`https://atlas-api.vnerd.nl/scripts/run/${scriptKey}`, {
+      const res = await fetch(`${API_BASE_URL}/scripts/run/${scriptKey}`, {
         method: "POST",
       });
       const data = await res.json();

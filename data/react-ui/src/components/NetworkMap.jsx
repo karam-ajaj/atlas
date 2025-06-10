@@ -3,6 +3,7 @@ import { Network } from "vis-network";
 import { DataSet } from "vis-data";
 import { SelectedNodePanel } from "./SelectedNodePanel";
 import { NetworkSettingsPanel } from "./NetworkSettingsPanel";
+import { API_BASE_URL } from "../apiConfig";
 
 
 function getSubnet(ip) {
@@ -35,7 +36,7 @@ export function NetworkMap() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("https://atlas-api.vnerd.nl/hosts");
+        const res = await fetch(`${API_BASE_URL}/hosts`);
         const json = await res.json();
         const [nonDockerHosts, dockerHosts] = json;
         setRawData({ nonDockerHosts, dockerHosts });

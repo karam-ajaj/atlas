@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { formatDistanceToNow, parseISO } from "date-fns";
+import { API_BASE_URL } from "../apiConfig";
 
 import {
   useReactTable,
@@ -15,7 +16,7 @@ export function HostsTable({ selectedNode }) {
   const [globalFilter, setGlobalFilter] = useState("");
 
   useEffect(() => {
-    fetch("https://atlas-api.vnerd.nl/hosts")
+    fetch(`${API_BASE_URL}/hosts`)
       .then((res) => res.json())
       .then(([normal, docker]) => {
         const flatten = (arr, group) =>

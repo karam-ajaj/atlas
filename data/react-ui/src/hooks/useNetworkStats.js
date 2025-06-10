@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "../apiConfig";
 
 function getSubnet(ip) {
   return ip.split(".").slice(0, 3).join(".");
@@ -16,7 +17,7 @@ export function useNetworkStats() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const res = await fetch("https://atlas-api.vnerd.nl/hosts");
+        const res = await fetch(`${API_BASE_URL}/hosts`);
         const json = await res.json();
         const [normalHosts, dockerHosts] = json;
 

@@ -100,6 +100,19 @@ atlas/
    # Then open http://localhost:8889 in browser
    ```
 
+4. **Run the React UI (optional):**
+   Build or start the React dashboard located in `data/react-ui`.
+   Set the `VITE_API_BASE_URL` environment variable so the UI can reach your
+   backend API:
+   ```bash
+   cd data/react-ui
+   # for development
+   VITE_API_BASE_URL=http://localhost:5000 npm run dev
+   # for a production build
+   VITE_API_BASE_URL=http://localhost:5000 npm run build
+   ```
+   You can also place this value in a `.env` file to avoid repeating it.
+
 ---
 
 ## 📈 Roadmap
