@@ -27,7 +27,7 @@ import re
 # Detect gateway (next hop)
 try:
     traceroute_output = subprocess.check_output(["traceroute", "-n", "8.8.8.8"], stderr=subprocess.DEVNULL).decode()
-    match = re.search(r"^ 1\s+(\d{1,3}(?:\.\d{1,3}){3})", traceroute_output, re.MULTILINE)
+    match = re.search(r"^\s*1\s+(\d{1,3}(?:\.\d{1,3}){3})", traceroute_output, re.MULTILINE)
     inferred_nexthop = match.group(1) if match else "unavailable"
 except Exception:
     inferred_nexthop = "unavailable"

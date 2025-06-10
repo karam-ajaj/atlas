@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.93 scan initiated Tue Jun 10 16:48:50 2025 as: nmap -O -sS -p- -oX /config/logs/nmap_scan.xml 192.168.2.81/24 -->
+<nmaprun scanner="nmap" args="nmap -O -sS -p- -oX /config/logs/nmap_scan.xml 192.168.2.81/24" start="1749574130" startstr="Tue Jun 10 16:48:50 2025" version="7.93" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="65535" services="1-65535"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.2.3" addrtype="ipv4"/>
+<address addr="2E:CC:F4:BC:0E:2C" addrtype="mac"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.2.13" addrtype="ipv4"/>
+<address addr="7C:8B:CA:8A:F7:B5" addrtype="mac" vendor="Tp-link Technologies"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.2.6" addrtype="ipv4"/>
+<address addr="CA:0A:EB:F8:61:79" addrtype="mac"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.2.5" addrtype="ipv4"/>
+<address addr="B8:16:5F:60:57:64" addrtype="mac" vendor="LG Innotek"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.2.2" addrtype="ipv4"/>
+<address addr="96:FF:FA:7A:E0:1D" addrtype="mac"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.2.21" addrtype="ipv4"/>
+<address addr="7A:1D:53:D1:7C:D8" addrtype="mac"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.2.14" addrtype="ipv4"/>
+<address addr="7E:8B:CA:74:56:B2" addrtype="mac"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.2.111" addrtype="ipv4"/>
+<address addr="48:21:0B:56:08:4A" addrtype="mac" vendor="Pegatron"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.2.254" addrtype="ipv4"/>
+<address addr="B0:AC:D2:04:3E:6C" addrtype="mac" vendor="zte"/>
+<hostnames>
+</hostnames>
+</hosthint>

@@ -30,6 +30,19 @@ def get_hosts():
     conn.close()
     return [rows1, rows2]
 
+@app.get("/external")
+def get_external_networks():
+    try:
+        conn = sqlite3.connect("/config/db/atlas.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM external_networks ORDER BY last_seen DESC LIMIT 1")
+        row = cursor.fetchone()
+        conn.close()
+        return row if row else {}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # POST /scripts/run/{script_name} to safely run whitelisted scripts
 @app.post("/scripts/run/{script_name}")
 def run_named_script(script_name: str):
@@ -53,3 +66,4 @@ def run_named_script(script_name: str):
         return JSONResponse(content={"status": "success", "output": result.stdout})
     except subprocess.CalledProcessError as e:
         return JSONResponse(status_code=500, content={"status": "error", "output": e.stderr})
+

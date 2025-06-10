@@ -1,33 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE nmaprun>
 <?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
-<!-- Nmap 7.93 scan initiated Wed Jun  4 22:55:34 2025 as: nmap -O -sS -p- -oX /config/logs/nmap_full.xml 192.168.2.0/24 -->
-<nmaprun scanner="nmap" args="nmap -O -sS -p- -oX /config/logs/nmap_full.xml 192.168.2.0/24" start="1749077734" startstr="Wed Jun  4 22:55:34 2025" version="7.93" xmloutputversion="1.05">
+<!-- Nmap 7.93 scan initiated Fri Jun  6 11:39:51 2025 as: nmap -O -sS -p- -oX /config/logs/nmap_full.xml 195.190.228.0/24 -->
+<nmaprun scanner="nmap" args="nmap -O -sS -p- -oX /config/logs/nmap_full.xml 195.190.228.0/24" start="1749209991" startstr="Fri Jun  6 11:39:51 2025" version="7.93" xmloutputversion="1.05">
 <scaninfo type="syn" protocol="tcp" numservices="65535" services="1-65535"/>
 <verbose level="0"/>
 <debugging level="0"/>
 <hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.3" addrtype="ipv4"/>
+<address addr="195.190.228.133" addrtype="ipv4"/>
 <hostnames>
 </hostnames>
 </hosthint>
-<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.13" addrtype="ipv4"/>
+<host starttime="1749210035" endtime="1749211352"><status state="up" reason="echo-reply" reason_ttl="254"/>
+<address addr="195.190.228.133" addrtype="ipv4"/>
 <hostnames>
+<hostname name="195-190-228-133.fixed.kpn.net" type="PTR"/>
 </hostnames>
-</hosthint>
-<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.81" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-</hosthint>
-<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.111" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-</hosthint>
-<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
-<address addr="192.168.2.254" addrtype="ipv4"/>
-<hostnames>
-</hostnames>
-</hosthint>
+<ports><extraports state="filtered" count="65535">
+<extrareasons reason="no-response" count="65535" proto="tcp" ports="1-65535"/>
+</extraports>
+</ports>
+<os></os>
+<times srtt="7951" rttvar="2732" to="100000"/>
+</host>
+<runstats><finished time="1749211352" timestr="Fri Jun  6 12:02:32 2025" summary="Nmap done at Fri Jun  6 12:02:32 2025; 256 IP addresses (1 host up) scanned in 1360.67 seconds" elapsed="1360.67" exit="success"/><hosts up="1" down="255" total="256"/>
+</runstats>
+</nmaprun>

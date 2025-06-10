@@ -27,3 +27,6 @@ apt update && apt install -y jq
 
 # install lxml (for nmap xml script)
 apt install python3-lxml -y
+
+# deep host script
+apt install -y gawk

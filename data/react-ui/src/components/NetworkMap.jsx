@@ -29,6 +29,7 @@ export function NetworkMap() {
   const [nodeInfoMap, setNodeInfoMap] = useState({});
   const [filters, setFilters] = useState({ subnet: "", group: "", name: "" });
   const [rawData, setRawData] = useState({ nonDockerHosts: [], dockerHosts: [] });
+  const [externalNode, setExternalNode] = useState(null);
   const [selectedSubnet, setSelectedSubnet] = useState(null);
   const [layoutStyle, setLayoutStyle] = useState("default");
 
@@ -39,6 +40,16 @@ export function NetworkMap() {
         const json = await res.json();
         const [nonDockerHosts, dockerHosts] = json;
         setRawData({ nonDockerHosts, dockerHosts });
+        try {
+  const extRes = await fetch("https://atlas-api.vnerd.nl/external");
+  const extJson = await extRes.json();
+  if (extJson && extJson.length >= 2) {
+    setExternalNode({ id: extJson[0], ip: extJson[1] }); // [id, public_ip]
+  }
+} catch (e) {
+  console.warn("No external node detected.");
+}
+
       } catch (err) {
         console.error("Error loading host data:", err);
         setError("Failed to load network data.");
@@ -47,215 +58,282 @@ export function NetworkMap() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (!rawData.nonDockerHosts.length && !rawData.dockerHosts.length) return;
+useEffect(() => {
+  if (!rawData.nonDockerHosts.length && !rawData.dockerHosts.length) return;
 
-    const nodes = new DataSet();
-    const edges = new DataSet();
-    const infoMap = {};
-    const subnetMap = new Map();
-    const hostMap = new Map();
-    const networkMap = new Map();
-    const nexthopLinks = new Set();
+  const nodes = new DataSet();
+  const edges = new DataSet();
+  const infoMap = {};
+  const subnetMap = new Map();
+  const nexthopLinks = new Set();
+  const hostIpToNodeId = new Map();
+  const seenNetworks = new Set();
 
-    const getSubnet = (ip) => ip.split(".").slice(0, 3).join(".");
-    const getHubColor = (subnet) => {
-      if (subnet.startsWith("192.168")) return "#60a5fa";
-      if (subnet.startsWith("10.")) return "#34d399";
-      if (subnet.startsWith("172.17")) return "#f97316";
-      return "#9ca3af";
-    };
-
-    const ensureSubnetHub = (subnet) => {
-      const id = `subnet-${subnet}`;
-      if (!subnetMap.has(subnet)) {
-        subnetMap.set(subnet, true);
-        nodes.add({
-          id,
-          label: `${subnet}.x`,
-          shape: "box",
-          color: getHubColor(subnet),
-          font: { size: 14, color: "#000" },
-        });
-      }
-      return id;
-    };
-
-    const ensureHostNode = (ip) => {
-      const id = `host-${ip}`;
-      if (!hostMap.has(ip)) {
-        hostMap.set(ip, true);
-        const parent = ensureSubnetHub(getSubnet(ip));
-        nodes.add({
-          id,
-          label: ip,
-          shape: "box",
-          color: "#fbbf24",
-          font: { size: 13, color: "#000" },
-        });
-        edges.add({ from: parent, to: id });
-      }
-      return id;
-    };
-
-    const ensureNetworkNode = (networkName, hostIp) => {
-      const id = `net-${hostIp}-${networkName}`;
-      const key = `${hostIp}-${networkName}`;
-      if (!networkMap.has(key)) {
-        networkMap.set(key, true);
-        const parent = ensureHostNode(hostIp);
-        nodes.add({
-          id,
-          label: networkName,
-          shape: "box",
-          color: "#10b981",
-          font: { size: 12, color: "#000" },
-        });
-        edges.add({ from: parent, to: id });
-      }
-      return id;
-    };
-
-    const addHost = (id, ip, name, os, group, ports, mac = "", nexthop, network_name, last_seen = "") => {
-      const subnet = getSubnet(ip);
-      const nodeId = `${group[0]}-${id}`;
-
-      const matchFilters =
-        (!filters.name || name.toLowerCase().includes(filters.name.toLowerCase())) &&
-        (!filters.group || group === filters.group) &&
-        (!filters.subnet || subnet.startsWith(filters.subnet));
-
-      if (!matchFilters) return;
-
-      let parentId;
-      if (group === "docker" && nexthop && nexthop.includes(".")) {
-        parentId = ensureNetworkNode(network_name, nexthop);
-      } else {
-        parentId = ensureSubnetHub(subnet);
-      }
-
+  const ensureSubnetHub = (subnet, networkName = null) => {
+    const hubId = getHubId(subnet);
+    if (!subnetMap.has(subnet)) {
+      subnetMap.set(subnet, []);
       nodes.add({
-        id: nodeId,
-        label: `${name.split(".").slice(0, 2).join(".")}`,
-        title: `${os}\nPorts: ${ports}`,
-        group,
+        id: hubId,
+        label: networkName ? `${networkName}` : `${subnet}.x`,
+        shape: "box",
+        color: getHubColor(subnet),
+        font: { size: 14, color: "#000" },
+        level: 1, // 👈 Keep it below Internet
       });
+    }
+    return hubId;
+  };
 
-      edges.add({ from: parentId, to: nodeId });
+const ensureNetworkNode = (networkName, hostIp) => {
+  const networkId = `network-${networkName}`;
+  if (seenNetworks.has(networkId)) return networkId;
 
-      infoMap[nodeId] = {
-        name,
-        ip,
-        os,
-        group,
-        subnet,
-        ports,
-        mac,
-        nexthop,
-        network_name,
-        last_seen,
-      };
+  // Infer subnet from nexthop if available
+  let inferredSubnet = hostIp ? getSubnet(hostIp) : "unknown";
 
-      // Show routing
-      if (group === "docker" && nexthop && nexthop !== "unknown" && nexthop.includes(".")) {
-        const fromSubnet = getSubnet(ip);
-        const toSubnet = getSubnet(nexthop);
-        const fromHub = ensureSubnetHub(fromSubnet);
-        const toHub = ensureSubnetHub(toSubnet);
-        const key = `${fromHub}->${toHub}`;
+  // const networkId = `network-${networkName}`;
+if (!seenNetworks.has(networkId) && !nodes.get(networkId)) {
+  nodes.add({
+    id: networkId,
+    label: networkName,
+    shape: "box",
+    color: "#10b981", // Tailwind green
+    font: { size: 12, color: "#000" },
+    level: 3,
+  });}
 
-        if (fromHub !== toHub && !nexthopLinks.has(key)) {
-          edges.add({
-            id: key,
-            from: fromHub,
-            to: toHub,
-            dashes: true,
-            color: { color: "#3b82f6" },
-            arrows: { to: { enabled: true } },
-            title: `Route: ${fromSubnet}.x → ${toSubnet}.x`,
-          });
-          nexthopLinks.add(key);
-        }
-      }
-    };
+  // Attach to host if known
+  if (hostIp && hostIpToNodeId.has(hostIp)) {
+    const hostNodeId = hostIpToNodeId.get(hostIp);
+    edges.add({ from: hostNodeId, to: networkId });
+  }
 
-    rawData.nonDockerHosts.forEach(([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
-      addHost(id, ip, name, os, "normal", ports, mac, nexthop, network_name, last_seen)
-    );
+  // 👉 Save subnet info for this network node
+  nodeInfoMap[networkId] = {
+    name: networkName,
+    subnet: inferredSubnet,
+    group: "network",
+  };
 
-    rawData.dockerHosts.forEach(([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
-      addHost(id, ip, name, os, "docker", ports, mac, nexthop, network_name, last_seen)
-    );
+  seenNetworks.add(networkId);
+  return networkId;
+};
 
-    setNodeInfoMap(infoMap);
 
-    const layoutConfig =
-      layoutStyle === "hierarchical"
-        ? { hierarchical: { direction: "UD", sortMethod: "hubsize" } }
-        : layoutStyle === "circular"
-        ? { randomSeed: 2 }
-        : { improvedLayout: true };
 
-    const data = { nodes, edges };
-    const options = {
-      layout: layoutConfig,
-      physics: {
-        stabilization: true,
-        barnesHut: {
-          gravitationalConstant: -3000,
-          springLength: 140,
-          springConstant: 0.05,
-        },
-      },
-      nodes: { shape: "dot", size: 16, font: { size: 12 } },
-      edges: {
+const addHost = (id, ip, name, os, group, ports, mac = "", nexthop, network_name, last_seen = "") => {
+  // Guard invalid IPs
+  if (!ip || ip === "Unknown" || !ip.includes(".")) return;
+
+  const subnet = getSubnet(ip);
+  const nodeId = `${group[0]}-${id}-${ip}`;
+  const level = group === "docker" ? 4 : 2;
+
+  // Avoid duplicates
+  if (!nodes.get(nodeId)) {
+    nodes.add({
+      id: nodeId,
+      label: `${name.split(".").slice(0, 2).join(".")}`,
+      title: `${os}\nPorts: ${ports}`,
+      group,
+      level,
+    });
+  }
+
+  const matchFilters =
+    (!filters.name || name.toLowerCase().includes(filters.name.toLowerCase())) &&
+    (!filters.group || group === filters.group) &&
+    (!filters.subnet || subnet.startsWith(filters.subnet));
+
+  if (!matchFilters) return;
+
+  const hubId = group === "normal" ? ensureSubnetHub(subnet) : null;
+
+  if (group === "normal") {
+    edges.add({ from: hubId, to: nodeId });
+    hostIpToNodeId.set(ip, nodeId);
+  } else if (group === "docker") {
+    const networkId = ensureNetworkNode(network_name, nexthop);
+    if (networkId) {
+      edges.add({ from: networkId, to: nodeId });
+    }
+  }
+
+  infoMap[nodeId] = {
+    name,
+    ip,
+    os,
+    group,
+    subnet,
+    ports,
+    mac,
+    nexthop,
+    network_name,
+    last_seen,
+  };
+
+  // Inter-subnet links
+  if (group === "normal" && nexthop && nexthop !== "unknown" && nexthop.includes(".")) {
+    const hopSubnet = getSubnet(nexthop);
+    const toHub = ensureSubnetHub(hopSubnet);
+    const fromHub = hubId;
+    const edgeKey = `${fromHub}->${toHub}`;
+
+    if (fromHub !== toHub && !nexthopLinks.has(edgeKey)) {
+      edges.add({
+        id: edgeKey,
+        from: fromHub,
+        to: toHub,
+        dashes: true,
+        color: { color: "#3b82f6" },
+        arrows: { to: { enabled: true } },
+        title: `Route: ${subnet}.x → ${hopSubnet}.x`,
+      });
+      nexthopLinks.add(edgeKey);
+    }
+  }
+};
+
+
+  rawData.nonDockerHosts.forEach(([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
+    addHost(id, ip, name, os, "normal", ports, mac, nexthop, network_name, last_seen)
+  );
+
+  rawData.dockerHosts.forEach(([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
+    addHost(id, ip, name, os, "docker", ports, mac, nexthop, network_name, last_seen)
+  );
+
+  // Add Internet node if external IP is known
+if (externalNode?.ip) {
+  const extId = "internet-node";
+  nodes.add({
+    id: extId,
+    label: `Internet\n(${externalNode.ip})`,
+    shape: "box",
+    color: "#f43f5e",
+    font: { size: 12, color: "#000" },
+    level: 0,
+  });
+
+  const allHosts = [...rawData.nonDockerHosts, ...rawData.dockerHosts];
+  const gatewayCandidates = allHosts
+    .map(h => h[6])
+    .filter(ip => ip && ip.includes(".") && ip !== "unknown");
+
+  if (gatewayCandidates.length > 0) {
+    const detectedSubnet = getSubnet(gatewayCandidates[0]);
+    const hubId = getHubId(detectedSubnet);
+
+    if (nodes.get(hubId)) {
+      edges.add({
+        from: hubId,
+        to: extId,
         arrows: "to",
-        smooth: true,
-        color: { color: "#aaa" },
-      },
-      interaction: { hover: true },
-      groups: {
-        docker: { color: { background: "#34d399" } },
-        normal: { color: { background: "#60a5fa" } },
-      },
-    };
+        dashes: true,
+        color: { color: "#f43f5e" },
+        title: `Internet access via ${externalNode.ip}`,
+      });
+    }
+  }
 
-    if (containerRef.current) {
-      const net = new Network(containerRef.current, data, options);
-      net.on("click", (params) => {
-        if (params.nodes.length > 0) {
-          const nodeId = params.nodes[0];
-          if (infoMap[nodeId]) {
-            setSelectedNode(infoMap[nodeId]);
-            setSelectedRoute(null);
-            setSelectedSubnet(null);
-          } else if (nodeId?.startsWith("subnet-")) {
-            setSelectedSubnet({
-              subnet: nodeId.replace("subnet-", ""),
-              label: nodes.get(nodeId)?.label,
-            });
-            setSelectedNode(null);
-            setSelectedRoute(null);
-          }
-        } else if (params.edges.length > 0) {
-          const edgeId = params.edges[0];
-          if (edgeId.includes("->")) {
-            const [fromHub, toHub] = edgeId.replace("subnet-", "").split("->");
-            setSelectedRoute({ from: `${fromHub}.x`, to: `${toHub}.x` });
-            setSelectedNode(null);
-          }
-        } else {
+  nodeInfoMap[extId] = {
+    name: "Internet",
+    ip: externalNode.ip,
+    os: "Public Gateway",
+    group: "external",
+    subnet: "external",
+    ports: "N/A",
+    mac: "",
+    nexthop: "",
+    network_name: "Internet",
+    last_seen: "",
+  };
+}
+
+
+
+
+  setNodeInfoMap(infoMap);
+
+  const layoutConfig =
+    layoutStyle === "hierarchical"
+      ? {
+          hierarchical: {
+            direction: "UD",
+            sortMethod: "hubsize",
+          },
+        }
+      : layoutStyle === "circular"
+      ? {
+          randomSeed: 2,
+        }
+      : { improvedLayout: true };
+
+  const data = { nodes, edges };
+  const options = {
+    layout: layoutConfig,
+    physics: {
+      stabilization: true,
+      barnesHut: {
+        gravitationalConstant: -3000,
+        springLength: 140,
+        springConstant: 0.05,
+      },
+    },
+    nodes: { shape: "dot", size: 16, font: { size: 12 } },
+    edges: {
+      arrows: "to",
+      smooth: true,
+      color: { color: "#aaa" },
+    },
+    interaction: { hover: true },
+    groups: {
+      docker: { color: { background: "#34d399" } },
+      normal: { color: { background: "#60a5fa" } },
+    },
+  };
+
+  if (containerRef.current) {
+    const net = new Network(containerRef.current, data, options);
+    net.on("click", (params) => {
+      if (params.nodes.length > 0) {
+        const nodeId = params.nodes[0];
+        if (infoMap[nodeId]) {
+          setSelectedNode(infoMap[nodeId]);
+          setSelectedRoute(null);
+          setSelectedSubnet(null);
+        } else if (nodeId?.startsWith("subnet-")) {
+          setSelectedSubnet({
+            subnet: nodeId.replace("subnet-", ""),
+            label: nodes.get(nodeId)?.label,
+          });
           setSelectedNode(null);
           setSelectedRoute(null);
         }
-      });
-      networkRef.current = net;
-    }
-  }, [rawData, filters, layoutStyle]);
+      } else if (params.edges.length > 0) {
+        const edgeId = params.edges[0];
+        if (edgeId.includes("->")) {
+          const [fromHub, toHub] = edgeId.replace("subnet-", "").split("->");
+          setSelectedRoute({ from: `${fromHub}.x`, to: `${toHub}.x` });
+          setSelectedNode(null);
+        }
+      } else {
+        setSelectedNode(null);
+        setSelectedRoute(null);
+      }
+    });
+    networkRef.current = net;
+  }
+}, [rawData, filters, layoutStyle, externalNode]);
+
+
 
   return (
     <div className="relative w-full h-full bg-white border rounded p-4">
       <h2 className="text-lg font-semibold mb-2">Network Map</h2>
+
+      {/* Layout Selector */}
       <div className="flex space-x-4 mb-4">
         <select
           value={layoutStyle}
@@ -266,6 +344,8 @@ export function NetworkMap() {
           <option value="hierarchical">Hierarchical</option>
           <option value="circular">Circular</option>
         </select>
+
+        {/* Existing filters */}
         <input
           type="text"
           placeholder="Filter by name"
@@ -302,7 +382,6 @@ export function NetworkMap() {
             <ul className="space-y-1">
               <li><span className="inline-block w-3 h-3 bg-blue-400 mr-2 rounded-full"></span>Normal Host</li>
               <li><span className="inline-block w-3 h-3 bg-green-400 mr-2 rounded-full"></span>Docker Host</li>
-              <li><span className="inline-block w-3 h-3 bg-yellow-400 mr-2 rounded"></span>Docker Host IP</li>
               <li><span className="inline-block w-3 h-3 bg-orange-400 mr-2 rounded"></span>Subnet Hub</li>
               <li><span className="inline-block w-4 border-t-2 border-dashed border-blue-400 mr-2 align-middle"></span> Inter-subnet Route</li>
             </ul>

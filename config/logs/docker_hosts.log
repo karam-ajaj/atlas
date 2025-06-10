@@ -1,4 +1,4 @@
-172.17.0.2	atlas	linux	02:42:ac:11:00:02	80/tcp -> 0.0.0.0:8888,8000/tcp -> 0.0.0.0:8889	192.168.2.81	bridge
+	atlas1	linux		no_ports	192.168.2.81	host
 10.0.9.3	portainer_agent.phoi9opu9cpmpasi72bsk15hv.3ybbalegqysghb7bm8h6o438j	linux	02:42:0a:00:09:03	no_ports	192.168.2.81	portainer_internal
 10.0.0.10	sablier_sablier.1.69q18gwuk74qwx36q0rj8btyj	linux	02:42:0a:00:00:0a	10000/tcp (internal)	192.168.2.81	ingress
 10.0.1.118	sablier_sablier.1.69q18gwuk74qwx36q0rj8btyj	linux	02:42:0a:00:01:76	10000/tcp (internal)	192.168.2.81	traefik-public
