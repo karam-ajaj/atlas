@@ -1,0 +1,12 @@
+# Ignore React build artifacts and dependencies
+# /data/react-ui/node_modules/
+# /data/react-ui/dist/
+
+# Ignore log files
+/config/logs/
+
+# Ignore database files
+/config/db/*.db
+
+# Ignore Python bytecode
+/config/scripts/__pycache__/
