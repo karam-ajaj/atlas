@@ -36,12 +36,12 @@ export function NetworkMap() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("https://atlas-api.vnerd.nl/hosts");
+        const res = await fetch("/api/hosts");
         const json = await res.json();
         const [nonDockerHosts, dockerHosts] = json;
         setRawData({ nonDockerHosts, dockerHosts });
         try {
-  const extRes = await fetch("https://atlas-api.vnerd.nl/external");
+  const extRes = await fetch("/api/external");
   const extJson = await extRes.json();
   if (extJson && extJson.length >= 2) {
     setExternalNode({ id: extJson[0], ip: extJson[1] }); // [id, public_ip]

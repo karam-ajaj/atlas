@@ -18,7 +18,7 @@ export function ScriptsPanel() {
     setError("");
 
     try {
-      const res = await fetch(`https://atlas-api.vnerd.nl/scripts/run/${scriptKey}`, {
+      const res = await fetch(`/api/scripts/run/${scriptKey}`, {
         method: "POST",
       });
       const data = await res.json();

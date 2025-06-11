@@ -15,7 +15,7 @@ export function HostsTable({ selectedNode }) {
   const [globalFilter, setGlobalFilter] = useState("");
 
   useEffect(() => {
-    fetch("https://atlas-api.vnerd.nl/hosts")
+    fetch("/api/hosts")
       .then((res) => res.json())
       .then(([normal, docker]) => {
         const flatten = (arr, group) =>
