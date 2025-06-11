@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Network } from "vis-network";
 import { DataSet } from "vis-data";
 import { SelectedNodePanel } from "./SelectedNodePanel";
-import { NetworkSettingsPanel } from "./NetworkSettingsPanel";
+// import { NetworkSettingsPanel } from "./NetworkSettingsPanel";
 
 
 function getSubnet(ip) {

@@ -1,369 +1,213 @@
-INFO:     Started server process [44]
+INFO:     Started server process [3474]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8889 (Press CTRL+C to quit)
-INFO:     172.18.0.15:40178 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:40178 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56916 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56916 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:55434 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:55434 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:55434 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:55434 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:55434 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:55434 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46666 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46666 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46666 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46666 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46666 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46666 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46666 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46666 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46666 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46666 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46668 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:46666 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:37638 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:39742 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:39742 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:39742 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:39742 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:39742 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:39742 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:47120 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:47120 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:47120 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:47120 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:47120 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:47120 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:52572 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:52572 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:52572 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:52572 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:52572 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:52572 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38974 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38972 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38974 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:52750 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:52750 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:52750 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:35618 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:53844 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:53844 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:53844 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59642 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59642 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59642 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44416 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44416 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44416 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44416 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44416 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44416 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44416 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44416 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44416 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44496 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44496 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44496 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44496 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44496 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44496 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:37268 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:37268 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:37268 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43776 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43776 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43776 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43776 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43786 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43776 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:50926 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:50926 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:50926 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:50926 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:50926 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:50926 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:41788 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:41788 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:41788 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59872 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59872 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59872 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44314 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44314 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:44314 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:36474 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:36474 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:36474 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:36474 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:36474 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:36474 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54936 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:50170 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42592 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56486 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59228 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59228 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59228 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42010 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42902 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42898 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:42902 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:58438 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:54006 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:41958 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:41958 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:41958 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:41958 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:41958 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:41958 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /favicon.ico HTTP/1.1" 404 Not Found
-INFO:     172.18.0.15:38576 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:38576 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:50736 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43782 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:50736 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:45466 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:45466 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:45466 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56090 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56090 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56090 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56090 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56090 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56090 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:56272 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:33342 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:33342 - "GET /favicon.ico HTTP/1.1" 404 Not Found
-INFO:     172.18.0.15:33342 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:33342 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:33342 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:33342 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:33342 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:33342 - "GET /favicon.ico HTTP/1.1" 404 Not Found
-INFO:     172.18.0.15:43430 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43430 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:43430 - "GET /external HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59902 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59902 - "GET /hosts HTTP/1.1" 200 OK
-INFO:     172.18.0.15:59902 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:42172 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:42172 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:42172 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:42172 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:42172 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:42172 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:42172 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:50570 - "POST /scripts/run/scan-full HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/dist-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/applications.py", line 112, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/middleware/errors.py", line 187, in __call__
+    raise exc
+  File "/usr/local/lib/python3.11/dist-packages/starlette/middleware/errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/middleware/cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/usr/local/lib/python3.11/dist-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 714, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 734, in app
+    await route.handle(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 288, in handle
+    await self.app(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 76, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/usr/local/lib/python3.11/dist-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 73, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 214, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/starlette/concurrency.py", line 37, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/anyio/_backends/_asyncio.py", line 2470, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/anyio/_backends/_asyncio.py", line 967, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/config/scripts/app.py", line 60, in run_named_script
+    result = subprocess.run(
+             ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/subprocess.py", line 1024, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.11/subprocess.py", line 1901, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+OSError: [Errno 8] Exec format error: '/config/scripts/atlas_check.sh'
+INFO:     172.18.0.15:37980 - "POST /scripts/run/scan-full HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/dist-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/applications.py", line 112, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/middleware/errors.py", line 187, in __call__
+    raise exc
+  File "/usr/local/lib/python3.11/dist-packages/starlette/middleware/errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/middleware/cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/usr/local/lib/python3.11/dist-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 714, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 734, in app
+    await route.handle(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 288, in handle
+    await self.app(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 76, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/usr/local/lib/python3.11/dist-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/usr/local/lib/python3.11/dist-packages/starlette/routing.py", line 73, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/fastapi/routing.py", line 214, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/starlette/concurrency.py", line 37, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/anyio/to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/anyio/_backends/_asyncio.py", line 2470, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/anyio/_backends/_asyncio.py", line 967, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/config/scripts/app.py", line 60, in run_named_script
+    result = subprocess.run(
+             ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/subprocess.py", line 1024, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.11/subprocess.py", line 1901, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+OSError: [Errno 8] Exec format error: '/config/scripts/atlas_check.sh'
+INFO:     172.18.0.15:39544 - "POST /scripts/run/scan-docker HTTP/1.1" 200 OK
+INFO:     172.18.0.15:39544 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:39544 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:39544 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:59248 - "POST /scripts/run/scan-hosts-fast HTTP/1.1" 200 OK
+INFO:     172.18.0.15:58410 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:58410 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:58410 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:35972 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:35972 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:38164 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:38164 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:38164 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:38164 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:43006 - "POST /scripts/run/scan-hosts-deep HTTP/1.1" 200 OK
+INFO:     172.18.0.15:38170 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:49122 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:49122 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:43140 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:43140 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:43140 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:43140 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:43140 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:37872 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:37872 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:37872 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:39170 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:39170 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:39170 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:39106 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:39112 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:39106 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:39112 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:52532 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:52532 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:52532 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:52532 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:52532 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:52532 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47678 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47678 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47678 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47678 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47678 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47678 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:57056 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:57056 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:57056 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55232 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55232 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55232 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55232 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55232 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55232 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55232 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55232 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55232 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47348 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47348 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47348 - "GET /external HTTP/1.1" 200 OK

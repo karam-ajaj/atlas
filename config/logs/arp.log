@@ -105,7 +105,7 @@ lgwebostv.home (192.168.2.5) at b8:16:5f:60:57:64 [ether] on ens18
 ? (192.168.2.75) at <incomplete> on ens18
 ? (192.168.2.238) at <incomplete> on ens18
 ? (192.168.2.113) at <incomplete> on ens18
-device-53.home (192.168.2.20) at 80:8b:ca:94:8a:eb [ether] on ens18
+? (192.168.2.20) at 80:8b:ca:94:8a:eb [ether] on ens18
 ? (192.168.2.183) at <incomplete> on ens18
 ? (192.168.2.90) at <incomplete> on ens18
 ? (192.168.2.253) at <incomplete> on ens18

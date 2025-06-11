@@ -47,10 +47,10 @@ def get_external_networks():
 @app.post("/scripts/run/{script_name}")
 def run_named_script(script_name: str):
     allowed_scripts = {
-        "scan-full": "/config/scripts/check.sh",
-        "scan-hosts-fast": "/config/scripts/hosts_fast_scan.sh",
-        "scan-hosts-deep": "/config/scripts/hosts_deep_scan_macs.sh",
-        "scan-docker": "/config/scripts/new_docker_script_multips_ips.sh"
+        "scan-full": "/config/scripts/atlas_check.sh",
+        "scan-hosts-fast": "/config/scripts/atlas_hosts_fast_scan.sh",
+        "scan-hosts-deep": "/config/scripts/atlas_hosts_deep_scan_macs.sh",
+        "scan-docker": "/config/scripts/atlas_docker_script_multips_ips.sh"
     }
 
     if script_name not in allowed_scripts:

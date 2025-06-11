@@ -1,1 +1,69 @@
-Starting Nmap 7.93 ( https://nmap.org ) at 2025-06-10 16:48 UTC
+Starting Nmap 7.93 ( https://nmap.org ) at 2025-06-10 21:27 UTC
+Nmap scan report for sanaa-s-s23-fe.home (192.168.2.2)
+Host is up (0.026s latency).
+Not shown: 65534 closed tcp ports (reset)
+PORT      STATE SERVICE
+37125/tcp open  unknown
+MAC Address: 96:FF:FA:7A:E0:1D (Unknown)
+No exact OS matches for host (If you know what OS is running on it, see https://nmap.org/submit/ ).
+TCP/IP fingerprint:
+OS:SCAN(V=7.93%E=4%D=6/10%OT=37125%CT=1%CU=43660%PV=Y%DS=1%DC=D%G=Y%M=96FFF
+OS:A%TM=6848A383%P=x86_64-pc-linux-gnu)SEQ(SP=107%GCD=1%ISR=10C%TI=Z%CI=Z%I
+OS:I=I%TS=9)SEQ(SP=107%GCD=1%ISR=10C%TI=Z%CI=Z%TS=8)OPS(O1=M5B4ST11NWA%O2=M
+OS:5B4ST11NWA%O3=M5B4NNT11NWA%O4=M5B4ST11NWA%O5=M5B4ST11NWA%O6=M5B4ST11)WIN
+OS:(W1=FFFF%W2=FFFF%W3=FFFF%W4=FFFF%W5=FFFF%W6=FFFF)ECN(R=Y%DF=Y%T=40%W=FFF
+OS:F%O=M5B4NNSNWA%CC=Y%Q=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=AS%RD=0%Q=)T2(R=N)T3(
+OS:R=N)T4(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=Y%T=40%W=0%S=Z
+OS:%A=S+%F=AR%O=%RD=0%Q=)T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(R=Y
+OS:%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N%T=40%IPL=164%UN=0%RI
+OS:PL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)IE(R=Y%DFI=N%T=40%CD=S)
+
+Network Distance: 1 hop
+
+Nmap scan report for lgwebostv.home (192.168.2.5)
+Host is up (0.0038s latency).
+Not shown: 65521 closed tcp ports (reset)
+PORT      STATE SERVICE
+1045/tcp  open  fpitp
+1199/tcp  open  dmidi
+1268/tcp  open  propel-msgsys
+1638/tcp  open  ismc
+1642/tcp  open  isis-am
+1853/tcp  open  vids-avtp
+3000/tcp  open  ppp
+3001/tcp  open  nessus
+7000/tcp  open  afs3-fileserver
+7250/tcp  open  unknown
+9080/tcp  open  glrpc
+18181/tcp open  opsec-cvp
+33243/tcp open  unknown
+36866/tcp open  unknown
+MAC Address: B8:16:5F:60:57:64 (LG Innotek)
+Device type: general purpose
+Running: Linux 4.X|5.X
+OS CPE: cpe:/o:linux:linux_kernel:4 cpe:/o:linux:linux_kernel:5
+OS details: Linux 4.15 - 5.6
+Network Distance: 1 hop
+
+Nmap scan report for a14-alkhas-b-amer.home (192.168.2.6)
+Host is up (0.019s latency).
+All 65535 scanned ports on a14-alkhas-b-amer.home (192.168.2.6) are in ignored states.
+Not shown: 65535 closed tcp ports (reset)
+MAC Address: CA:0A:EB:F8:61:79 (Unknown)
+Too many fingerprints match this host to give specific OS details
+Network Distance: 1 hop
+
+Nmap scan report for re200-1.home (192.168.2.13)
+Host is up (0.0043s latency).
+Not shown: 65534 closed tcp ports (reset)
+PORT   STATE SERVICE
+80/tcp open  http
+MAC Address: 7C:8B:CA:8A:F7:B5 (Tp-link Technologies)
+Device type: general purpose
+Running: Linux 2.6.X
+OS CPE: cpe:/o:linux:linux_kernel:2.6
+OS details: Linux 2.6.23 - 2.6.38
+Network Distance: 1 hop
+
+Stats: 0:07:57 elapsed; 251 hosts completed (8 up), 4 undergoing SYN Stealth Scan
+SYN Stealth Scan Timing: About 57.79% done; ETC: 21:40 (0:05:05 remaining)
