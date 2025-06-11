@@ -1,0 +1,3 @@
+config/db/
+config/scripts/__pycache__/
+*.log
