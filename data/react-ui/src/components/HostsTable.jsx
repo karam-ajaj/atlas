@@ -82,13 +82,12 @@ export function HostsTable({ selectedNode }) {
   });
 
   useEffect(() => {
-    if (!selectedNode || !tableContainerRef.current) return;
+    if (!selectedNode) return;
     const rowIndex = data.findIndex((row) => row.ip === selectedNode.ip);
     if (rowIndex >= 0) {
-      const offset = rowVirtualizer.getVirtualItems().find(v => v.index === rowIndex)?.start;
-      if (offset !== undefined) {
-        tableContainerRef.current.scrollTop = offset;
-      }
+      // useVirtualizer provides an API to scroll to a specific index
+      // which works even when the row isn't currently rendered
+      rowVirtualizer.scrollToIndex(rowIndex);
     }
   }, [selectedNode, data, rowVirtualizer]);
 
