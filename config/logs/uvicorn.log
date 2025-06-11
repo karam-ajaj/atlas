@@ -211,3 +211,27 @@ INFO:     172.18.0.15:55232 - "GET /external HTTP/1.1" 200 OK
 INFO:     172.18.0.15:47348 - "GET /hosts HTTP/1.1" 200 OK
 INFO:     172.18.0.15:47348 - "GET /hosts HTTP/1.1" 200 OK
 INFO:     172.18.0.15:47348 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55888 - "GET / HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:55888 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:55888 - "GET /ads.txt HTTP/1.1" 404 Not Found
+INFO:     192.168.2.12:58588 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:47318 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47318 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47318 - "GET /external HTTP/1.1" 200 OK
+INFO:     192.168.2.12:59494 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:38852 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:41894 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:41894 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:41894 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:34330 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:34330 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:40896 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:40896 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:40896 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:40896 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:40896 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:40896 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:40896 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:40902 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:40896 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:40902 - "GET /hosts HTTP/1.1" 200 OK
