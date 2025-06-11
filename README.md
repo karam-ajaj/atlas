@@ -65,16 +65,16 @@
 ```
 atlas/
 ├── config/
-│   └── logs/
-│       ├── docker.log        # Docker container info
-│       ├── nmap.log          # Nmap scan results
-│       └── docker_hosts.log  # Processed container data
+│   ├── logs/
+│   │   ├── docker.log        # Docker container info
+│   │   ├── nmap.log          # Nmap scan results
+│   │   └── docker_hosts.log  # Processed container data
+│   └── scripts/
+│       └── docker_script.sh  # Script to scan Docker containers
 ├── data/
 │   └── html/
 │       ├── visuals/          # G6-based working dashboard
 │       └── visuals2/         # vis.js-based dashboard version
-├── scripts/
-│   └── docker_script.sh      # Script to scan Docker containers
 └── README.md
 ```
 
@@ -90,7 +90,7 @@ atlas/
 
 2. **Run the scanner script inside your container:**
    ```bash
-   bash scripts/docker_script.sh
+   bash config/scripts/docker_script.sh
    ```
 
 3. **Serve the dashboard using Nginx or Python server:**
