@@ -6,6 +6,9 @@ COPY config/nginx/default.conf /etc/nginx/conf.d/default.conf
 # Copy HTML static files
 COPY data/html/ /usr/share/nginx/html/
 
+# Copy Go binary from your local Go project
+COPY config/atlas_go_sqlite/atlas /config/bin/atlas
+
 # Copy all other config files (excluding db)
 COPY config/ /config/
 

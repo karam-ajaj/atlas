@@ -74,7 +74,7 @@ docker run -d \
   -v /swarm/data/atlas/html:/usr/share/nginx/html \
   -v /swarm/config/atlas:/config \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  ngnix
+  keinstien/atlas:v2.0
 
 ports:
 8888 nginx
@@ -90,9 +90,9 @@ docker push keinstien/atlas:v1.0
 docker rm -f atlas1
 
 docker run -d \
-  --name atlas2 \
+  --name atlas1 \
   --network=host \
   --cap-add=NET_RAW \
   --cap-add=NET_ADMIN \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  keinstien/atlas:v1.65
+  keinstien/atlas:v2.0

@@ -44,4 +44,10 @@ CREATE TABLE IF NOT EXISTS logs (
     content TEXT,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ✅ Add UNIQUE constraint via index
+CREATE UNIQUE INDEX IF NOT EXISTS idx_hosts_ip ON hosts(ip);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_docker_hosts_ip ON docker_hosts(ip);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_external_networks_ip ON external_networks(public_ip);
+
 EOF

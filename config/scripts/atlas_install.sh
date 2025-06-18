@@ -30,3 +30,6 @@ apt install python3-lxml -y
 
 # deep host script
 apt install -y gawk
+
+# install go
+apt install -y golang
