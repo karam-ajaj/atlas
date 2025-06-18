@@ -1,33 +1,36 @@
-FROM nginx:latest
+# Stage 1: Build the Go binary
+FROM golang:1.22 AS builder
 
-# Copy nginx config
+WORKDIR /app
+COPY config/atlas_go /app
+
+RUN go build -o atlas .
+
+# Stage 2: Final runtime image
+FROM python:3.11-slim
+
+# Install only what you need for runtime
+RUN apt update && apt install -y \
+    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq \
+    && pip install fastapi uvicorn \
+    && apt install -y docker.io \
+    && apt clean && rm -rf /var/lib/apt/lists/*
+
+# Remove default Nginx config
+RUN rm -f /etc/nginx/conf.d/default.conf /etc/nginx/sites-enabled/default
+
+# Copy Nginx config and static HTML
 COPY config/nginx/default.conf /etc/nginx/conf.d/default.conf
-
-# Copy HTML static files
 COPY data/html/ /usr/share/nginx/html/
 
-# Copy Go binary from your local Go project
-COPY config/atlas_go_sqlite/atlas /config/bin/atlas
+# Copy scripts, logs, Go binary, FastAPI backend
+COPY config /config/
+COPY --from=builder /app/atlas /config/bin/atlas
 
-# Copy all other config files (excluding db)
-COPY config/ /config/
+# Make all shell scripts executable
+RUN chmod +x /config/scripts/*.sh
 
-# Run setup script if needed
-RUN chmod +x /config/scripts/atlas_install.sh && /config/scripts/atlas_install.sh
-RUN mkdir /config/db && touch /config/db/atlas.db
-RUN chmod +x /config/scripts/atlas_db_setup.sh && /config/scripts/atlas_db_setup.sh
-RUN chmod +x /config/scripts/atlas_check.sh
-# RUN export PYTHONPATH=/config && uvicorn scripts.app:app --host 0.0.0.0 --port 8889 > /config/logs/uvicorn.log 2>&1 &
-
-# Expose the default nginx port
-EXPOSE 8888
-EXPOSE 8889
-
+# Entrypoint: initializes DB, runs scans, launches FastAPI and Nginx
 CMD ["/config/scripts/atlas_check.sh"]
 
-
-# cd /swarm/github-repos/atlas
-# docker build -t keinstien/atlas:v1.1 .
-# docker push keinstien/atlas:v1.1
-
-# docker build -t keinstien/atlas:v1.1 /swarm/github-repos/atlas
+EXPOSE 8888 8889
