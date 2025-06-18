@@ -187,9 +187,8 @@ To edit UI:
 - Atlas runs automatically on container start.
 
 - All Go scan tasks run sequentially:
-```
-- initdb → fastscan → deepscan → dockerscan
-```
+   - `initdb → fastscan → deepscan → dockerscan`
+
 - Scheduled scans are run every 30 minutes via Go timers.
 
 - No cron dependency required inside the container.
