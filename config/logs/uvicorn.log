@@ -1,1 +1,120 @@
-bash: line 2: uvicorn: command not found
+INFO:     Started server process [3835]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8889 (Press CTRL+C to quit)
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:39228 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     192.168.2.27:49961 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     192.168.2.27:49961 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     192.168.2.27:49961 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     192.168.2.27:49961 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     192.168.2.27:49978 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:37730 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:44150 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:54764 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:34700 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:34700 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:34700 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:43080 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:48850 - "GET /.env HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:58368 - "GET / HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:58368 - "GET /js/lkk_ch.js HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:58368 - "GET /js/twint_ch.js HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:48064 - "GET / HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:48064 - "GET /js/twint_ch.js HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:48064 - "GET /js/lkk_ch.js HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:47766 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:50696 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55762 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:49788 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:40816 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     192.168.2.21:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     192.168.2.21:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:57122 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:54186 - "GET / HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:52204 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:52204 - "GET /login HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:52204 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:38552 - "GET /sftp-config.json HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:34322 - "GET /.vscode/sftp.json HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:60042 - "GET / HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:47020 - "GET /wp HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:47020 - "GET /wordpress HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:47020 - "GET /atlas-api HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:47020 - "GET /wordpress HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:47020 - "GET /old HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:47020 - "GET /backup HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:47020 - "GET /new HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:47020 - "GET /test HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:47020 - "GET /wp HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:43226 - "GET /temp HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:60950 - "GET /blog HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:54680 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:46390 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:34210 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:42048 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:37164 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55444 - "GET / HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:55444 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:38984 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:38984 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:33592 - "GET / HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:33592 - "GET / HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:34766 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:34782 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:34782 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:59262 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:59262 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:59262 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:59262 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:59262 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:59262 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:59262 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:59262 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:59262 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:59262 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:55956 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:49112 - "GET /api/external HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:49112 - "GET /api/external HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:49112 - "GET /api/external HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:49112 - "GET /api/external HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:49112 - "GET /api/external HTTP/1.1" 404 Not Found
+INFO:     172.18.0.15:49112 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:49112 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:49112 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:49112 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:49112 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK
+INFO:     172.18.0.15:46686 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /hosts HTTP/1.1" 200 OK
+INFO:     172.18.0.15:0 - "GET /external HTTP/1.1" 200 OK

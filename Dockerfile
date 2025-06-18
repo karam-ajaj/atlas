@@ -13,13 +13,14 @@ COPY config/ /config/
 RUN chmod +x /config/scripts/atlas_install.sh && /config/scripts/atlas_install.sh
 RUN mkdir /config/db && touch /config/db/atlas.db
 RUN chmod +x /config/scripts/atlas_db_setup.sh && /config/scripts/atlas_db_setup.sh
-RUN export PYTHONPATH=/config && uvicorn scripts.app:app --host 0.0.0.0 --port 8889 > /config/logs/uvicorn.log 2>&1 &
+RUN chmod +x /config/scripts/atlas_check.sh
+# RUN export PYTHONPATH=/config && uvicorn scripts.app:app --host 0.0.0.0 --port 8889 > /config/logs/uvicorn.log 2>&1 &
 
 # Expose the default nginx port
 EXPOSE 8888
 EXPOSE 8889
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/config/scripts/atlas_check.sh"]
 
 
 # cd /swarm/github-repos/atlas
