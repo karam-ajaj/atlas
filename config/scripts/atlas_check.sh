@@ -1,23 +1,37 @@
-# this is the main script to find the hosts and docker containers
-
 #!/bin/bash
 
-# initiate db
-# ./atlas_db_setup.sh
+LOGFILE="/config/logs/boot.log"
+mkdir -p /config/logs
 
-# # find containers
-# # ./docker_script_multips_ips.sh
-# ./atlas_docker_script_multips_ips.sh
+log() {
+  TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+  echo "$TIMESTAMP 🔹 $1" | tee -a "$LOGFILE"
+}
 
-# # find hosts
-# ./atlas_hosts_fast_scan.sh
-# ./atlas_hosts_deep_scan_macs.sh
-
-
-# export the path
+# Start FastAPI in the background
+log "🚀 Starting FastAPI backend..."
 export PYTHONPATH=/config
-# # start in the background and save to log file
 uvicorn scripts.app:app --host 0.0.0.0 --port 8889 > /config/logs/uvicorn.log 2>&1 &
 
-# Start Nginx in foreground
-nginx -g "daemon off;"
+# Start Nginx in the foreground — this keeps the container alive
+log "🌐 Starting Nginx server..."
+nginx -g "daemon off;" &
+
+NGINX_PID=$!
+
+# Run scans in background
+(
+  log "📦 Initializing database..."
+  /config/bin/atlas initdb && log "✅ Database initialized."
+
+  log "🚀 Running fast scan..."
+  /config/bin/atlas fastscan && log "✅ Fast scan complete."
+
+  log "🐳 Running Docker scan..."
+  /config/bin/atlas dockerscan && log "✅ Docker scan complete."
+
+  log "🕵️ Running deep host scan..."
+  /config/bin/atlas deepscan && log "✅ Deep scan complete."
+) &
+
+wait "$NGINX_PID"

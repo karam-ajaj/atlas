@@ -1,13 +1,13 @@
 ? (192.168.2.37) at <incomplete> on ens18
 ? (192.168.2.200) at <incomplete> on ens18
 ? (192.168.2.107) at <incomplete> on ens18
-yoga-1.home (192.168.2.14) at 7e:8b:ca:74:56:b2 [ether] on ens18
+yoga-1.home (192.168.2.14) at <incomplete> on ens18
 ? (172.18.0.20) at 02:42:ac:12:00:14 [ether] on docker_gwbridge
 ? (192.168.2.145) at <incomplete> on ens18
 ? (192.168.2.52) at <incomplete> on ens18
 ? (192.168.2.215) at <incomplete> on ens18
 ? (192.168.2.122) at <incomplete> on ens18
-? (192.168.2.29) at <incomplete> on ens18
+? (192.168.2.29) at 80:8b:ca:f8:61:79 [ether] on ens18
 ? (192.168.2.160) at <incomplete> on ens18
 ? (192.168.2.67) at <incomplete> on ens18
 ? (192.168.2.230) at <incomplete> on ens18
@@ -15,6 +15,7 @@ yoga-1.home (192.168.2.14) at 7e:8b:ca:74:56:b2 [ether] on ens18
 ? (192.168.2.44) at <incomplete> on ens18
 ? (192.168.2.207) at <incomplete> on ens18
 ? (192.168.2.82) at <incomplete> on ens18
+? (172.17.0.2) at 02:42:ac:11:00:02 [ether] on docker0
 ? (192.168.2.245) at <incomplete> on ens18
 ? (192.168.2.152) at <incomplete> on ens18
 ? (192.168.2.59) at <incomplete> on ens18
@@ -40,7 +41,7 @@ yoga-1.home (192.168.2.14) at 7e:8b:ca:74:56:b2 [ether] on ens18
 ? (192.168.2.49) at <incomplete> on ens18
 ? (192.168.2.212) at <incomplete> on ens18
 ? (192.168.2.119) at <incomplete> on ens18
-? (192.168.2.26) at <incomplete> on ens18
+? (192.168.2.26) at c6:75:55:e4:a3:ad [ether] on ens18
 ? (192.168.2.189) at <incomplete> on ens18
 ? (192.168.2.64) at <incomplete> on ens18
 ? (192.168.2.227) at <incomplete> on ens18
@@ -54,7 +55,7 @@ px01.home (192.168.2.111) at 48:21:0b:56:08:4a [ether] on ens18
 ? (192.168.2.219) at <incomplete> on ens18
 ? (172.18.0.35) at 02:42:ac:12:00:23 [ether] on docker_gwbridge
 ? (192.168.2.126) at <incomplete> on ens18
-re200.home (192.168.2.1) at <incomplete> on ens18
+re200.home (192.168.2.1) at 7c:8b:ca:8a:f7:b5 [ether] on ens18
 ? (192.168.2.164) at <incomplete> on ens18
 ? (192.168.2.71) at <incomplete> on ens18
 ? (192.168.2.234) at <incomplete> on ens18
@@ -66,13 +67,13 @@ re200.home (192.168.2.1) at <incomplete> on ens18
 ? (192.168.2.156) at <incomplete> on ens18
 ? (192.168.2.63) at <incomplete> on ens18
 ? (192.168.2.194) at <incomplete> on ens18
-? (192.168.2.101) at <incomplete> on ens18
-? (192.168.2.8) at <incomplete> on ens18
+? (192.168.2.101) at bc:24:11:69:42:9d [ether] on ens18
+yoga.home (192.168.2.8) at 08:9d:f4:74:56:b2 [ether] on ens18
 ? (192.168.2.171) at <incomplete> on ens18
 ? (192.168.2.78) at <incomplete> on ens18
 ? (192.168.2.209) at <incomplete> on ens18
 ? (192.168.2.116) at <incomplete> on ens18
-? (192.168.2.23) at <incomplete> on ens18
+? (192.168.2.23) at bc:24:11:23:54:62 [ether] on ens18
 ? (192.168.2.186) at <incomplete> on ens18
 ? (192.168.2.93) at <incomplete> on ens18
 ? (192.168.2.224) at <incomplete> on ens18
@@ -81,12 +82,12 @@ re200.home (192.168.2.1) at <incomplete> on ens18
 ? (192.168.2.38) at <incomplete> on ens18
 ? (192.168.2.201) at <incomplete> on ens18
 ? (192.168.2.108) at <incomplete> on ens18
-? (192.168.2.15) at <incomplete> on ens18
+? (192.168.2.15) at 84:b8:b8:a3:7a:42 [ether] on ens18
 ? (192.168.2.146) at <incomplete> on ens18
 ? (192.168.2.53) at <incomplete> on ens18
 ? (192.168.2.216) at <incomplete> on ens18
 ? (192.168.2.123) at <incomplete> on ens18
-? (192.168.2.30) at <incomplete> on ens18
+? (192.168.2.30) at 80:8b:ca:bc:0e:2c [ether] on ens18
 ? (192.168.2.161) at <incomplete> on ens18
 ? (192.168.2.68) at <incomplete> on ens18
 ? (192.168.2.231) at <incomplete> on ens18
@@ -113,13 +114,13 @@ lgwebostv.home (192.168.2.5) at b8:16:5f:60:57:64 [ether] on ens18
 ? (192.168.2.35) at <incomplete> on ens18
 ? (192.168.2.198) at <incomplete> on ens18
 ? (192.168.2.105) at <incomplete> on ens18
-? (192.168.2.12) at <incomplete> on ens18
+? (192.168.2.12) at 7e:8b:ca:99:54:2b [ether] on ens18
 ? (172.18.0.18) at 02:42:ac:12:00:12 [ether] on docker_gwbridge
 ? (192.168.2.175) at <incomplete> on ens18
 ? (192.168.2.50) at <incomplete> on ens18
 ? (192.168.2.213) at <incomplete> on ens18
 ? (192.168.2.120) at <incomplete> on ens18
-? (192.168.2.27) at <incomplete> on ens18
+? (192.168.2.27) at c6:75:55:e4:a3:ad [ether] on ens18
 ? (192.168.2.190) at <incomplete> on ens18
 ? (192.168.2.65) at <incomplete> on ens18
 ? (192.168.2.228) at <incomplete> on ens18
@@ -147,12 +148,12 @@ sanaa-s-s23-fe.home (192.168.2.2) at 96:ff:fa:7a:e0:1d [ether] on ens18
 ? (192.168.2.32) at <incomplete> on ens18
 ? (192.168.2.195) at <incomplete> on ens18
 ? (192.168.2.102) at <incomplete> on ens18
-mihyar-s-s23.home (192.168.2.9) at ee:37:7c:81:00:55 [ether] on ens18
+? (192.168.2.9) at ee:37:7c:81:00:55 [ether] on ens18
 ? (192.168.2.172) at <incomplete> on ens18
 ? (192.168.2.79) at <incomplete> on ens18
 ? (192.168.2.210) at <incomplete> on ens18
 ? (192.168.2.117) at <incomplete> on ens18
-? (192.168.2.24) at <incomplete> on ens18
+? (192.168.2.24) at d2:be:41:84:d4:be [ether] on ens18
 ? (192.168.2.187) at <incomplete> on ens18
 ? (192.168.2.94) at <incomplete> on ens18
 ? (192.168.2.225) at <incomplete> on ens18
@@ -202,13 +203,14 @@ re200-1.home (192.168.2.13) at 7c:8b:ca:8a:f7:b5 [ether] on ens18
 ? (192.168.2.51) at <incomplete> on ens18
 ? (192.168.2.214) at <incomplete> on ens18
 ? (192.168.2.121) at <incomplete> on ens18
-? (192.168.2.28) at <incomplete> on ens18
+? (192.168.2.28) at 96:ff:fa:7a:e0:1d [ether] on ens18
 ? (192.168.2.191) at <incomplete> on ens18
 ? (192.168.2.66) at <incomplete> on ens18
 ? (192.168.2.229) at <incomplete> on ens18
 ? (192.168.2.136) at <incomplete> on ens18
 ? (192.168.2.43) at <incomplete> on ens18
 ? (192.168.2.206) at <incomplete> on ens18
+? (172.17.0.3) at <incomplete> on docker0
 ? (192.168.2.244) at <incomplete> on ens18
 ? (192.168.2.151) at <incomplete> on ens18
 ? (192.168.2.58) at <incomplete> on ens18
@@ -220,22 +222,22 @@ sanaa-s-galaxy-a21s.home (192.168.2.3) at 2e:cc:f4:bc:0e:2c [ether] on ens18
 ? (192.168.2.73) at <incomplete> on ens18
 ? (192.168.2.236) at <incomplete> on ens18
 ? (192.168.2.143) at <incomplete> on ens18
-? (192.168.2.18) at <incomplete> on ens18
+nas.home (192.168.2.18) at 24:5e:be:22:25:80 [ether] on ens18
 ? (192.168.2.181) at <incomplete> on ens18
 ? (192.168.2.88) at <incomplete> on ens18
 ? (192.168.2.251) at <incomplete> on ens18
 ? (172.18.0.3) at 02:42:ac:12:00:03 [ether] on docker_gwbridge
 ? (192.168.2.158) at <incomplete> on ens18
-? (192.168.2.33) at <incomplete> on ens18
+rhel9.home (192.168.2.33) at bc:24:11:23:54:62 [ether] on ens18
 ? (192.168.2.196) at <incomplete> on ens18
 ? (192.168.2.103) at <incomplete> on ens18
-device-43.home (192.168.2.10) at 12:32:84:e1:71:51 [ether] on ens18
+? (192.168.2.10) at 12:32:84:e1:71:51 [ether] on ens18
 ? (172.18.0.16) at 02:42:ac:12:00:10 [ether] on docker_gwbridge
 ? (192.168.2.173) at <incomplete> on ens18
 ? (192.168.2.48) at <incomplete> on ens18
 ? (192.168.2.211) at <incomplete> on ens18
 ? (192.168.2.118) at <incomplete> on ens18
-? (192.168.2.25) at <incomplete> on ens18
+iphone-1.home (192.168.2.25) at 7a:1d:53:d1:7c:d8 [ether] on ens18
 ? (192.168.2.188) at <incomplete> on ens18
 ? (192.168.2.95) at <incomplete> on ens18
 ? (192.168.2.226) at <incomplete> on ens18

@@ -1,18 +1,11 @@
-# Nmap 7.93 scan initiated Tue Jun 10 21:26:59 2025 as: nmap -O -sS -oG /config/logs/nmap.log 192.168.2.81/24
+# Nmap 7.93 scan initiated Wed Jun 18 21:02:20 2025 as: nmap -sn -oG /config/logs/nmap.log 192.168.2.81/24
 Host: 192.168.2.2 (sanaa-s-s23-fe.home)	Status: Up
-Host: 192.168.2.2 (sanaa-s-s23-fe.home)	Ports: 	Ignored State: closed (1000)
 Host: 192.168.2.5 (lgwebostv.home)	Status: Up
-Host: 192.168.2.5 (lgwebostv.home)	Ports: 1045/open/tcp//fpitp///, 1199/open/tcp//dmidi///, 3000/open/tcp//ppp///, 3001/open/tcp//nessus///, 7000/open/tcp//afs3-fileserver///, 9080/open/tcp//glrpc///	Ignored State: closed (994)	OS: Linux 4.15 - 5.6	Seq Index: 258	IP ID Seq: All zeros
-Host: 192.168.2.6 (a14-alkhas-b-amer.home)	Status: Up
-Host: 192.168.2.6 (a14-alkhas-b-amer.home)	Ports: 	Ignored State: closed (1000)
+Host: 192.168.2.8 (yoga.home)	Status: Up
 Host: 192.168.2.13 (re200-1.home)	Status: Up
-Host: 192.168.2.13 (re200-1.home)	Ports: 80/open/tcp//http///	Ignored State: closed (999)	OS: Linux 2.6.23 - 2.6.38	Seq Index: 197	IP ID Seq: All zeros
-Host: 192.168.2.14 (yoga-1.home)	Status: Up
-Host: 192.168.2.14 (yoga-1.home)	Ports: 7070/open/tcp//realserver///	Ignored State: filtered (999)	Seq Index: 251	IP ID Seq: Incremental
+Host: 192.168.2.18 (nas.home)	Status: Up
+Host: 192.168.2.33 (rhel9.home)	Status: Up
 Host: 192.168.2.111 (px01.home)	Status: Up
-Host: 192.168.2.111 (px01.home)	Ports: 22/open/tcp//ssh///, 111/open/tcp//rpcbind///, 3128/open/tcp//squid-http///	Ignored State: closed (997)	OS: Linux 4.15 - 5.6	Seq Index: 262	IP ID Seq: All zeros
 Host: 192.168.2.254 (mijnmodem.kpn)	Status: Up
-Host: 192.168.2.254 (mijnmodem.kpn)	Ports: 53/open/tcp//domain///, 80/open/tcp//http///, 631/open/tcp//ipp///, 50000/closed/tcp//ibm-db2///, 50001/closed/tcp//unknown///, 50002/closed/tcp//iiimsf///, 50003/closed/tcp//unknown///, 50006/closed/tcp//unknown///	Ignored State: filtered (992)	OS: Linux 3.2 - 4.9	Seq Index: 261	IP ID Seq: All zeros
 Host: 192.168.2.81 (device-1.home)	Status: Up
-Host: 192.168.2.81 (device-1.home)	Ports: 22/open/tcp//ssh///, 80/filtered/tcp//http///, 111/open/tcp//rpcbind///, 443/filtered/tcp//https///, 1000/filtered/tcp//cadlock///, 3389/filtered/tcp//ms-wbt-server///, 8888/open/tcp//sun-answerbook///, 9000/filtered/tcp//cslistener///	Ignored State: closed (992)	OS: Linux 2.6.32	Seq Index: 262	IP ID Seq: All zeros
-# Nmap done at Tue Jun 10 21:28:29 2025 -- 256 IP addresses (8 hosts up) scanned in 89.80 seconds
+# Nmap done at Wed Jun 18 21:02:22 2025 -- 256 IP addresses (9 hosts up) scanned in 2.18 seconds
