@@ -6,6 +6,7 @@
 # Run fast + docker scan
 /config/bin/atlas fastscan
 /config/bin/atlas dockerscan
+/config/bin/atlas deepscan
 
 # Launch FastAPI backend
 export PYTHONPATH=/config
