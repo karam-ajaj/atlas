@@ -136,9 +136,8 @@ For development CI/CD (for UI and backend anf build a new docker version):
 
 ## 🌍 URLs
 
-- **API Endpoints:**
-  - `🧠 http://localhost:8888/api/hosts` (Host Data API endpoint)
-  - `🌍 http://localhost:8888/api/external` (External IP API endpoint)
+- **Swagger API docs:**
+  - `🌍 http://localhost:8888/api/docs` (Host Data API endpoint)
 
 - **Frontend UI:**
   - `🖥️ UI	http://localhost:8888/` (main dashboard)

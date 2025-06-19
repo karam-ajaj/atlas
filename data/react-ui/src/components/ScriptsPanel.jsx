@@ -4,7 +4,6 @@ const scripts = [
   { label: "Fast Host Scan", key: "scan-hosts-fast" },
   { label: "Deep Host Scan", key: "scan-hosts-deep" },
   { label: "Scan Docker", key: "scan-docker" },
-  { label: "Full Scan", key: "scan-full" },
 ];
 
 export function ScriptsPanel() {

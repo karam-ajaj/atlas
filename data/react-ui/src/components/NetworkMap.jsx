@@ -69,6 +69,9 @@ useEffect(() => {
   const hostIpToNodeId = new Map();
   const seenNetworks = new Set();
 
+  const matchingNodeIds = new Set();
+
+
   const ensureSubnetHub = (subnet, networkName = null) => {
     const hubId = getHubId(subnet);
     if (!subnetMap.has(subnet)) {
@@ -141,12 +144,17 @@ const addHost = (id, ip, name, os, group, ports, mac = "", nexthop, network_name
     });
   }
 
-  const matchFilters =
-    (!filters.name || name.toLowerCase().includes(filters.name.toLowerCase())) &&
-    (!filters.group || group === filters.group) &&
-    (!filters.subnet || subnet.startsWith(filters.subnet));
+const nameMatch = !filters.name || name.toLowerCase().includes(filters.name.toLowerCase());
+const groupMatch = !filters.group || group === filters.group;
+const subnetMatch = !filters.subnet || subnet.startsWith(filters.subnet);
 
-  if (!matchFilters) return;
+const visible = groupMatch && subnetMatch;
+if (!visible) return;
+
+if (filters.name && nameMatch) {
+  matchingNodeIds.add(`${group[0]}-${id}-${ip}`);
+}
+
 
   const hubId = group === "normal" ? ensureSubnetHub(subnet) : null;
 
@@ -253,7 +261,15 @@ if (externalNode?.ip) {
 
 
 
-
+for (const nodeId of matchingNodeIds) {
+  if (nodes.get(nodeId)) {
+    nodes.update({
+      id: nodeId,
+      color: { background: "#facc15", border: "#f59e0b" }, // yellow highlight
+      borderWidth: 3,
+    });
+  }
+}
   setNodeInfoMap(infoMap);
 
   const layoutConfig =

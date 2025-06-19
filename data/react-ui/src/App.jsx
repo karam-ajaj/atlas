@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { NetworkMap } from "./components/NetworkMap";
 import { HostsTable } from "./components/HostsTable";
+import { ScriptsPanel } from "./components/ScriptsPanel";
 import { LogsPanel } from "./components/LogsPanel";
 import { useNetworkStats } from "./hooks/useNetworkStats";
-import { ScriptsPanel } from "./components/ScriptsPanel";
 
-const tabs = ["Network Map", "Hosts Table", "Logs", "Scripts"];
+const tabs = ["Network Map", "Hosts Table", "Scripts", "Logs"];
 
 function Sidebar({ activeTab, setActiveTab }) {
   const stats = useNetworkStats();
@@ -55,8 +55,8 @@ export default function App() {
         {activeTab === "Hosts Table" && (
           <HostsTable selectedNode={selectedNode} onSelectNode={setSelectedNode} />
         )}
-        {activeTab === "Logs" && <LogsPanel />}
         {activeTab === "Scripts" && <ScriptsPanel />}
+        {activeTab === "Logs" && <LogsPanel />}
       </div>
     </div>
   );
