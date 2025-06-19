@@ -127,15 +127,9 @@ The built output will be in:
 /swarm/data/atlas/react-ui/dist/
 ```
 
-Copy build to NGINX HTML volume:
-
+For development CI/CD (for UI and backend anf build a new docker version):
 ```bash
-cp -r dist/* /swarm/data/atlas/html/
-```
-
-For development structure:
-```bash
-mv /swarm/data/atlas/react-ui /swarm/data/atlas-dev/
+/swarm/github-repos/atlas/deploy.sh
 ```
 
 ---

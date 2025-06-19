@@ -1,105 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Hosts</title>
-    <script>
-        function fetchHosts() {
-            const apiBase = window.location.hostname.includes('vnerd.nl')
-  ? 'https://atlas-api.vnerd.nl'
-  : 'http://192.168.2.81:8889';
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Network Hosts</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #eee;
+    }
+    h1, h2 {
+      margin-top: 1em;
+    }
+  </style>
+  <script>
+    async function fetchHosts() {
+      try {
+        const res = await fetch("/api/hosts");
+        const data = await res.json();
+        const [regularHosts, dockerHosts] = data;
 
-fetch(`${apiBase}/hosts`)
+        const regularTable = document.getElementById("regularHostsTable");
+        const dockerTable = document.getElementById("dockerHostsTable");
 
-                .then(response => response.json())
-                .then(data => {
-                    const [regularHosts, dockerHosts] = data;
-
-                    const regularTable = document.getElementById('regularHostsTable');
-                    const dockerTable = document.getElementById('dockerHostsTable');
-
-                    // Populate regular hosts table
-                    regularHosts.forEach(host => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${host[0]}</td>
-                            <td>${host[1]}</td>
-                            <td>${host[2]}</td>
-                            <td>${host[3]}</td>
-                            <td>${host[4]}</td>
-                            <td>${host[5]}</td>
-                            <td>${host[6]}</td>
-                            <td>${host[7]}</td>
-                            <td>${host[8]}</td>
-                        `;
-                        regularTable.appendChild(row);
-                    });
-
-                    // Populate docker hosts table
-                    dockerHosts.forEach(host => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${host[0]}</td>
-                            <td>${host[1]}</td>
-                            <td>${host[2]}</td>
-                            <td>${host[3]}</td>
-                            <td>${host[4]}</td>
-                            <td>${host[5]}</td>
-                            <td>${host[6]}</td>
-                            <td>${host[7]}</td>
-                            <td>${host[8]}</td>
-                        `;
-                        dockerTable.appendChild(row);
-                    });
-                })
-                .catch(error => console.error('Error fetching data:', error));
+        function insertRow(host, table) {
+          const row = document.createElement("tr");
+          row.innerHTML = host.map(cell => `<td>${cell}</td>`).join("");
+          table.appendChild(row);
         }
 
-        window.onload = fetchHosts;
-    </script>
+        regularHosts.forEach(h => insertRow(h, regularTable));
+        dockerHosts.forEach(h => insertRow(h, dockerTable));
+
+      } catch (err) {
+        console.error("❌ Failed to load /api/hosts:", err);
+        document.body.innerHTML += `<p style="color:red;">Error loading host data. Check console for details.</p>`;
+      }
+    }
+
+    window.onload = fetchHosts;
+  </script>
 </head>
 <body>
-    <h1>Network Hosts</h1>
+  <h1>📡 Network Hosts Overview</h1>
 
-    <h2>Regular Hosts</h2>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>IP</th>
-                <th>Name</th>
-                <th>OS Details</th>
-                <th>MAC Address</th>
-                <th>Open Ports</th>
-                <th>Next hop</th>
-                <th>Network Name</th>
-                <th>Last Seen</th>
-            </tr>
-        </thead>
-        <tbody id="regularHostsTable">
-            <!-- Regular hosts will be added here -->
-        </tbody>
-    </table>
+  <h2>🖥️ Regular Hosts</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>IP</th>
+        <th>Name</th>
+        <th>OS Details</th>
+        <th>MAC Address</th>
+        <th>Open Ports</th>
+        <th>Next hop</th>
+        <th>Network Name</th>
+        <th>Last Seen</th>
+      </tr>
+    </thead>
+    <tbody id="regularHostsTable"></tbody>
+  </table>
 
-    <h2>Docker Hosts</h2>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>IP</th>
-                <th>Name</th>
-                <th>OS Details</th>
-                <th>MAC Address</th>
-                <th>Open Ports</th>
-                <th>Next hop</th>
-                <th>Network Name</th>
-                <th>Last Seen</th>
-            </tr>
-        </thead>
-        <tbody id="dockerHostsTable">
-            <!-- Docker hosts will be added here -->
-        </tbody>
-    </table>
+  <h2>🐳 Docker Hosts</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>IP</th>
+        <th>Name</th>
+        <th>OS Details</th>
+        <th>MAC Address</th>
+        <th>Open Ports</th>
+        <th>Next hop</th>
+        <th>Network Name</th>
+        <th>Last Seen</th>
+      </tr>
+    </thead>
+    <tbody id="dockerHostsTable"></tbody>
+  </table>
 </body>
 </html>

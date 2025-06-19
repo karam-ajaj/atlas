@@ -33,6 +33,9 @@ function Sidebar({ activeTab, setActiveTab }) {
         <p>Normal Hosts: {stats.normal}</p>
         <p>Unique Subnets: {stats.subnets}</p>
         <p>Duplicate IPs: {stats.duplicateIps}</p>
+        {stats.updatedAt && (
+          <p className="mt-2 text-gray-400 italic">Updated: {stats.updatedAt}</p>
+        )}
       </div>
     </div>
   );
