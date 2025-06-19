@@ -1,3 +1,12 @@
+# Ignore DB and logs
 config/db/
-config/scripts/__pycache__/
+config/logs/
 *.log
+
+# Ignore Python cache
+config/scripts/__pycache__/
+
+# Ignore Git and editor junk
+.git
+*.swp
+*.bak

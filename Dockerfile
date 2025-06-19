@@ -24,7 +24,8 @@ COPY config/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY data/html/ /usr/share/nginx/html/
 
 # Copy scripts, logs, Go binary, FastAPI backend
-COPY config /config/
+# COPY config /config/
+COPY config/scripts /config/scripts
 COPY --from=builder /app/atlas /config/bin/atlas
 
 # Make all shell scripts executable

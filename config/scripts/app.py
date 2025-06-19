@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 import subprocess
+import logging
 
 app = FastAPI()
 
@@ -47,18 +48,19 @@ def get_external_networks():
 @app.post("/scripts/run/{script_name}")
 def run_named_script(script_name: str):
     allowed_scripts = {
-        "scan-full": "/config/scripts/atlas_check.sh",
-        "scan-hosts-fast": "/config/scripts/atlas_hosts_fast_scan.sh",
-        "scan-hosts-deep": "/config/scripts/atlas_hosts_deep_scan_macs.sh",
-        "scan-docker": "/config/scripts/atlas_docker_script_multips_ips.sh"
+        "scan-hosts-fast": "/config/bin/atlas fastscan",
+        "scan-hosts-deep": "/config/bin/atlas deepscan",
+        "scan-docker": "/config/bin/atlas dockerscan"
     }
 
     if script_name not in allowed_scripts:
         raise HTTPException(status_code=400, detail="Invalid script name")
 
     try:
+        command = allowed_scripts[script_name].split()
+        logging.debug(f"Running: {command}")
         result = subprocess.run(
-            [allowed_scripts[script_name]],
+            command,
             capture_output=True,
             text=True,
             check=True
@@ -66,4 +68,3 @@ def run_named_script(script_name: str):
         return JSONResponse(content={"status": "success", "output": result.stdout})
     except subprocess.CalledProcessError as e:
         return JSONResponse(status_code=500, content={"status": "error", "output": e.stderr})
-
