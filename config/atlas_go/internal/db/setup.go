@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS hosts (
 	open_ports TEXT,
 	next_hop TEXT,
 	network_name TEXT,
+	status TEXT DEFAULT 'unknown',
 	last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -47,6 +48,7 @@ CREATE TABLE IF NOT EXISTS docker_hosts (
 	open_ports TEXT,
 	next_hop TEXT,
 	network_name TEXT,
+	status TEXT DEFAULT 'unknown',
 	last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -64,6 +66,9 @@ CREATE TABLE IF NOT EXISTS logs (
 	content TEXT,
 	timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE hosts ADD COLUMN online_status TEXT DEFAULT 'unknown';
+ALTER TABLE docker_hosts ADD COLUMN online_status TEXT DEFAULT 'unknown';
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_hosts_ip ON hosts(ip);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_docker_hosts_ip ON docker_hosts(ip);

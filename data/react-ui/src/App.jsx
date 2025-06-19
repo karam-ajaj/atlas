@@ -35,7 +35,7 @@ function Sidebar({ activeTab, setActiveTab }) {
         <p>Duplicate IPs: {stats.duplicateIps}</p>
         {stats.updatedAt && (
           <p className="mt-2 text-gray-400 italic">Updated: {stats.updatedAt}</p>
-        )}
+      )}
       </div>
     </div>
   );

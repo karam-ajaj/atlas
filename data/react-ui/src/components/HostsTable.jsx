@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { formatDistanceToNow, parseISO } from "date-fns";
+import { StatusDot } from "./StatusDot";
+
 
 import {
   useReactTable,
@@ -19,7 +21,7 @@ export function HostsTable({ selectedNode }) {
       .then((res) => res.json())
       .then(([normal, docker]) => {
         const flatten = (arr, group) =>
-          arr.map(([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) => ({
+          arr.map(([id, ip, name, os, mac, ports, nexthop, network_name, last_seen, online_status]) => ({
             id: `${group[0]}-${id}`,
             ip,
             name,
@@ -31,13 +33,24 @@ export function HostsTable({ selectedNode }) {
             network_name,
             subnet: ip.split(".").slice(0, 3).join("."),
             last_seen,
+            online_status,
           }));
         setData([...flatten(normal, "normal"), ...flatten(docker, "docker")]);
       });
   }, []);
 
   const columns = useMemo(() => [
-  { accessorKey: "name", header: "Name", meta: { width: "w-64" } },
+  {
+  accessorKey: "name",
+  header: "Name",
+  meta: { width: "w-64" },
+  cell: ({ row }) => (
+    <div className="flex items-center">
+      <StatusDot status={row.original.online_status} />
+      {row.original.name}
+    </div>
+  ),
+},
   { accessorKey: "ip", header: "IP", meta: { width: "w-36" } },
   { accessorKey: "os", header: "OS", meta: { width: "w-24" } },
   { accessorKey: "mac", header: "MAC", meta: { width: "w-48" } },
@@ -51,10 +64,17 @@ export function HostsTable({ selectedNode }) {
   header: "Last Seen",
   meta: { width: "w-48" },
   cell: ({ getValue }) => {
-    const raw = getValue();
-    if (!raw) return "Unknown";
-    return formatDistanceToNow(parseISO(raw), { addSuffix: true });
-  },
+  const raw = getValue();
+  if (!raw || raw === "Unknown") return "Unknown";
+
+  try {
+    const parsed = parseISO(raw);
+    if (isNaN(parsed)) return "Invalid";
+    return formatDistanceToNow(parsed, { addSuffix: true });
+  } catch (e) {
+    return "Invalid";
+  }
+},
 }
 ], []);
 

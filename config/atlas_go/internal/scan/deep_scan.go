@@ -13,6 +13,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+import "atlas/internal/utils"
+
 var commonPorts = []int{22, 80, 443, 445, 139, 3306, 8080, 8443, 3000, 9091, 3389}
 
 func getAliveHosts() ([]string, error) {
@@ -112,7 +114,7 @@ func getOSFingerprint(ip string) string {
 	return "Unknown"
 }
 
-func insertHostInfo(ip, name, osDetails, mac string, ports []string) {
+func insertHostInfo(ip, name, osDetails, mac string, ports []string, status string) {
 	dbPath := "/config/db/atlas.db"
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
@@ -126,16 +128,22 @@ func insertHostInfo(ip, name, osDetails, mac string, ports []string) {
 		portList = strings.Join(ports, ",")
 	}
 
-	_, err = db.Exec(`
-		INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen)
-		VALUES (?, ?, ?, ?, ?, '', '', CURRENT_TIMESTAMP)
-		ON CONFLICT(ip) DO UPDATE SET
-			name=excluded.name,
-			os_details=excluded.os_details,
-			mac_address=excluded.mac_address,
-			open_ports=excluded.open_ports,
-			last_seen=CURRENT_TIMESTAMP
-	`, ip, name, osDetails, mac, portList)
+_, err = db.Exec(`
+    INSERT INTO hosts (
+        ip, name, os_details, mac_address, open_ports, next_hop, network_name, status, last_seen
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(ip) DO UPDATE SET
+        name=excluded.name,
+        os_details=excluded.os_details,
+        mac_address=excluded.mac_address,
+        open_ports=excluded.open_ports,
+        next_hop=excluded.next_hop,
+        network_name=excluded.network_name,
+        status=excluded.status,
+        last_seen=CURRENT_TIMESTAMP
+`, ip, name, osDetails, mac, portList, "", "", status)
+
 
 	if err != nil {
 		fmt.Printf("❌ Insert/update failed for %s: %v\n", ip, err)
@@ -143,6 +151,7 @@ func insertHostInfo(ip, name, osDetails, mac string, ports []string) {
 		fmt.Printf("✅ Recorded %s (%s)\n", ip, name)
 	}
 }
+
 
 func DeepScan() error {
 	ips, err := getAliveHosts()
@@ -162,7 +171,8 @@ func DeepScan() error {
 			osDetails = "Unknown"
 		}
 
-		insertHostInfo(ip, name, osDetails, mac, ports)
+		status := utils.PingHost(ip)
+		insertHostInfo(ip, name, osDetails, mac, ports, status)
 	}
 
 	return nil

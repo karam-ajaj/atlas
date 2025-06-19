@@ -12,6 +12,8 @@ import (
     _ "github.com/mattn/go-sqlite3"
 )
 
+import "atlas/internal/utils"
+
 type DockerContainer struct {
     ID      string
     Name    string
@@ -121,37 +123,46 @@ func getGateway(network, ip string) string {
 
 
 func updateDockerDB(containers []DockerContainer) error {
-    db, err := sql.Open("sqlite3", "/config/db/atlas.db")
-    if err != nil {
-        return err
-    }
-    defer db.Close()
+	db, err := sql.Open("sqlite3", "/config/db/atlas.db")
+	if err != nil {
+		return err
+	}
+	defer db.Close()
 
-    knownIPs := []string{}
-    for _, c := range containers {
-        knownIPs = append(knownIPs, c.IP)
+	knownIPs := []string{}
+	for _, c := range containers {
+		knownIPs = append(knownIPs, c.IP)
 
-        _, err = db.Exec(`
-            INSERT INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(ip) DO UPDATE SET
-                name=excluded.name,
-                os_details=excluded.os_details,
-                mac_address=excluded.mac_address,
-                open_ports=excluded.open_ports,
-                next_hop=excluded.next_hop,
-                network_name=excluded.network_name,
-                last_seen=excluded.last_seen
-        `, c.IP, c.Name, c.OS, c.MAC, c.Ports, c.NextHop, c.NetName, time.Now().Format("2006-01-02 15:04:05"))
-        if err != nil {
-            fmt.Printf("Insert/update failed for %s: %v\n", c.IP, err)
-        }
-    }
+        status := utils.PingHost(c.IP)
+		// status := "offline"
+		// if utils.IsHostOnline(c.IP) {
+		// 	status = "online"
+		// }
 
-    ipList := "'" + strings.Join(knownIPs, "','") + "'"
-    _, err = db.Exec(fmt.Sprintf("DELETE FROM docker_hosts WHERE ip NOT IN (%s);", ipList))
-    return err
+		_, err = db.Exec(`
+			INSERT INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, online_status, last_seen)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+			ON CONFLICT(ip) DO UPDATE SET
+				name=excluded.name,
+				os_details=excluded.os_details,
+				mac_address=excluded.mac_address,
+				open_ports=excluded.open_ports,
+				next_hop=excluded.next_hop,
+				network_name=excluded.network_name,
+				online_status=excluded.online_status,
+				last_seen=excluded.last_seen
+		`, c.IP, c.Name, c.OS, c.MAC, c.Ports, c.NextHop, c.NetName, status, time.Now().Format("2006-01-02 15:04:05"))
+		if err != nil {
+			fmt.Printf("Insert/update failed for %s: %v\n", c.IP, err)
+		}
+	}
+
+	// Clean up old records
+	ipList := "'" + strings.Join(knownIPs, "','") + "'"
+	_, err = db.Exec(fmt.Sprintf("DELETE FROM docker_hosts WHERE ip NOT IN (%s);", ipList))
+	return err
 }
+
 
 func DockerScan() error {
     ids, err := getDockerContainers()
