@@ -28,6 +28,25 @@ Atlas performs three key functions:
 
 ---
 
+## 🖼️ Screenshots
+
+### Dashboard View
+
+![Atlas Dashboard 1](screenshots/network-map-1.png)
+![Atlas Dashboard 2](screenshots/network-map-2.png)
+
+### Hosts Table
+
+![Hosts Table 1](screenshots/hosts-table-1.png)
+![Hosts Table 1](screenshots/hosts-table-2.png)
+
+### Vis Dashboard (dev)
+
+![Network Graph](screenshots/vis.png)
+
+
+---
+
 ## 🚀 Deployment (Docker)
 
 Run the Atlas stack with:
@@ -46,7 +65,7 @@ docker run -d \
 
 Expose the UI on http://localhost:8888
 
-Launch backend API at http://localhost:8888/api/...
+Launch backend API at http://localhost:8889
 
 Auto-scan Docker + local subnet on container start
 
