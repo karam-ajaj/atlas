@@ -32,18 +32,33 @@ Atlas performs three key functions:
 
 ### Dashboard View
 
-![Atlas Dashboard 1](screenshots/network-map-1.png)
-![Atlas Dashboard 2](screenshots/network-map-2.png)
+<div style="display: flex; gap: 24px; flex-wrap: wrap;">
+  <a href="screenshots/network-map-1.png" target="_blank">
+    <img src="screenshots/network-map-1.png" alt="Atlas Dashboard 1" width="300"/>
+  </a>
+  <a href="screenshots/network-map-2.png" target="_blank">
+    <img src="screenshots/network-map-2.png" alt="Atlas Dashboard 2" width="300"/>
+  </a>
+</div>
 
 ### Hosts Table
 
-![Hosts Table 1](screenshots/hosts-table-1.png)
-![Hosts Table 1](screenshots/hosts-table-2.png)
+<div style="display: flex; gap: 24px; flex-wrap: wrap;">
+  <a href="screenshots/hosts-table-1.png" target="_blank">
+    <img src="screenshots/hosts-table-1.png" alt="Hosts Table 1" width="300"/>
+  </a>
+  <a href="screenshots/hosts-table-2.png" target="_blank">
+    <img src="screenshots/hosts-table-2.png" alt="Hosts Table 2" width="300"/>
+  </a>
+</div>
 
 ### Vis Dashboard (dev)
 
-![Network Graph](screenshots/vis.png)
-
+<div style="display: flex; gap: 24px; flex-wrap: wrap;">
+  <a href="screenshots/vis.png" target="_blank">
+    <img src="screenshots/vis.png" alt="Network Graph" width="300"/>
+  </a>
+</div>
 
 ---
 
