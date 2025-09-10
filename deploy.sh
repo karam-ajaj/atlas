@@ -34,9 +34,14 @@ echo "🐳 Building Docker image: keinstien/atlas:$VERSION"
 cd /swarm/github-repos/atlas || exit 1
 docker build -t keinstien/atlas:$VERSION . || exit 1
 
-# Step 6: Push to Docker Hub
+# Tag and push latest
+echo "🔄 Tagging Docker image as latest"
+docker tag keinstien/atlas:$VERSION keinstien/atlas:latest
+
+# Step 6: Push both tags to Docker Hub
 echo "📤 Pushing Docker image to Docker Hub..."
 docker push keinstien/atlas:$VERSION || exit 1
+docker push keinstien/atlas:latest || exit 1
 
 # Step 7: Run new container
 echo "🚀 Deploying container..."

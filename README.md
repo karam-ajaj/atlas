@@ -132,6 +132,37 @@ For development CI/CD (for UI and backend anf build a new docker version):
 /swarm/github-repos/atlas/deploy.sh
 ```
 
+
+## 🚀 CI/CD: Build and Publish a New Atlas Docker Image
+
+To deploy a new version and upload it to Docker Hub, use the provided CI/CD script:
+
+1. Build and publish a new image:
+
+   ```bash
+   /swarm/github-repos/atlas/deploy.sh
+   ```
+
+   - The script will prompt you for a version tag (e.g. `v3.2`).
+   - It will build the React frontend, copy to NGINX, build the Docker image, and push **both** `keinstien/atlas:$VERSION` and `keinstien/atlas:latest` to Docker Hub.
+
+2. Why push both tags?
+
+   - **Version tag:** Allows you to pin deployments to a specific release (e.g. `keinstien/atlas:v3.2`).
+   - **Latest tag:** Users can always pull the most recent stable build via `docker pull keinstien/atlas:latest`.
+
+3. The script will also redeploy the running container with the new version.
+
+**Example output:**
+```shell
+🔄 Tagging Docker image as latest
+📤 Pushing Docker image to Docker Hub...
+✅ Deployment complete for version: v3.2
+```
+
+> **Note:** Make sure you are logged in to Docker Hub (`docker login`) before running the script.
+
+
 ---
 
 ## 🌍 URLs
