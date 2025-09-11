@@ -6,7 +6,6 @@
 ---
 ## Live Demo 🔗 [atlasdemo.vnerd.nl](https://atlasdemo.vnerd.nl/)
 
----
 ## 🚀 What It Does
 
 Atlas performs three key functions:
