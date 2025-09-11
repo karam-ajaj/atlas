@@ -239,6 +239,7 @@ To edit UI:
 - Modify React app under `/react-ui`
 - Rebuild and copy static files to `/html`
 
+(automated deplolyment and publish to dockerhub using the script deploy.sh)
 ---
 
 ## ⚙️ Automation Notes
