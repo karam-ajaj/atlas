@@ -84,6 +84,12 @@ Launch backend API at http://localhost:8889
 
 Auto-scan Docker + local subnet on container start
 
+#### Useful links
+
+Swagger API: http://localhost/api/docs
+
+Network Hosts Overview: http://localhost/hosts.html
+
 ---
 
 ## ⚙️ How it Works
