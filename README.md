@@ -238,8 +238,7 @@ To edit API:
 To edit UI:
 - Modify React app under `/react-ui`
 - Rebuild and copy static files to `/html`
-
-_automated deplolyment and publish to dockerhub using the script deploy.sh_
+- _automated deplolyment and publish to dockerhub using the script deploy.sh_
 ---
 
 ## ⚙️ Automation Notes
