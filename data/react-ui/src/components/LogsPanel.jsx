@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 
 export function LogsPanel() {
   const [logFiles, setLogFiles] = useState([]);
@@ -14,10 +14,19 @@ export function LogsPanel() {
     fetch("/api/logs/list")
       .then((res) => res.json())
       .then((files) => {
-        setLogFiles(files);
-        if (files.length > 0) setSelectedFile(files[0]);
-      });
+        setLogFiles(files || []);
+        if (files && files.length > 0) setSelectedFile(files[0]);
+      })
+      .catch(() => setLogFiles([]));
   }, []);
+
+  // Selected file label for display and tooltip
+  const selectedLabel = useMemo(() => {
+    if (!selectedFile) return "";
+    return selectedFile.startsWith("container:")
+      ? `(Container) ${selectedFile.replace("container:", "")}`
+      : selectedFile;
+  }, [selectedFile]);
 
   useEffect(() => {
     if (!selectedFile) return;
@@ -31,27 +40,29 @@ export function LogsPanel() {
     setLogLines([]);
     setLoading(true);
 
+    const enc = encodeURIComponent(selectedFile);
+
     if (streaming) {
-      const es = new EventSource(`/api/logs/${selectedFile}/stream`);
+      const es = new EventSource(`/api/logs/${enc}/stream`);
       es.onmessage = (event) => {
-        const line = event.data.trim();
+        const line = (event.data ?? "").trim();
         if (!seenLinesRef.current.has(line)) {
           seenLinesRef.current.add(line);
           setLogLines((prev) => [...prev.slice(-500), line]);
         }
       };
       es.onerror = () => {
-        es.close();
+        try { es.close(); } catch {}
         eventSourceRef.current = null;
       };
       eventSourceRef.current = es;
       setLoading(false);
     } else {
-      fetch(`/api/logs/${selectedFile}`)
+      fetch(`/api/logs/${enc}`)
         .then((res) => res.json())
         .then((data) => {
-          const lines = data.content.split("\n");
-          lines.forEach(line => seenLinesRef.current.add(line));
+          const lines = (data?.content || "").split("\n");
+          lines.forEach((line) => seenLinesRef.current.add(line));
           setLogLines(lines.slice(-500));
         })
         .finally(() => setLoading(false));
@@ -59,15 +70,16 @@ export function LogsPanel() {
 
     return () => {
       if (eventSourceRef.current) {
-        eventSourceRef.current.close();
+        try { eventSourceRef.current.close(); } catch {}
         eventSourceRef.current = null;
       }
     };
   }, [selectedFile, streaming]);
 
   const handleDownload = () => {
+    const enc = encodeURIComponent(selectedFile);
     const link = document.createElement("a");
-    link.href = `/api/logs/${selectedFile}/download`;
+    link.href = `/api/logs/${enc}/download`;
     link.download = selectedFile;
     link.click();
   };
@@ -86,40 +98,57 @@ export function LogsPanel() {
 
   return (
     <div className="p-4 bg-gray-900 text-green-300 font-mono rounded shadow h-full flex flex-col space-y-4">
-      <div className="flex items-center space-x-4">
-        <label className="text-white">Select Log:</label>
-        <select
-          value={selectedFile}
-          onChange={(e) => setSelectedFile(e.target.value)}
-          className="bg-gray-800 text-white px-2 py-1 rounded"
-        >
-          {logFiles.map((file) => (
-            <option key={file} value={file}>
-              {file.startsWith("container:") ? `(Container) ${file.replace("container:", "")}` : file}
-            </option>
-          ))}
-        </select>
+      {/* Toolbar: responsive and keeps search visible */}
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="text-white shrink-0">Select Log:</label>
+
+        {/* Constrain select to a width ratio so it doesn't take over the row */}
+        <div className="flex-1 min-w-[220px] max-w-[50%]">
+          <select
+            title={selectedLabel}
+            value={selectedFile}
+            onChange={(e) => setSelectedFile(e.target.value)}
+            className="bg-gray-800 text-white px-2 py-1 rounded w-full"
+          >
+            {logFiles.map((file) => {
+              const label = file.startsWith("container:")
+                ? `(Container) ${file.replace("container:", "")}`
+                : file;
+              return (
+                <option key={file} value={file} title={label}>
+                  {label}
+                </option>
+              );
+            })}
+          </select>
+        </div>
 
         <button
           onClick={handleDownload}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded shrink-0"
+          disabled={!selectedFile}
+          title="Download current log"
         >
           Download
         </button>
 
         <button
           onClick={() => setStreaming((prev) => !prev)}
-          className={`px-4 py-1 rounded ${streaming ? "bg-red-600" : "bg-gray-700"} text-white`}
+          className={`px-4 py-1 rounded text-white shrink-0 ${
+            streaming ? "bg-red-600 hover:bg-red-700" : "bg-gray-700 hover:bg-gray-600"
+          }`}
+          disabled={!selectedFile}
         >
           {streaming ? "Stop Live" : "Live Stream"}
         </button>
 
+        {/* Search: full width on small screens, fixed width on larger */}
         <input
           type="text"
           placeholder="Search..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-gray-800 text-white px-2 py-1 rounded border border-gray-600"
+          className="bg-gray-800 text-white px-2 py-1 rounded border border-gray-600 w-full sm:w-64 md:w-80 shrink-0"
         />
       </div>
 

@@ -4,6 +4,8 @@ import { HostsTable } from "./components/HostsTable";
 import { ScriptsPanel } from "./components/ScriptsPanel";
 import { LogsPanel } from "./components/LogsPanel";
 import { useNetworkStats } from "./hooks/useNetworkStats";
+import BuildTag from "./components/BuildTag";
+import ThemeToggle from "./components/ThemeToggle";
 
 const tabs = ["Network Map", "Hosts Table", "Scripts", "Logs"];
 
@@ -12,7 +14,7 @@ function Sidebar({ activeTab, setActiveTab }) {
 
   return (
     <div className="w-64 bg-gray-900 text-white p-4 flex flex-col">
-      <h1 className="text-xl font-bold mb-6">Atlas UI</h1>
+      <h1 className="text-xl font-bold mb-1">Atlas UI<span className="ml-2"><BuildTag /></span></h1>
       <div className="space-y-2">
         {tabs.map((tab) => (
           <button
@@ -35,7 +37,7 @@ function Sidebar({ activeTab, setActiveTab }) {
         <p>Duplicate IPs: {stats.duplicateIps}</p>
         {stats.updatedAt && (
           <p className="mt-2 text-gray-400 italic">Updated: {stats.updatedAt}</p>
-      )}
+        )}
       </div>
     </div>
   );

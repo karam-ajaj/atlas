@@ -1,12 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, FileResponse, StreamingResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
 import sqlite3
 import subprocess
 import logging
 import os
-import time
 
 app = FastAPI(
     title="Atlas Network API",
@@ -14,10 +12,9 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    root_path="/api",  # 🛠️ Needed when served behind Nginx as /api/
+    root_path="/api",
 )
 
-# Enable CORS for frontend access
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,7 +23,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# === ROUTES ===
+LOGS_DIR = "/config/logs"
+os.makedirs(LOGS_DIR, exist_ok=True)
+
+# Scripts and their log files (used for POST tee + stream)
+ALLOWED_SCRIPTS = {
+    "scan-hosts-fast": {
+        "cmd": "/config/bin/atlas fastscan",
+        "log": os.path.join(LOGS_DIR, "scan-hosts-fast.log"),
+    },
+    "scan-hosts-deep": {
+        "cmd": "/config/bin/atlas deepscan",
+        "log": os.path.join(LOGS_DIR, "scan-hosts-deep.log"),
+    },
+    "scan-docker": {
+        "cmd": "/config/bin/atlas dockerscan",
+        "log": os.path.join(LOGS_DIR, "scan-docker.log"),
+    },
+}
 
 @app.get("/hosts", tags=["Hosts"])
 def get_hosts():
@@ -52,24 +66,68 @@ def get_external_networks():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# POST still supported; now tees output to a persistent log file too
 @app.post("/scripts/run/{script_name}", tags=["Scripts"])
 def run_named_script(script_name: str):
-    allowed_scripts = {
-        "scan-hosts-fast": "/config/bin/atlas fastscan",
-        "scan-hosts-deep": "/config/bin/atlas deepscan",
-        "scan-docker": "/config/bin/atlas dockerscan"
-    }
-
-    if script_name not in allowed_scripts:
+    if script_name not in ALLOWED_SCRIPTS:
         raise HTTPException(status_code=400, detail="Invalid script name")
 
+    cmd = ALLOWED_SCRIPTS[script_name]["cmd"]
+    log_file = ALLOWED_SCRIPTS[script_name]["log"]
+    os.makedirs(LOGS_DIR, exist_ok=True)
+    open(log_file, "a").close()  # ensure exists
+
     try:
-        command = allowed_scripts[script_name].split()
-        logging.debug(f"Running: {command}")
-        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        shell_cmd = f'{cmd} 2>&1 | tee -a "{log_file}"'
+        logging.debug(f"Running (tee to log): {shell_cmd}")
+        result = subprocess.run(["bash", "-lc", shell_cmd], capture_output=True, text=True, check=True)
         return JSONResponse(content={"status": "success", "output": result.stdout})
     except subprocess.CalledProcessError as e:
+        # also persist error output
+        try:
+            with open(log_file, "a") as f:
+                if e.stdout: f.write(e.stdout)
+                if e.stderr: f.write(e.stderr)
+        except Exception:
+            pass
         return JSONResponse(status_code=500, content={"status": "error", "output": e.stderr})
+
+# NEW: proper live stream endpoint that ends when the process exits
+@app.get("/scripts/run/{script_name}/stream", tags=["Scripts"])
+def stream_named_script(script_name: str):
+    if script_name not in ALLOWED_SCRIPTS:
+        raise HTTPException(status_code=400, detail="Invalid script name")
+
+    cmd = ALLOWED_SCRIPTS[script_name]["cmd"]
+    log_file = ALLOWED_SCRIPTS[script_name]["log"]
+    os.makedirs(LOGS_DIR, exist_ok=True)
+    open(log_file, "a").close()
+
+    def event_generator():
+        # Use bash -lc so pipes/aliases work if needed
+        process = subprocess.Popen(
+            ["bash", "-lc", cmd],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+        try:
+            with open(log_file, "a", buffering=1) as lf:
+                for line in iter(process.stdout.readline, ''):
+                    lf.write(line)
+                    yield f"data: {line.rstrip()}\n\n"
+            rc = process.wait()
+            # Let the client know we are done; then the HTTP connection is closed
+            yield f"data: [exit {rc}]\n\n"
+        except GeneratorExit:
+            # Client closed connection; stop the process
+            try: process.kill()
+            except Exception: pass
+        except Exception as e:
+            yield f"data: [ERROR] {str(e)}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @app.get("/scripts/last-scan-status", tags=["Scripts"])
 def last_scan_status():
@@ -86,8 +144,6 @@ def last_scan_status():
         "deep": get_latest("hosts"),
         "docker": get_latest("docker_hosts")
     }
-
-LOGS_DIR = "/config/logs"
 
 @app.get("/logs/list", tags=["Logs"])
 def list_logs():
@@ -165,6 +221,7 @@ def stream_log(filename: str):
             if not os.path.exists(filepath):
                 yield f"data: [ERROR] File not found: {filepath}\n\n"
                 return
+            # NOTE: -F follows forever; the client must close this
             cmd = ["tail", "-n", "10", "-F", filepath]
 
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)

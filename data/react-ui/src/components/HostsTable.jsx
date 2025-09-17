@@ -1,234 +1,349 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
-import { formatDistanceToNow, parseISO } from "date-fns";
-import { StatusDot } from "./StatusDot";
+import React, { useEffect, useMemo, useState } from "react";
 
+function ipToNum(ip) {
+  const m = (ip || "").match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (!m) return Number.MAX_SAFE_INTEGER;
+  return (
+    (parseInt(m[1]) << 24) +
+    (parseInt(m[2]) << 16) +
+    (parseInt(m[3]) << 8) +
+    parseInt(m[4])
+  );
+}
+function subnetOf(ip) {
+  const parts = (ip || "").split(".");
+  return parts.length === 4 ? `${parts[0]}.${parts[1]}.${parts[2]}` : "";
+}
+function fmtLastSeen(v) {
+  if (!v || v.toLowerCase() === "invalid" || v.toLowerCase() === "unknown") return "—";
+  const s = (v + "Z").replace(" ", "T");
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return v;
+  const secs = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
+  if (secs < 60) return `${secs}s`;
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d`;
+}
+function normalizeRow(r, group) {
+  return {
+    id: r[0],
+    ip: r[1] || "",
+    name: r[2] || "NoName",
+    os: r[3] || "Unknown",
+    mac: r[4] || "Unknown",
+    ports: r[5] || "no_ports",
+    nextHop: r[6] || "Unknown",
+    network: r[7] || (group === "docker" ? "docker" : ""),
+    lastSeen: r[8] || "Invalid",
+    group,
+    subnet: subnetOf(r[1] || ""),
+  };
+}
+function sortRows(rows, key, dir) {
+  const sign = dir === "desc" ? -1 : 1;
+  return [...rows].sort((a, b) => {
+    if (key === "ip") return (ipToNum(a.ip) - ipToNum(b.ip)) * sign;
+    if (key === "lastSeen") {
+      const ad = new Date((a.lastSeen + "Z").replace(" ", "T")).getTime() || 0;
+      const bd = new Date((b.lastSeen + "Z").replace(" ", "T")).getTime() || 0;
+      return (ad - bd) * sign;
+    }
+    const av = (a[key] || "").toString().toLowerCase();
+    const bv = (b[key] || "").toString().toLowerCase();
+    if (av < bv) return -1 * sign;
+    if (av > bv) return 1 * sign;
+    return (ipToNum(a.ip) - ipToNum(b.ip)) * sign;
+  });
+}
 
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  flexRender,
-} from "@tanstack/react-table";
-import { useVirtualizer } from "@tanstack/react-virtual";
-
-export function HostsTable({ selectedNode }) {
-  const [data, setData] = useState([]);
-  const [globalFilter, setGlobalFilter] = useState("");
+function HostsTable() {
+  const [raw, setRaw] = useState({ hosts: [], docker: [] });
+  const [q, setQ] = useState("");
+  const [sortKey, setSortKey] = useState("group");
+  const [sortDir, setSortDir] = useState("asc");
+  const [mode, setMode] = useState("basic"); // basic | advanced
+  const [density, setDensity] = useState("comfortable"); // comfortable | compact
 
   useEffect(() => {
     fetch("/api/hosts")
-      .then((res) => res.json())
-      .then(([normal, docker]) => {
-        const flatten = (arr, group) =>
-          arr.map(([id, ip, name, os, mac, ports, nexthop, network_name, last_seen, online_status]) => ({
-            id: `${group[0]}-${id}`,
-            ip,
-            name,
-            os,
-            mac,
-            group,
-            ports,
-            nexthop,
-            network_name,
-            subnet: ip.split(".").slice(0, 3).join("."),
-            last_seen,
-            online_status,
-          }));
-        setData([...flatten(normal, "normal"), ...flatten(docker, "docker")]);
-      });
+      .then((r) => r.json())
+      .then((json) => {
+        const hostsRows = Array.isArray(json?.[0]) ? json[0] : [];
+        const dockerRows = Array.isArray(json?.[1]) ? json[1] : [];
+        setRaw({ hosts: hostsRows, docker: dockerRows });
+      })
+      .catch(() => setRaw({ hosts: [], docker: [] }));
   }, []);
 
-  const columns = useMemo(() => [
-  {
-  accessorKey: "name",
-  header: "Name",
-  meta: { width: "w-64" },
-  cell: ({ row }) => (
-    <div className="flex items-center">
-      <StatusDot status={row.original.online_status} />
-      {row.original.name}
-    </div>
-  ),
-},
-  { accessorKey: "ip", header: "IP", meta: { width: "w-36" } },
-  { accessorKey: "os", header: "OS", meta: { width: "w-24" } },
-  { accessorKey: "mac", header: "MAC", meta: { width: "w-48" } },
-  { accessorKey: "group", header: "Group", meta: { width: "w-24" } },
-  { accessorKey: "ports", header: "Ports", meta: { width: "w-96" } },
-  { accessorKey: "nexthop", header: "Next Hop", meta: { width: "w-36" } },
-  { accessorKey: "subnet", header: "Subnet", meta: { width: "w-32" } },
-  { accessorKey: "network_name", header: "Network", meta: { width: "w-48" } },
-  {
-  accessorKey: "last_seen",
-  header: "Last Seen",
-  meta: { width: "w-48" },
-  cell: ({ getValue }) => {
-  const raw = getValue();
-  if (!raw || raw === "Unknown") return "Unknown";
+  const rows = useMemo(() => {
+    const merged = [
+      ...raw.hosts.map((r) => normalizeRow(r, "normal")),
+      ...raw.docker.map((r) => normalizeRow(r, "docker")),
+    ];
 
-  try {
-    const parsed = parseISO(raw);
-    if (isNaN(parsed)) return "Invalid";
-    return formatDistanceToNow(parsed, { addSuffix: true });
-  } catch (e) {
-    return "Invalid";
-  }
-},
-}
-], []);
+    const filtered = q
+      ? merged.filter((r) => {
+          const needle = q.toLowerCase();
+          return (
+            r.name.toLowerCase().includes(needle) ||
+            r.ip.toLowerCase().includes(needle) ||
+            r.os.toLowerCase().includes(needle) ||
+            r.mac.toLowerCase().includes(needle) ||
+            r.ports.toLowerCase().includes(needle) ||
+            r.network.toLowerCase().includes(needle) ||
+            r.subnet.toLowerCase().includes(needle) ||
+            r.group.toLowerCase().includes(needle)
+          );
+        })
+      : merged;
 
-
-  const table = useReactTable({
-    data,
-    columns,
-    state: { globalFilter },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) =>
-      String(row.getValue(columnId)).toLowerCase().includes(filterValue.toLowerCase()),
-  });
-
-  const tableContainerRef = useRef(null);
-  const { rows } = table.getRowModel();
-
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 40,
-    overscan: 10,
-  });
-
-  useEffect(() => {
-    if (!selectedNode || !tableContainerRef.current) return;
-    const rowIndex = data.findIndex((row) => row.ip === selectedNode.ip);
-    if (rowIndex >= 0) {
-      const offset = rowVirtualizer.getVirtualItems().find(v => v.index === rowIndex)?.start;
-      if (offset !== undefined) {
-        tableContainerRef.current.scrollTop = offset;
-      }
+    if (sortKey === "group") {
+      const primary = [...filtered].sort((a, b) => {
+        const ga = a.group === "normal" ? 0 : 1;
+        const gb = b.group === "normal" ? 0 : 1;
+        if (ga !== gb) return ga - gb;
+        return ipToNum(a.ip) - ipToNum(b.ip);
+      });
+      return sortDir === "desc" ? primary.reverse() : primary;
     }
-  }, [selectedNode, data, rowVirtualizer]);
+    return sortRows(filtered, sortKey, sortDir);
+  }, [raw, q, sortKey, sortDir]);
 
-  const exportVisibleToCSV = () => {
-    const visibleRows = rowVirtualizer.getVirtualItems().map(v => rows[v.index].original);
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }
+
+  function exportCSV() {
+    const header = [
+      "name",
+      "ip",
+      "os",
+      "mac",
+      "group",
+      "ports",
+      "nextHop",
+      "subnet",
+      "network",
+      "lastSeen",
+    ];
     const csv = [
-      ["Name", "IP", "OS", "Group", "Ports", "Next Hop", "Subnet", "Network"],
-      ...visibleRows.map(row => [
-        row.name, row.ip, row.os, row.group, row.ports, row.nexthop, row.subnet, row.network_name
-      ])
-    ].map(e => e.join(",")).join("\n");
+      header.join(","),
+      ...rows.map((r) =>
+        [
+          r.name,
+          r.ip,
+          r.os,
+          r.mac,
+          r.group,
+          r.ports,
+          r.nextHop,
+          r.subnet,
+          r.network,
+          r.lastSeen,
+        ]
+          .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
+          .join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "hosts.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
 
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "visible-hosts.csv";
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+  // UI helpers
+  const thBase =
+    "px-3 text-[11px] leading-4 font-semibold uppercase tracking-wide text-gray-600 bg-gray-100 border-b-2 border-gray-200 sticky top-0 z-20 whitespace-nowrap";
+  const tdBase = "px-3 border-b border-gray-200 align-middle";
+  const rowH = density === "compact" ? "h-9 text-[13px]" : "h-11 text-sm";
+  const thH = density === "compact" ? "h-9" : "h-10";
+  const dot = (g) => (g === "docker" ? "bg-emerald-500" : "bg-gray-400");
+  const isAdvanced = mode === "advanced";
 
   return (
-    <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-lg font-semibold mb-2">Hosts Table</h2>
-
-      <div className="flex items-center justify-between mb-4 space-x-2">
+    <div className="flex flex-col h-full">
+      {/* Toolbar */}
+      <div className="mb-3 flex flex-wrap items-center gap-3">
         <input
           type="text"
-          value={globalFilter ?? ""}
-          onChange={(e) => setGlobalFilter(e.target.value)}
           placeholder="Search hosts..."
-          className="flex-1 p-2 border border-gray-300 rounded-md shadow-sm"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="w-full sm:w-80 md:w-96 px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button
-          onClick={exportVisibleToCSV}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition"
-        >
-          Export
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <div className="inline-flex rounded border overflow-hidden">
+            <button
+              onClick={() => setMode("basic")}
+              className={`px-3 py-2 text-sm ${mode === "basic" ? "bg-gray-200" : "bg-white"}`}
+              title="Show key columns only"
+            >
+              Basic
+            </button>
+            <button
+              onClick={() => setMode("advanced")}
+              className={`px-3 py-2 text-sm ${mode === "advanced" ? "bg-gray-200" : "bg-white"}`}
+              title="Show all columns"
+            >
+              Advanced
+            </button>
+          </div>
+          <div className="inline-flex rounded border overflow-hidden">
+            <button
+              onClick={() => setDensity("comfortable")}
+              className={`px-3 py-2 text-sm ${density === "comfortable" ? "bg-gray-200" : "bg-white"}`}
+              title="Comfortable spacing"
+            >
+              Cozy
+            </button>
+            <button
+              onClick={() => setDensity("compact")}
+              className={`px-3 py-2 text-sm ${density === "compact" ? "bg-gray-200" : "bg-white"}`}
+              title="Compact rows"
+            >
+              Dense
+            </button>
+          </div>
+          <button
+            onClick={exportCSV}
+            className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Export
+          </button>
+        </div>
       </div>
 
-      <div
-        ref={tableContainerRef}
-        className="h-[70vh] overflow-auto border rounded-lg shadow-sm overflow-x-auto"
-      >
-        <table className="w-full text-sm text-left border-collapse min-w-[900px]">
-          <thead className="sticky top-0 bg-gray-50 z-10 shadow-sm text-gray-700 text-xs uppercase tracking-wider">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-  key={header.id}
-  className={`px-4 py-2 border-b font-semibold text-sm bg-gray-100 cursor-pointer select-none ${
-    header.column.columnDef.meta?.width || ""
-  }`}
-  onClick={header.column.getToggleSortingHandler()}
->
-  {flexRender(header.column.columnDef.header, header.getContext())}
-  {{
-    asc: " ▲",
-    desc: " ▼",
-  }[header.column.getIsSorted()] ?? null}
-</th>
+      {/* Scroll container: vertical + horizontal */}
+      <div className="relative flex-1 overflow-auto rounded border border-gray-200">
+        <div className="min-w-full overflow-x-auto">
+          {/* border-separate + border-spacing-0 keeps crisp vertical dividers */}
+          <table className="w-full min-w-[1280px] table-fixed border-separate border-spacing-0">
+            <colgroup>
+              {/* Favor Name and Ports for readability */}
+              <col style={{ width: "32%" }} /> {/* Name */}
+              <col style={{ width: "14%" }} /> {/* IP */}
+              <col style={{ width: "9%" }} />  {/* OS */}
+              <col style={{ width: "14%" }} /> {/* MAC (advanced) */}
+              <col style={{ width: "8%" }} />  {/* Group */}
+              <col style={{ width: "30%" }} /> {/* Ports */}
+              <col style={{ width: "14%" }} /> {/* Next hop (advanced) */}
+              <col style={{ width: "10%" }} /> {/* Subnet (advanced) */}
+              <col style={{ width: "10%" }} /> {/* Network (advanced) */}
+              <col style={{ width: "10%" }} /> {/* Last Seen (advanced) */}
+            </colgroup>
 
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody
-            style={{
-              height: `${rowVirtualizer.getTotalSize()}px`,
-              position: "relative",
-            }}
-          >
-            {rowVirtualizer.getVirtualItems().length === 0 ? (
+            <thead className="bg-gray-100">
               <tr>
-                <td colSpan={columns.length} className="text-center py-4 text-gray-500">
-                  No matching hosts found.
-                </td>
+                <th className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("name")}>Name</th>
+                <th className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("ip")}>IP</th>
+                <th className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("os")}>OS</th>
+                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("mac")}>MAC</th>
+                <th className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("group")}>Group</th>
+                <th className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("ports")}>Ports</th>
+                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("nextHop")}>Next hop</th>
+                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("subnet")}>Subnet</th>
+                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("network")}>Network</th>
+                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("lastSeen")}>Last seen</th>
               </tr>
-            ) : (
-              rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                const row = rows[virtualRow.index];
-                const isSelected = row.original.ip === selectedNode?.ip;
-                return (
-                  <tr
-                    key={row.id}
-                    className={`border-b ${
-                      isSelected
-                        ? "bg-yellow-100"
-                        : virtualRow.index % 2 === 0
-                        ? "bg-white"
-                        : "bg-gray-50"
-                    } hover:bg-blue-50 transition-all duration-150`}
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      transform: `translateY(${virtualRow.start}px)`,
-                      width: "100%",
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-  key={cell.id}
-  title={cell.getValue()}
-  className={`px-4 py-1 truncate ${
-    cell.column.columnDef.meta?.width || ""
-  } whitespace-nowrap`}
->
-  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-</td>
+            </thead>
 
-                    ))}
+            <tbody>
+              {rows.map((r) => {
+                const key = `${r.group}-${r.ip}-${r.name}`;
+                return (
+                  <tr key={key} className="select-text">
+                    <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0`}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`inline-block h-2 w-2 rounded-full ${r.group === "docker" ? "bg-emerald-500" : "bg-gray-400"}`} />
+                        <span className="min-w-0 block truncate" title={r.name}>
+                          {r.name}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0 whitespace-nowrap font-mono`} title={r.ip}>
+                      {r.ip}
+                    </td>
+
+                    <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0`}>
+                      <span className={`block truncate ${(!r.os || /^unknown$/i.test(r.os)) ? "text-gray-400" : ""}`} title={r.os || "—"}>
+                        {r.os && !/^unknown$/i.test(r.os) ? r.os : "—"}
+                      </span>
+                    </td>
+
+                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`}>
+                      <span className={`block whitespace-nowrap ${(!r.mac || /^unknown$/i.test(r.mac)) ? "text-gray-400" : ""}`} title={r.mac || "—"}>
+                        {r.mac && !/^unknown$/i.test(r.mac) ? r.mac : "—"}
+                      </span>
+                    </td>
+
+                    <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0 capitalize`}>
+                      {r.group}
+                    </td>
+
+                    <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0`}>
+                      {/* Allow up to two lines; title shows full */}
+                      <div title={r.ports} className="min-w-0">
+                        <div
+                          className="block"
+                          style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {r.ports}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`}>
+                      <span className={`block truncate ${(!r.nextHop || /^unknown$/i.test(r.nextHop) || r.nextHop === "unavailable") ? "text-gray-400" : ""}`} title={r.nextHop || "—"}>
+                        {r.nextHop && !/^unknown$/i.test(r.nextHop) && r.nextHop !== "unavailable" ? r.nextHop : "—"}
+                      </span>
+                    </td>
+
+                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} title={r.subnet}>
+                      {r.subnet || <span className="text-gray-400">—</span>}
+                    </td>
+
+                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`}>
+                      <span className={`block truncate ${(!r.network || /^unknown$/i.test(r.network)) ? "text-gray-400" : ""}`} title={r.network || "—"}>
+                        {r.network && !/^unknown$/i.test(r.network) ? r.network : "—"}
+                      </span>
+                    </td>
+
+                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} title={r.lastSeen}>
+                      {fmtLastSeen(r.lastSeen)}
+                    </td>
                   </tr>
                 );
-              })
-            )}
-          </tbody>
-        </table>
+              })}
+              {rows.length === 0 && (
+                <tr>
+                  <td className="px-3 py-6 text-center text-gray-500" colSpan={10}>
+                    No data.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 }
+
+export default HostsTable;
+export { HostsTable };
