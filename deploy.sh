@@ -73,26 +73,32 @@ else
   echo "ℹ️ Skipping backup (set RUN_BACKUP=1 to enable and ensure script exists)"
 fi
 
-# Step 5: Build Docker image from repo root
-echo "🐳 Building Docker image: $IMAGE:$VERSION"
-DOCKER_BUILDKIT=1 docker build -t "$IMAGE:$VERSION" "$REPO_ROOT"
-
-# Step 5b: Optionally tag as latest
-if $DO_LATEST; then
-  echo "🔄 Tagging Docker image as latest"
-  docker tag "$IMAGE:$VERSION" "$IMAGE:latest"
+# Step 5: Create buildx builder if not exists
+echo "🔧 Setting up buildx builder for multi-platform builds..."
+if ! docker buildx ls | grep -q "atlas-builder"; then
+  docker buildx create --name atlas-builder --use
 else
-  echo "⏭️ Skipping 'latest' tag per selection"
+  docker buildx use atlas-builder
 fi
 
-# Step 6: Push image(s) to Docker Hub
-echo "📤 Pushing Docker image(s) to Docker Hub..."
-docker push "$IMAGE:$VERSION"
+# Step 5a: Build and push multi-platform Docker image
+echo "🐳 Building multi-platform Docker image: $IMAGE:$VERSION"
 if $DO_LATEST; then
-  docker push "$IMAGE:latest"
+  echo "🔄 Building and pushing both $VERSION and latest tags for linux/amd64,linux/arm64..."
+  docker buildx build --platform linux/amd64,linux/arm64 \
+    -t "$IMAGE:$VERSION" \
+    -t "$IMAGE:latest" \
+    --push \
+    "$REPO_ROOT"
+else
+  echo "🔄 Building and pushing $VERSION tag for linux/amd64,linux/arm64..."
+  docker buildx build --platform linux/amd64,linux/arm64 \
+    -t "$IMAGE:$VERSION" \
+    --push \
+    "$REPO_ROOT"
 fi
 
-# Step 7: Run new container
+# Step 6: Run new container
 echo "🚀 Deploying container..."
 docker run -d \
   --name "$CONTAINER_NAME" \

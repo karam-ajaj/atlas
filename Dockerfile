@@ -1,10 +1,30 @@
 # Stage 1: Build the Go binary
-FROM golang:1.22 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.22 AS builder
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /app
 COPY config/atlas_go /app
 
-RUN go build -o atlas .
+# Install cross-compilation tools for CGO
+RUN apt-get update && apt-get install -y gcc-aarch64-linux-gnu gcc-x86-64-linux-gnu ca-certificates git && \
+    update-ca-certificates
+
+# Download dependencies first with GOPROXY settings and git config
+ENV GOPROXY=direct
+ENV GOSUMDB=off
+RUN git config --global http.sslverify false
+RUN go mod download
+
+# Set appropriate CC for cross-compilation and build
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+      CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o atlas .; \
+    else \
+      CGO_ENABLED=1 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o atlas .; \
+    fi
 
 # Stage 2: Final runtime image
 FROM python:3.11-slim
