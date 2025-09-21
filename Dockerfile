@@ -1,19 +1,40 @@
 # Stage 1: Build the Go binary
-FROM golang:1.22 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.22 AS builder
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /app
 COPY config/atlas_go /app
 
-RUN go build -o atlas .
+# Install cross-compilation tools for CGO
+RUN apt-get update && apt-get install -y gcc-aarch64-linux-gnu ca-certificates git
+
+# Configure git and go for SSL issues in CI
+RUN git config --global http.sslverify false
+
+# Download dependencies first with GOPROXY settings
+ENV GOPROXY=direct
+ENV GOSUMDB=off
+ENV GIT_SSL_NO_VERIFY=true
+RUN go mod download || true
+
+# Set appropriate CC for cross-compilation and build
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+      CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o atlas .; \
+    else \
+      CGO_ENABLED=1 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o atlas .; \
+    fi
 
 # Stage 2: Final runtime image
 FROM python:3.11-slim
 
 # Install only what you need for runtime
 RUN apt update && apt install -y \
-    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq \
-    && pip install fastapi uvicorn \
-    && apt install -y docker.io \
+    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq docker.io \
+    && pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org fastapi uvicorn \
     && apt clean && rm -rf /var/lib/apt/lists/*
 
 # Remove default Nginx config

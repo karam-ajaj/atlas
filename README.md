@@ -66,6 +66,8 @@ Atlas performs three key functions:
 
 ## 🚀 Deployment (Docker)
 
+Atlas now supports multi-platform deployment for both **linux/amd64** (x86_64) and **linux/arm64** (ARM64/aarch64) architectures including Raspberry Pi.
+
 Run the Atlas stack with:
 
 ```bash
@@ -173,14 +175,14 @@ For development CI/CD (for UI and backend anf build a new docker version):
 
 To deploy a new version and upload it to Docker Hub, use the provided CI/CD script:
 
-1. Build and publish a new image:
+1. Build and publish a new multi-platform image:
 
    ```bash
    /swarm/github-repos/atlas/deploy.sh
    ```
 
    - The script will prompt you for a version tag (e.g. `v3.2`).
-   - It will build the React frontend, copy to NGINX, build the Docker image, and push **both** `keinstien/atlas:$VERSION` and `keinstien/atlas:latest` to Docker Hub.
+   - It will build the React frontend, copy to NGINX, build the Docker image for **both linux/amd64 and linux/arm64**, and push **both** `keinstien/atlas:$VERSION` and `keinstien/atlas:latest` to Docker Hub.
 
 2. Why push both tags?
 
@@ -188,6 +190,8 @@ To deploy a new version and upload it to Docker Hub, use the provided CI/CD scri
    - **Latest tag:** Users can always pull the most recent stable build via `docker pull keinstien/atlas:latest`.
 
 3. The script will also redeploy the running container with the new version.
+
+**Multi-platform support:** The deployment script now uses Docker Buildx to create images that work on both x86_64 and ARM64 systems (including Raspberry Pi).
 
 **Example output:**
 ```shell
