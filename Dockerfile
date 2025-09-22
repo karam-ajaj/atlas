@@ -11,7 +11,7 @@ FROM python:3.11-slim
 
 # Install only what you need for runtime
 RUN apt update && apt install -y \
-    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq \
+    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq gettext-base \
     && pip install fastapi uvicorn \
     && apt install -y docker.io \
     && apt clean && rm -rf /var/lib/apt/lists/*
@@ -19,8 +19,8 @@ RUN apt update && apt install -y \
 # Remove default Nginx config
 RUN rm -f /etc/nginx/conf.d/default.conf /etc/nginx/sites-enabled/default
 
-# Copy Nginx config and static HTML
-COPY config/nginx/default.conf /etc/nginx/conf.d/default.conf
+# Copy Nginx config template and static HTML
+COPY config/nginx/default.conf.template /config/nginx/default.conf.template
 COPY data/html/ /usr/share/nginx/html/
 
 # Copy scripts, logs, Go binary, FastAPI backend
@@ -34,4 +34,5 @@ RUN chmod +x /config/scripts/*.sh
 # Entrypoint: initializes DB, runs scans, launches FastAPI and Nginx
 CMD ["/config/scripts/atlas_check.sh"]
 
+# Default UI port (override via ATLAS_UI_PORT) and API port
 EXPOSE 8888 8889
