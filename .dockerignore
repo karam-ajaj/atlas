@@ -10,3 +10,7 @@ config/scripts/__pycache__/
 .git
 *.swp
 *.bak
+
+# Ignore local UI build artifacts and dependencies
+data/react-ui/node_modules
+data/react-ui/dist
