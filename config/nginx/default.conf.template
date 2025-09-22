@@ -1,6 +1,6 @@
 server {
-    listen       8888;
-    listen       [::]:8888;
+    listen       ${ATLAS_UI_PORT};
+    listen       [::]:${ATLAS_UI_PORT};
     server_name  localhost;
 
     location / {
