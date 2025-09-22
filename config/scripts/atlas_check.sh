@@ -15,6 +15,7 @@ uvicorn scripts.app:app --host 0.0.0.0 --port 8889 > /config/logs/uvicorn.log 2>
 
 # Start Nginx in the foreground — this keeps the container alive
 ATLAS_UI_PORT=${ATLAS_UI_PORT:-8888}
+export ATLAS_UI_PORT
 log "🌐 Rendering Nginx config for UI port ${ATLAS_UI_PORT}..."
 envsubst '${ATLAS_UI_PORT}' < /config/nginx/default.conf.template > /etc/nginx/conf.d/default.conf
 log "🌐 Starting Nginx server on port ${ATLAS_UI_PORT}..."
