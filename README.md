@@ -198,6 +198,21 @@ To deploy a new version and upload it to Docker Hub, use the provided CI/CD scri
 
 > **Note:** Make sure you are logged in to Docker Hub (`docker login`) before running the script.
 
+### 🐳 Multi-arch Docker builds (arm64 focus)
+
+The repository also includes `Dockerfile.arm64`, which reproduces the deploy script inside Docker multi-stage builds. The recommended command to build an ARM image is:
+
+```bash
+docker buildx build --platform linux/arm64 \
+  -f Dockerfile.arm64 \
+  --build-arg VERSION="$(git describe --tags --always)" \
+  --build-arg COMMIT_SHA="$(git rev-parse --short HEAD)" \
+  --build-arg BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  -t keinstien/atlas:arm64 .
+```
+
+To verify cross-platform compatibility you can swap `--platform` (e.g. `linux/amd64`) and retag the output (such as `keinstien/atlas:amd64`). The resulting containers continue to boot via `atlas_check.sh`, just like the primary image.
+
 
 ---
 

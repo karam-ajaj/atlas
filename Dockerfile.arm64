@@ -1,0 +1,106 @@
+# syntax=docker/dockerfile:1.6
+
+# ------------------------------
+# Stage 1: Build the React UI
+# ------------------------------
+FROM node:18-bullseye AS ui-builder
+WORKDIR /app/ui
+
+# Install dependencies using lockfile
+COPY data/react-ui/package.json data/react-ui/package-lock.json ./
+RUN npm ci
+
+# Copy the rest of the UI source and build for production
+COPY data/react-ui/ ./
+RUN npm run build
+
+# ------------------------------
+# Stage 2: Build the Go CLI for linux/arm64
+# ------------------------------
+FROM golang:1.22-bullseye AS go-builder
+WORKDIR /app/atlas
+
+ARG TARGETOS=linux
+ARG TARGETARCH=arm64
+ARG TARGETVARIANT
+
+# Install the appropriate compiler toolchain for CGO-enabled sqlite dependency
+RUN set -eux; \
+    apt-get update; \
+    if [ "${TARGETARCH}" = "arm64" ]; then \
+      apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu; \
+      ln -sf /usr/bin/aarch64-linux-gnu-gcc /usr/local/bin/cc; \
+    elif [ "${TARGETARCH}" = "amd64" ]; then \
+      apt-get install -y --no-install-recommends build-essential; \
+      ln -sf /usr/bin/gcc /usr/local/bin/cc; \
+    else \
+      echo "Unsupported TARGETARCH: ${TARGETARCH}"; \
+      exit 1; \
+    fi; \
+    rm -rf /var/lib/apt/lists/*
+
+ENV GOOS=${TARGETOS} \
+    GOARCH=${TARGETARCH} \
+    CGO_ENABLED=1 \
+    CC=cc
+
+COPY config/atlas_go/go.mod config/atlas_go/go.sum ./
+RUN go mod download
+
+COPY config/atlas_go/ ./
+RUN go build -o atlas .
+
+# ------------------------------
+# Stage 3: Final runtime image
+# ------------------------------
+FROM python:3.11-slim AS runtime
+
+ARG VERSION="dev"
+ARG COMMIT_SHA="local"
+ARG BUILD_TIME="1970-01-01T00:00:00Z"
+
+ENV PYTHONUNBUFFERED=1
+
+# Install runtime dependencies (Nginx, networking tools, docker client, FastAPI stack)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        nginx \
+        iputils-ping \
+        traceroute \
+        nmap \
+        sqlite3 \
+        net-tools \
+        curl \
+        jq \
+        docker.io \
+    && pip install --no-cache-dir fastapi uvicorn \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Remove default Nginx configuration
+RUN rm -f /etc/nginx/conf.d/default.conf /etc/nginx/sites-enabled/default
+
+# Copy Nginx config
+COPY config/nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# Copy runtime scripts and Go binary
+COPY config/scripts /config/scripts
+RUN mkdir -p /config/bin
+COPY --from=go-builder /app/atlas/atlas /config/bin/atlas
+RUN chmod +x /config/scripts/*.sh
+
+# Copy freshly built UI into Nginx web root
+RUN mkdir -p /usr/share/nginx/html
+COPY --from=ui-builder /app/ui/dist/ /usr/share/nginx/html/
+
+# Inject build metadata for the UI
+RUN <<EOF
+set -euo pipefail
+cat > /usr/share/nginx/html/build-info.json <<JSON
+{ "version": "${VERSION}", "commit": "${COMMIT_SHA}", "builtAt": "${BUILD_TIME}" }
+JSON
+EOF
+
+CMD ["/config/scripts/atlas_check.sh"]
+
+EXPOSE 8888 8889
