@@ -72,6 +72,7 @@ RUN apt-get update \
         net-tools \
         curl \
         jq \
+        gettext-base \
         docker.io \
     && pip install --no-cache-dir fastapi uvicorn \
     && apt-get clean \
@@ -80,14 +81,15 @@ RUN apt-get update \
 # Remove default Nginx configuration
 RUN rm -f /etc/nginx/conf.d/default.conf /etc/nginx/sites-enabled/default
 
-# Copy Nginx config
-COPY config/nginx/default.conf /etc/nginx/conf.d/default.conf
-
 # Copy runtime scripts and Go binary
 COPY config/scripts /config/scripts
 RUN mkdir -p /config/bin
 COPY --from=go-builder /app/atlas/atlas /config/bin/atlas
 RUN chmod +x /config/scripts/*.sh
+
+# Copy Nginx configuration template
+RUN mkdir -p /config/nginx
+COPY config/nginx/default.conf.template /config/nginx/default.conf.template
 
 # Copy freshly built UI into Nginx web root
 RUN mkdir -p /usr/share/nginx/html
