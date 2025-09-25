@@ -130,9 +130,9 @@ func insertHostInfo(ip, name, osDetails, mac string, ports []string, status stri
 
 _, err = db.Exec(`
     INSERT INTO hosts (
-        ip, name, os_details, mac_address, open_ports, next_hop, network_name, status, last_seen
+        ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    VALUES (?, ?, 'Unknown', 'Unknown', 'Unknown', '', 'LAN', CURRENT_TIMESTAMP, 'online')
     ON CONFLICT(ip) DO UPDATE SET
         name=excluded.name,
         os_details=excluded.os_details,
@@ -140,9 +140,9 @@ _, err = db.Exec(`
         open_ports=excluded.open_ports,
         next_hop=excluded.next_hop,
         network_name=excluded.network_name,
-        status=excluded.status,
-        last_seen=CURRENT_TIMESTAMP
-`, ip, name, osDetails, mac, portList, "", "", status)
+        last_seen=CURRENT_TIMESTAMP,
+        online_status=excluded.online_status
+`, ip, name, osDetails, mac, portList, "", "", time.Now().Format("2006-01-02 15:04:05"), status)
 
 
 	if err != nil {

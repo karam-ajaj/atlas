@@ -40,6 +40,7 @@ function normalizeRow(r, group) {
     nextHop: r[6] || "Unknown",
     network: r[7] || (group === "docker" ? "docker" : ""),
     lastSeen: r[8] || "Invalid",
+    online_status: r[9] || "unknown",
     group,
     subnet: subnetOf(r[1] || ""),
   };
@@ -101,7 +102,8 @@ function HostsTable() {
             r.ports.toLowerCase().includes(needle) ||
             r.network.toLowerCase().includes(needle) ||
             r.subnet.toLowerCase().includes(needle) ||
-            r.group.toLowerCase().includes(needle)
+            r.group.toLowerCase().includes(needle) ||
+            (r.online_status ?? "").toLowerCase().includes(needle)
           );
         })
       : merged;
@@ -138,6 +140,7 @@ function HostsTable() {
       "subnet",
       "network",
       "lastSeen",
+      "online_status",
     ];
     const csv = [
       header.join(","),
@@ -153,6 +156,7 @@ function HostsTable() {
             r.subnet,
             r.network,
             r.lastSeen,
+            r.online_status,
         ]
           .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
           .join(",")
@@ -242,6 +246,7 @@ function HostsTable() {
               <col style={{ width: "10%" }} />
               <col style={{ width: "10%" }} />
               <col style={{ width: "10%" }} />
+              <col style={{ width: "10%" }} /> {/* new col for online_status */}
             </colgroup>
 
             <thead className="bg-gray-100">
@@ -256,6 +261,7 @@ function HostsTable() {
                 <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("subnet")}>Subnet</th>
                 <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("network")}>Network</th>
                 <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("lastSeen")}>Last seen</th>
+                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("online_status")}>Online Status</th>
               </tr>
             </thead>
 
@@ -319,12 +325,17 @@ function HostsTable() {
                     <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} title={r.lastSeen}>
                       {fmtLastSeen(r.lastSeen)}
                     </td>
+                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} title={r.online_status}>
+                      <span className={`block truncate ${(!r.online_status || /^unknown$/i.test(r.online_status)) ? "text-gray-400" : ""}`}>
+                        {r.online_status && !/^unknown$/i.test(r.online_status) ? r.online_status : "—"}
+                      </span>
+                    </td>
                   </tr>
                 );
               })}
               {rows.length === 0 && (
                 <tr>
-                  <td className="px-3 py-6 text-center text-gray-500" colSpan={10}>
+                  <td className="px-3 py-6 text-center text-gray-500" colSpan={11}>
                     No data.
                   </td>
                 </tr>

@@ -49,35 +49,83 @@ func inspectContainer(id string) ([]DockerContainer, error) {
     if err := json.Unmarshal(out, &data); err != nil {
         return nil, err
     }
+    if len(data) == 0 {
+        return nil, fmt.Errorf("no inspect data for container %s", id)
+    }
 
     var results []DockerContainer
     info := data[0]
-    name := strings.TrimPrefix(info["Name"].(string), "/")
-    image := info["Config"].(map[string]interface{})["Image"].(string)
 
-    networks := info["NetworkSettings"].(map[string]interface{})["Networks"].(map[string]interface{})
+    // Name
+    name := ""
+    if n, ok := info["Name"].(string); ok {
+        name = strings.TrimPrefix(n, "/")
+    }
+
+    // Image
+    image := ""
+    if cfg, ok := info["Config"].(map[string]interface{}); ok {
+        if img, ok := cfg["Image"].(string); ok {
+            image = img
+        }
+    }
+
+    // Networks
+    networks := map[string]interface{}{}
+    if ns, ok := info["NetworkSettings"].(map[string]interface{}); ok {
+        if nets, ok := ns["Networks"].(map[string]interface{}); ok {
+            networks = nets
+        }
+    }
     for netName, netData := range networks {
-        ip := netData.(map[string]interface{})["IPAddress"].(string)
-        mac := netData.(map[string]interface{})["MacAddress"].(string)
+        ip := ""
+        mac := ""
+        netMap, _ := netData.(map[string]interface{})
+        if v, ok := netMap["IPAddress"].(string); ok {
+            ip = v
+        }
+        if v, ok := netMap["MacAddress"].(string); ok {
+            mac = v
+        }
 
+        // OS
         osOut, _ := runCmd("docker", "image", "inspect", image, "--format", "{{.Os}}")
         osName := strings.TrimSpace(string(osOut))
         if osName == "" {
             osName = "unknown"
         }
 
+        // Ports
         portOut, _ := runCmd("docker", "inspect", id)
         var portData []map[string]interface{}
         json.Unmarshal(portOut, &portData)
-
         ports := []string{}
-        if pmap, ok := portData[0]["NetworkSettings"].(map[string]interface{})["Ports"].(map[string]interface{}); ok {
-            for port, val := range pmap {
-                if val == nil {
-                    ports = append(ports, fmt.Sprintf("%s (internal)", port))
-                } else {
-                    entry := val.([]interface{})[0].(map[string]interface{})
-                    ports = append(ports, fmt.Sprintf("%s -> %s:%s", port, entry["HostIp"], entry["HostPort"]))
+        if len(portData) > 0 {
+            if ns, ok := portData[0]["NetworkSettings"].(map[string]interface{}); ok {
+                if pmap, ok := ns["Ports"].(map[string]interface{}); ok {
+                    for port, val := range pmap {
+                        if val == nil {
+                            ports = append(ports, fmt.Sprintf("%s (internal)", port))
+                        } else {
+                            arr, arrOK := val.([]interface{})
+                            if arrOK && len(arr) > 0 {
+                                entry, entryOK := arr[0].(map[string]interface{})
+                                if entryOK {
+                                    hIp, hIpOK := entry["HostIp"].(string)
+                                    hPort, hPortOK := entry["HostPort"].(string)
+                                    if hIpOK && hPortOK {
+                                        ports = append(ports, fmt.Sprintf("%s -> %s:%s", port, hIp, hPort))
+                                    } else {
+                                        ports = append(ports, fmt.Sprintf("%s (internal)", port))
+                                    }
+                                } else {
+                                    ports = append(ports, fmt.Sprintf("%s (internal)", port))
+                                }
+                            } else {
+                                ports = append(ports, fmt.Sprintf("%s (internal)", port))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -118,51 +166,48 @@ func getGateway(network, ip string) string {
             return addr
         }
     }
-    return fields[0] // fallback to first IP if no match
+    if len(fields) > 0 {
+        return fields[0]
+    }
+    return "unavailable"
 }
-
 
 func updateDockerDB(containers []DockerContainer) error {
-	db, err := sql.Open("sqlite3", "/config/db/atlas.db")
-	if err != nil {
-		return err
-	}
-	defer db.Close()
+    db, err := sql.Open("sqlite3", "/config/db/atlas.db")
+    if err != nil {
+        return err
+    }
+    defer db.Close()
 
-	knownIPs := []string{}
-	for _, c := range containers {
-		knownIPs = append(knownIPs, c.IP)
+    knownIPs := []string{}
+    for _, c := range containers {
+        knownIPs = append(knownIPs, c.IP)
 
         status := utils.PingHost(c.IP)
-		// status := "offline"
-		// if utils.IsHostOnline(c.IP) {
-		// 	status = "online"
-		// }
 
-		_, err = db.Exec(`
-			INSERT INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, online_status, last_seen)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-			ON CONFLICT(ip) DO UPDATE SET
-				name=excluded.name,
-				os_details=excluded.os_details,
-				mac_address=excluded.mac_address,
-				open_ports=excluded.open_ports,
-				next_hop=excluded.next_hop,
-				network_name=excluded.network_name,
-				online_status=excluded.online_status,
-				last_seen=excluded.last_seen
-		`, c.IP, c.Name, c.OS, c.MAC, c.Ports, c.NextHop, c.NetName, status, time.Now().Format("2006-01-02 15:04:05"))
-		if err != nil {
-			fmt.Printf("Insert/update failed for %s: %v\n", c.IP, err)
-		}
-	}
+        _, err = db.Exec(`
+            INSERT INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'online')
+            ON CONFLICT(ip) DO UPDATE SET
+                name=excluded.name,
+                os_details=excluded.os_details,
+                mac_address=excluded.mac_address,
+                open_ports=excluded.open_ports,
+                next_hop=excluded.next_hop,
+                network_name=excluded.network_name,
+                last_seen=excluded.last_seen,
+                online_status=excluded.online_status
+        `, c.IP, c.Name, c.OS, c.MAC, c.Ports, c.NextHop, c.NetName, time.Now().Format("2006-01-02 15:04:05"), status)
+        if err != nil {
+            fmt.Printf("Insert/update failed for %s: %v\n", c.IP, err)
+        }
+    }
 
-	// Clean up old records
-	ipList := "'" + strings.Join(knownIPs, "','") + "'"
-	_, err = db.Exec(fmt.Sprintf("DELETE FROM docker_hosts WHERE ip NOT IN (%s);", ipList))
-	return err
+    // Clean up old records
+    ipList := "'" + strings.Join(knownIPs, "','") + "'"
+    _, err = db.Exec(fmt.Sprintf("DELETE FROM docker_hosts WHERE ip NOT IN (%s);", ipList))
+    return err
 }
-
 
 func DockerScan() error {
     ids, err := getDockerContainers()

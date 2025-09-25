@@ -65,11 +65,12 @@ func updateSQLiteDB(hosts map[string]string) error {
 
     for ip, name := range hosts {
         _, err = db.Exec(`
-            INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen)
-            VALUES (?, ?, 'Unknown', 'Unknown', 'Unknown', '', '', ?)
+            INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)
+            VALUES (?, ?, 'Unknown', 'Unknown', 'Unknown', '', 'LAN', CURRENT_TIMESTAMP, 'online')
             ON CONFLICT(ip) DO UPDATE SET
                 name=excluded.name,
-                last_seen=excluded.last_seen
+                last_seen=excluded.last_seen,
+                online_status=excluded.online_status
         `, ip, name, time.Now().Format("2006-01-02 15:04:05"))
         if err != nil {
             fmt.Printf("Insert/update failed for %s: %v\n", ip, err)
