@@ -70,14 +70,14 @@ Run Atlas with optional port configuration:
 
 ```bash
 docker run -d \
-  --name atlas-dev \
+  --name atlas \
   --network=host \
   --cap-add=NET_RAW \
   --cap-add=NET_ADMIN \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e ATLAS_UI_PORT=8884 \
   -e ATLAS_API_PORT=8885 \
-  keinstien/atlas:dev3.2.23
+  keinstien/atlas:latest
 ```
 
 **Environment Variables:**
