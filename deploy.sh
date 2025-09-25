@@ -8,7 +8,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UI_DIR="${REPO_ROOT}/data/react-ui"
 HTML_DIR="${REPO_ROOT}/data/html"
 IMAGE="keinstien/atlas"
-CONTAINER_NAME="atlas"
+CONTAINER_NAME="atlas-dev"
 
 echo "📁 Repo root: $REPO_ROOT"
 echo "🧩 UI dir:    $UI_DIR"
@@ -93,14 +93,16 @@ if $DO_LATEST; then
 fi
 
 # Step 7: Run new container
-# echo "🚀 Deploying container..."
-# docker run -d \
-#   --name "$CONTAINER_NAME" \
-#   --network=host \
-#   --cap-add=NET_RAW \
-#   --cap-add=NET_ADMIN \
-#   -v /var/run/docker.sock:/var/run/docker.sock \
-#   "$IMAGE:$VERSION"
+echo "🚀 Deploying container..."
+docker run -d \
+  --name "$CONTAINER_NAME" \
+  --network=host \
+  --cap-add=NET_RAW \
+  --cap-add=NET_ADMIN \
+  -e ATLAS_UI_PORT=8884 \
+  -e ATLAS_API_PORT=8885 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  "$IMAGE:$VERSION"
 
 if $DO_LATEST; then
   echo "✅ Deployment complete for version: $VERSION (also tagged as latest)"
