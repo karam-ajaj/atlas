@@ -66,25 +66,31 @@ Atlas performs three key functions:
 
 ## 🚀 Deployment (Docker)
 
-Run the Atlas stack with:
+Run Atlas with optional port configuration:
 
 ```bash
 docker run -d \
-  --name atlas \
+  --name atlas-dev \
   --network=host \
   --cap-add=NET_RAW \
   --cap-add=NET_ADMIN \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  keinstien/atlas:latest
+  -e ATLAS_UI_PORT=8884 \
+  -e ATLAS_API_PORT=8885 \
+  keinstien/atlas:dev3.2.23
 ```
 
-📌 This will:
+**Environment Variables:**
+- `ATLAS_UI_PORT` – Sets the port for the Atlas UI (Nginx). Default: 8888.
+- `ATLAS_API_PORT` – Sets the port for the FastAPI backend. Default: 8889.
 
-Expose the UI on http://localhost:8888
+If not set, defaults are used (UI: 8888, API: 8889).
 
-Launch backend API at http://localhost:8889
+Example endpoints:
+- UI:         http://localhost:8884
+- API:        http://localhost:8885/api
 
-Auto-scan Docker + local subnet on container start
+Auto-scanning of Docker and local subnets runs on container start.
 
 ---
 

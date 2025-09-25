@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from "react";
+import { apiGet, sseUrl, API_BASE_URL } from "../api";
 
 export function LogsPanel() {
   const [logFiles, setLogFiles] = useState([]);
@@ -10,14 +11,19 @@ export function LogsPanel() {
   const eventSourceRef = useRef(null);
   const seenLinesRef = useRef(new Set());
 
+  // Initial load of log list
   useEffect(() => {
-    fetch("/api/logs/list")
-      .then((res) => res.json())
+    let aborted = false;
+    apiGet("/logs/list")
       .then((files) => {
+        if (aborted) return;
         setLogFiles(files || []);
         if (files && files.length > 0) setSelectedFile(files[0]);
       })
-      .catch(() => setLogFiles([]));
+      .catch(() => {
+        if (!aborted) setLogFiles([]);
+      });
+    return () => { aborted = true; };
   }, []);
 
   // Selected file label for display and tooltip
@@ -28,11 +34,13 @@ export function LogsPanel() {
       : selectedFile;
   }, [selectedFile]);
 
+  // Load / stream a specific log
   useEffect(() => {
     if (!selectedFile) return;
 
+    // Cleanup any previous stream
     if (eventSourceRef.current) {
-      eventSourceRef.current.close();
+      try { eventSourceRef.current.close(); } catch {}
       eventSourceRef.current = null;
     }
 
@@ -43,7 +51,7 @@ export function LogsPanel() {
     const enc = encodeURIComponent(selectedFile);
 
     if (streaming) {
-      const es = new EventSource(`/api/logs/${enc}/stream`);
+      const es = new EventSource(sseUrl(`/logs/${enc}/stream`));
       es.onmessage = (event) => {
         const line = (event.data ?? "").trim();
         if (!seenLinesRef.current.has(line)) {
@@ -58,12 +66,14 @@ export function LogsPanel() {
       eventSourceRef.current = es;
       setLoading(false);
     } else {
-      fetch(`/api/logs/${enc}`)
-        .then((res) => res.json())
+      apiGet(`/logs/${enc}`)
         .then((data) => {
           const lines = (data?.content || "").split("\n");
           lines.forEach((line) => seenLinesRef.current.add(line));
           setLogLines(lines.slice(-500));
+        })
+        .catch(() => {
+          setLogLines(["[ERROR] Failed to load log"]);
         })
         .finally(() => setLoading(false));
     }
@@ -77,16 +87,20 @@ export function LogsPanel() {
   }, [selectedFile, streaming]);
 
   const handleDownload = () => {
+    if (!selectedFile) return;
     const enc = encodeURIComponent(selectedFile);
     const link = document.createElement("a");
-    link.href = `/api/logs/${enc}/download`;
+    // Use absolute API base (was /api/logs/... before)
+    link.href = `${API_BASE_URL}/logs/${enc}/download`;
     link.download = selectedFile;
     link.click();
   };
 
   const highlightMatch = (line) => {
     if (!searchTerm) return line;
-    const parts = line.split(new RegExp(`(${searchTerm})`, "gi"));
+    // Escape RegExp special chars in searchTerm
+    const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const parts = line.split(new RegExp(`(${escaped})`, "gi"));
     return parts.map((part, i) =>
       part.toLowerCase() === searchTerm.toLowerCase() ? (
         <span key={i} className="bg-yellow-300 text-black px-1 rounded">{part}</span>
@@ -98,11 +112,10 @@ export function LogsPanel() {
 
   return (
     <div className="p-4 bg-gray-900 text-green-300 font-mono rounded shadow h-full flex flex-col space-y-4">
-      {/* Toolbar: responsive and keeps search visible */}
+      {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3">
         <label className="text-white shrink-0">Select Log:</label>
 
-        {/* Constrain select to a width ratio so it doesn't take over the row */}
         <div className="flex-1 min-w-[220px] max-w-[50%]">
           <select
             title={selectedLabel}
@@ -125,7 +138,7 @@ export function LogsPanel() {
 
         <button
           onClick={handleDownload}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded shrink-0"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded shrink-0 disabled:opacity-50"
           disabled={!selectedFile}
           title="Download current log"
         >
@@ -142,7 +155,6 @@ export function LogsPanel() {
           {streaming ? "Stop Live" : "Live Stream"}
         </button>
 
-        {/* Search: full width on small screens, fixed width on larger */}
         <input
           type="text"
           placeholder="Search..."

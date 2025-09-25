@@ -1,11 +1,8 @@
-import React, { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import useEventSource from "../hooks/useEventSource";
+import { sseUrl, API_BASE_URL } from "../api";
 
-// Script executor with live output only
-// - Primary: stream from GET /api/scripts/run/{script}/stream (if backend supports it)
-// - Fallback: POST /api/scripts/run/{script} and display the response output
-
-const API = "/api";
+const API = API_BASE_URL;
 
 const SCRIPTS = [
   { key: "scan-hosts-fast", label: "Fast Scan" },
@@ -18,78 +15,75 @@ export function ScriptsPanel() {
   const [liveLines, setLiveLines] = useState([]);
   const [isLive, setIsLive] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [modeNote, setModeNote] = useState("");
 
-  // Refs to avoid stale closures and to control single-fallback behavior
   const gotLiveDataRef = useRef(false);
   const fallbackTriggeredRef = useRef(false);
-  const terminatedRef = useRef(false); // set when we decide the run is finished
+  const terminatedRef = useRef(false);
 
-  // Primary live streaming URL (starts the scan and streams)
   const liveUrl = useMemo(
     () => (isLive ? `${API}/scripts/run/${selected}/stream` : ""),
     [isLive, selected]
   );
 
-  // Open the EventSource and keep a controller so we can close it explicitly
   const esCtrl = useEventSource(liveUrl, {
     enabled: !!liveUrl,
     onOpen: () => {
-      // reset runtime flags on open
       gotLiveDataRef.current = false;
       terminatedRef.current = false;
-
-      // If the stream doesn't start producing quickly, try fallback once
+      setModeNote(`Streaming (${selected}) via SSE`);
+      // Fallback timer if no data
       window.setTimeout(async () => {
-        if (!isLive) return; // user may have stopped
+        if (!isLive) return;
         if (!gotLiveDataRef.current && !fallbackTriggeredRef.current) {
           fallbackTriggeredRef.current = true;
-          // Ensure we stop the ES before switching to POST
+          append(`[FALLBACK] No stream data quickly; switching to POST.`);
           setIsLive(false);
           esCtrl.close();
-          await runViaPost(selected, { annotate: "Fallback: stream not available, started via POST." });
+          await runViaPost(selected, { annotate: "Fallback: stream inactive." });
         }
       }, 1200);
     },
     onMessage: (line) => {
       gotLiveDataRef.current = true;
-
-      // Detect completion marker (your backend can emit "[exit 0]" when done)
       if (line && /^\[exit\s+\d+\]$/.test(line.trim())) {
-        setLiveLines((prev) => [...prev, line, "✅ Finished."]);
+        append(line);
+        append("✅ Finished.");
         terminatedRef.current = true;
-        setIsLive(false); // triggers cleanup and closes ES
+        setIsLive(false);
         esCtrl.close();
+        setBusy(false);
         return;
       }
-
-      setLiveLines((prev) => [...prev, line]);
+      append(line);
     },
     onError: async () => {
-      // If we've explicitly terminated (saw exit or decided finished), ignore errors
       if (terminatedRef.current) return;
-
-      // If we already received some data and the stream ends/errs, treat it as normal end
       if (gotLiveDataRef.current) {
-        setLiveLines((prev) => [...prev, "✅ Finished."]);
+        append("✅ Finished (stream closed).");
         terminatedRef.current = true;
         setIsLive(false);
         esCtrl.close();
+        setBusy(false);
         return;
       }
-
-      // No data yet: trigger the POST fallback once
       if (!fallbackTriggeredRef.current) {
         fallbackTriggeredRef.current = true;
+        append("[FALLBACK] Stream error; switching to POST.");
         setIsLive(false);
         esCtrl.close();
-        await runViaPost(selected, { annotate: "Fallback: stream error, started via POST." });
+        await runViaPost(selected, { annotate: "Fallback: SSE error." });
       }
-      // else: do nothing (avoid repeated messages)
     },
   });
 
+  function append(line) {
+    setLiveLines((prev) => [...prev, line]);
+  }
+
   function resetLive() {
     setLiveLines([]);
+    setModeNote("");
     gotLiveDataRef.current = false;
     fallbackTriggeredRef.current = false;
     terminatedRef.current = false;
@@ -99,43 +93,55 @@ export function ScriptsPanel() {
     setIsLive(false);
     terminatedRef.current = true;
     esCtrl.close();
-    setLiveLines((prev) => [...prev, "⏹️ Live stream closed."]);
+    append("⏹️ Live stream closed.");
+    setBusy(false);
   }
 
   async function startAndStream() {
     resetLive();
+    append(`▶ Starting ${selected} (SSE)…`);
     setIsLive(true);
+    setBusy(true);
   }
 
-  // Fallback path: POST to start the script, then display HTTP response output (no tailing here)
   async function runViaPost(scriptKey, options = {}) {
     try {
       setBusy(true);
-      const res = await fetch(`${API}/scripts/run/${scriptKey}`, { method: "POST" });
-      const json = await res.json().catch(() => ({}));
+      const url = sseUrl(`/scripts/run/${scriptKey}`);
+      setModeNote(`POST fallback (${scriptKey})`);
+      append(`▶ POST ${url}`);
+      const res = await fetch(url, { method: "POST" });
+      let json = {};
+      try {
+        json = await res.json();
+      } catch {
+        /* ignore */
+      }
       if (!res.ok) {
-        setLiveLines((prev) => [...prev, `POST failed: ${json.output || res.statusText}`]);
+        append(
+          `❌ POST failed (${res.status}) ${
+            json.output?.trim() || res.statusText || "Unknown error"
+          }`
+        );
+        terminatedRef.current = true;
         return;
       }
-
-      const lines = (json?.output ? json.output : "Started.").split("\n");
-      const annotate = options.annotate ? [options.annotate] : [];
-      setLiveLines((prev) => [...prev, ...annotate, ...lines]);
-
-      // Mark as finished since POST is not a stream
+      const raw = json?.output ? json.output : "Started.";
+      const lines = raw.split("\n");
+      if (options.annotate) append(options.annotate);
+      lines.forEach((l) => append(l));
+      append("✅ Finished (POST).");
       terminatedRef.current = true;
-      setIsLive(false);
-      esCtrl.close();
     } catch (e) {
-      setLiveLines((prev) => [...prev, `POST start failed: ${String(e)}`]);
+      append(`❌ POST start failed: ${String(e.message || e)}`);
     } finally {
       setBusy(false);
+      setIsLive(false);
+      esCtrl.close();
     }
   }
 
-  // "Run (no stream)" just uses POST without trying to open SSE
   async function runNoStream() {
-    // Ensure we are not in live mode
     if (isLive) stopLive();
     resetLive();
     await runViaPost(selected);
@@ -160,20 +166,24 @@ export function ScriptsPanel() {
             ))}
           </select>
 
-          <button
-            className="px-3 py-1 rounded bg-blue-600 text-white disabled:opacity-50"
-            onClick={startAndStream}
-            disabled={isLive || busy}
-          >
-            Start & Stream
-          </button>
-          <button
-            className="px-3 py-1 rounded bg-gray-200 text-gray-800 disabled:opacity-50"
-            onClick={stopLive}
-            disabled={!isLive}
-          >
-            Stop
-          </button>
+          {!isLive && (
+            <button
+              className="px-3 py-1 rounded bg-blue-600 text-white disabled:opacity-50"
+              onClick={startAndStream}
+              disabled={busy}
+            >
+              Start & Stream
+            </button>
+          )}
+          {isLive && (
+            <button
+              className="px-3 py-1 rounded bg-gray-200 text-gray-800 disabled:opacity-50"
+              onClick={stopLive}
+              disabled={!isLive}
+            >
+              Stop
+            </button>
+          )}
           <button
             className="px-3 py-1 rounded bg-slate-700 text-white disabled:opacity-50"
             onClick={runNoStream}
@@ -184,10 +194,16 @@ export function ScriptsPanel() {
         </div>
 
         <p className="text-xs text-gray-500 mt-2">
-          Primary: GET /api/scripts/run/{"{script}"}/stream. Fallback: POST /api/scripts/run/{"{script}"} (no tailing here).
+          Primary: SSE GET /scripts/run/{{script}}/stream → fallback: POST /scripts/run/{{script}}.
         </p>
+        {modeNote && (
+          <p className="text-xs mt-1 text-indigo-600 font-mono">{modeNote}</p>
+        )}
 
-        <div className="mt-3 h-[60vh] overflow-auto whitespace-pre-wrap font-mono rounded border border-gray-200 bg-gray-50 p-3">
+        <div className="mt-3 h-[60vh] overflow-auto whitespace-pre-wrap font-mono rounded border border-gray-200 bg-gray-50 p-3 text-xs">
+          {liveLines.length === 0 && (
+            <div className="text-gray-400">No output yet.</div>
+          )}
           {liveLines.map((l, i) => (
             <div key={i}>{l}</div>
           ))}

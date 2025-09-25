@@ -93,14 +93,14 @@ if $DO_LATEST; then
 fi
 
 # Step 7: Run new container
-echo "🚀 Deploying container..."
-docker run -d \
-  --name "$CONTAINER_NAME" \
-  --network=host \
-  --cap-add=NET_RAW \
-  --cap-add=NET_ADMIN \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  "$IMAGE:$VERSION"
+# echo "🚀 Deploying container..."
+# docker run -d \
+#   --name "$CONTAINER_NAME" \
+#   --network=host \
+#   --cap-add=NET_RAW \
+#   --cap-add=NET_ADMIN \
+#   -v /var/run/docker.sock:/var/run/docker.sock \
+#   "$IMAGE:$VERSION"
 
 if $DO_LATEST; then
   echo "✅ Deployment complete for version: $VERSION (also tagged as latest)"

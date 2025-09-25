@@ -42,6 +42,27 @@ ALLOWED_SCRIPTS = {
     },
 }
 
+@app.get("/health", tags=["Meta"])
+def health():
+    # Basic DB sanity: ensure hosts table exists
+    db_ok = True
+    try:
+        conn = sqlite3.connect("/config/db/atlas.db")
+        cur = conn.cursor()
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='hosts'")
+        exists = cur.fetchone() is not None
+        conn.close()
+        if not exists:
+            db_ok = False
+    except Exception:
+        db_ok = False
+
+    return {
+        "status": "ok",
+        "db": "ok" if db_ok else "init_pending",
+        "version": "1.0.0",
+    }
+
 @app.get("/hosts", tags=["Hosts"])
 def get_hosts():
     conn = sqlite3.connect("/config/db/atlas.db")

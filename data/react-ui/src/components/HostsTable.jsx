@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { apiGet } from "../api";
 
 function ipToNum(ip) {
   const m = (ip || "").match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
@@ -69,14 +70,18 @@ function HostsTable() {
   const [density, setDensity] = useState("comfortable"); // comfortable | compact
 
   useEffect(() => {
-    fetch("/api/hosts")
-      .then((r) => r.json())
+    let abort = false;
+    apiGet("/hosts")
       .then((json) => {
+        if (abort) return;
         const hostsRows = Array.isArray(json?.[0]) ? json[0] : [];
         const dockerRows = Array.isArray(json?.[1]) ? json[1] : [];
         setRaw({ hosts: hostsRows, docker: dockerRows });
       })
-      .catch(() => setRaw({ hosts: [], docker: [] }));
+      .catch(() => {
+        if (!abort) setRaw({ hosts: [], docker: [] });
+      });
+    return () => { abort = true; };
   }, []);
 
   const rows = useMemo(() => {
@@ -139,15 +144,15 @@ function HostsTable() {
       ...rows.map((r) =>
         [
           r.name,
-          r.ip,
-          r.os,
-          r.mac,
-          r.group,
-          r.ports,
-          r.nextHop,
-          r.subnet,
-          r.network,
-          r.lastSeen,
+            r.ip,
+            r.os,
+            r.mac,
+            r.group,
+            r.ports,
+            r.nextHop,
+            r.subnet,
+            r.network,
+            r.lastSeen,
         ]
           .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
           .join(",")
@@ -167,7 +172,6 @@ function HostsTable() {
   const tdBase = "px-3 border-b border-gray-200 align-middle";
   const rowH = density === "compact" ? "h-9 text-[13px]" : "h-11 text-sm";
   const thH = density === "compact" ? "h-9" : "h-10";
-  const dot = (g) => (g === "docker" ? "bg-emerald-500" : "bg-gray-400");
   const isAdvanced = mode === "advanced";
 
   return (
@@ -223,23 +227,21 @@ function HostsTable() {
         </div>
       </div>
 
-      {/* Scroll container: vertical + horizontal */}
+      {/* Scroll container */}
       <div className="relative flex-1 overflow-auto rounded border border-gray-200">
         <div className="min-w-full overflow-x-auto">
-          {/* border-separate + border-spacing-0 keeps crisp vertical dividers */}
           <table className="w-full min-w-[1280px] table-fixed border-separate border-spacing-0">
             <colgroup>
-              {/* Favor Name and Ports for readability */}
-              <col style={{ width: "32%" }} /> {/* Name */}
-              <col style={{ width: "14%" }} /> {/* IP */}
-              <col style={{ width: "9%" }} />  {/* OS */}
-              <col style={{ width: "14%" }} /> {/* MAC (advanced) */}
-              <col style={{ width: "8%" }} />  {/* Group */}
-              <col style={{ width: "30%" }} /> {/* Ports */}
-              <col style={{ width: "14%" }} /> {/* Next hop (advanced) */}
-              <col style={{ width: "10%" }} /> {/* Subnet (advanced) */}
-              <col style={{ width: "10%" }} /> {/* Network (advanced) */}
-              <col style={{ width: "10%" }} /> {/* Last Seen (advanced) */}
+              <col style={{ width: "32%" }} />
+              <col style={{ width: "14%" }} />
+              <col style={{ width: "9%" }} />
+              <col style={{ width: "14%" }} />
+              <col style={{ width: "8%" }} />
+              <col style={{ width: "30%" }} />
+              <col style={{ width: "14%" }} />
+              <col style={{ width: "10%" }} />
+              <col style={{ width: "10%" }} />
+              <col style={{ width: "10%" }} />
             </colgroup>
 
             <thead className="bg-gray-100">
@@ -270,29 +272,23 @@ function HostsTable() {
                         </span>
                       </div>
                     </td>
-
                     <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0 whitespace-nowrap font-mono`} title={r.ip}>
                       {r.ip}
                     </td>
-
                     <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0`}>
                       <span className={`block truncate ${(!r.os || /^unknown$/i.test(r.os)) ? "text-gray-400" : ""}`} title={r.os || "—"}>
                         {r.os && !/^unknown$/i.test(r.os) ? r.os : "—"}
                       </span>
                     </td>
-
                     <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`}>
                       <span className={`block whitespace-nowrap ${(!r.mac || /^unknown$/i.test(r.mac)) ? "text-gray-400" : ""}`} title={r.mac || "—"}>
                         {r.mac && !/^unknown$/i.test(r.mac) ? r.mac : "—"}
                       </span>
                     </td>
-
                     <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0 capitalize`}>
                       {r.group}
                     </td>
-
                     <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0`}>
-                      {/* Allow up to two lines; title shows full */}
                       <div title={r.ports} className="min-w-0">
                         <div
                           className="block"
@@ -307,23 +303,19 @@ function HostsTable() {
                         </div>
                       </div>
                     </td>
-
                     <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`}>
                       <span className={`block truncate ${(!r.nextHop || /^unknown$/i.test(r.nextHop) || r.nextHop === "unavailable") ? "text-gray-400" : ""}`} title={r.nextHop || "—"}>
                         {r.nextHop && !/^unknown$/i.test(r.nextHop) && r.nextHop !== "unavailable" ? r.nextHop : "—"}
                       </span>
                     </td>
-
                     <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} title={r.subnet}>
                       {r.subnet || <span className="text-gray-400">—</span>}
                     </td>
-
                     <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`}>
                       <span className={`block truncate ${(!r.network || /^unknown$/i.test(r.network)) ? "text-gray-400" : ""}`} title={r.network || "—"}>
                         {r.network && !/^unknown$/i.test(r.network) ? r.network : "—"}
                       </span>
                     </td>
-
                     <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} title={r.lastSeen}>
                       {fmtLastSeen(r.lastSeen)}
                     </td>

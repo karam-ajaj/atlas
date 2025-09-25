@@ -1,37 +1,38 @@
-# Stage 1: Build the Go binary
+# Stage 1: Build Go binary
 FROM golang:1.22 AS builder
-
 WORKDIR /app
 COPY config/atlas_go /app
-
+# If you have go.mod in config/atlas_go, this is enough; otherwise add module init
+RUN if [ ! -f go.mod ]; then go mod init atlas || true; fi
 RUN go build -o atlas .
 
-# Stage 2: Final runtime image
+# Stage 2: Runtime
 FROM python:3.11-slim
 
-# Install only what you need for runtime
 RUN apt update && apt install -y \
-    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq \
-    && pip install fastapi uvicorn \
+    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq ca-certificates \
+    && pip install --no-cache-dir fastapi uvicorn \
     && apt install -y docker.io \
     && apt clean && rm -rf /var/lib/apt/lists/*
 
 # Remove default Nginx config
-RUN rm -f /etc/nginx/conf.d/default.conf /etc/nginx/sites-enabled/default
+RUN rm -f /etc/nginx/conf.d/default.conf /etc/nginx/sites-enabled/default || true
 
-# Copy Nginx config and static HTML
-COPY config/nginx/default.conf /etc/nginx/conf.d/default.conf
+# Copy template & static UI content
+COPY config/nginx/default.conf.template /config/nginx/default.conf.template
 COPY data/html/ /usr/share/nginx/html/
 
-# Copy scripts, logs, Go binary, FastAPI backend
-# COPY config /config/
+# Copy scripts and binary
 COPY config/scripts /config/scripts
 COPY --from=builder /app/atlas /config/bin/atlas
 
 # Make all shell scripts executable
 RUN chmod +x /config/scripts/*.sh
 
-# Entrypoint: initializes DB, runs scans, launches FastAPI and Nginx
-CMD ["/config/scripts/atlas_check.sh"]
+# Set default ports (can be overridden at runtime)
+ENV ATLAS_UI_PORT=8888
+ENV ATLAS_API_PORT=8889
 
+# Entrypoint: initializes DB, runs scans, launches FastAPI and Nginx
 EXPOSE 8888 8889
+CMD ["/config/scripts/atlas_check.sh"]

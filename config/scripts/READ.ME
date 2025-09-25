@@ -96,3 +96,17 @@ docker run -d \
   --cap-add=NET_ADMIN \
   -v /var/run/docker.sock:/var/run/docker.sock \
   keinstien/atlas:v2.0
+
+
+
+
+
+docker run -d \
+  --name atlas-dev \
+  --network=host \
+  --cap-add=NET_RAW \
+  --cap-add=NET_ADMIN \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -e ATLAS_UI_PORT=8884 \
+  -e ATLAS_API_PORT=8885 \
+  keinstien/atlas:dev3.2.18
