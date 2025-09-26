@@ -9,9 +9,13 @@ declare -A gateway_cache
 # Function to extract container network info
 extract_container_info() {
     docker inspect "$1" | jq -r '
-        .[0].Name as $name |
-        .[0].NetworkSettings.Networks | to_entries[] |
-        [$name, .key, .value.IPAddress, .value.MacAddress] | @tsv
+        .[0] as $c |
+        if ($c.NetworkSettings.Networks | length) > 0 then
+            $c.NetworkSettings.Networks | to_entries[] |
+            [$c.Name, .key, .value.IPAddress, .value.MacAddress] | @tsv
+        else
+            [$c.Name, "", "", ""] | @tsv
+        end
     '
 }
 
