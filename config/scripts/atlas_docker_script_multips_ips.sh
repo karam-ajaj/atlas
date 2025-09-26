@@ -16,7 +16,7 @@ extract_container_info() {
 }
 
 # Collect container info
-docker ps -q | while read -r container_id; do
+docker ps -a -q | while read -r container_id; do
     extract_container_info "$container_id"
 done > "$log_file"
 
@@ -24,7 +24,7 @@ done > "$log_file"
 exec > "$hosts_file"
 while read -r name network ip mac; do
     short_name="${name##/}"
-    container_id=$(docker ps -q --filter name="^/${short_name}")
+    container_id=$(docker ps -a -q --filter name="^/${short_name}")
 
     if [ -n "$container_id" ]; then
         image=$(docker inspect -f '{{.Config.Image}}' "$container_id")
