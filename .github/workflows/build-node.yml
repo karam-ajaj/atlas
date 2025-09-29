@@ -1,27 +1,16 @@
 
-name: Build Test
+name: Node.js Build Test
 
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'data/react-ui/**'
   pull_request:
+    paths:
+      - 'data/react-ui/**'
 
 jobs:
-  build-go:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.22'
-
-    - name: Build Go App
-      run: |
-        cd config/atlas_go
-        go build -v ./...
-
   build-node:
     runs-on: ubuntu-latest
     steps:
