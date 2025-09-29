@@ -15,14 +15,14 @@ echo "🧩 UI dir:    $UI_DIR"
 echo "🗂️  HTML dir:   $HTML_DIR"
 
 # Prompt for version
-read -p "👉 Enter the version tag (e.g. v3.3): " VERSION
+read "👉 Enter the version tag (e.g. v3.3): " VERSION
 if [[ -z "${VERSION:-}" ]]; then
   echo "❌ Version tag is required. Exiting..."
   exit 1
 fi
 
 # Ask whether to also tag this version as 'latest'
-read -p "👉 Tag this version as 'latest' as well? (y/N): " TAG_LATEST
+read "👉 Tag this version as 'latest' as well? (y/N): " TAG_LATEST
 if [[ "${TAG_LATEST:-}" =~ ^([yY][eE][sS]|[yY])$ ]]; then
   DO_LATEST=true
 else
