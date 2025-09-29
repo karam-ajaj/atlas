@@ -8,7 +8,8 @@ RUN go mod download
 COPY config/atlas_go/ ./
 # Build the binary
 ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
-RUN go build -o atlas .
+RUN apk add --no-cache build-base \
+    && CGO_ENABLED=1 go build -o atlas .
 
 # Stage 2: Build React Frontend
 FROM node:20-alpine AS frontend-builder
@@ -37,13 +38,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir fastapi uvicorn \
     && mkdir -p /etc/nginx/http.d || true \
-    && chmod +x /config/scripts/*.sh \
-    && sed -i 's/\r$//' /config/scripts/atlas_check.sh
-
-# Set default ports
-ENV ATLAS_UI_PORT=8888
-ENV ATLAS_API_PORT=8889
+    && chmod +x /config/scripts/*.sh
 
 # Expose ports and define command
-EXPOSE 8888 8889
+EXPOSE 8888
 CMD ["/config/scripts/atlas_check.sh"]
