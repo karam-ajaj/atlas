@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
 db_file="/config/db/atlas.db"
 
