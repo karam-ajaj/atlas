@@ -1,12 +1,22 @@
 # Ignore React build artifacts and dependencies
-# /data/react-ui/node_modules/
-# /data/react-ui/dist/
+data/react-ui/node_modules/
+data/react-ui/dist/
+data/html/
+
+# Ignore local environment files
+**/.env
 
 # Ignore log files
-/config/logs/
+config/logs/
 
 # Ignore database files
-/config/db/*.db
+config/db/atlas.db
 
 # Ignore Python bytecode
-/config/scripts/__pycache__/
+**/__pycache__
+
+# atlas bin
+config/atlas_go/atlas
+
+# trash
+**/*.tar

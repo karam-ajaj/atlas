@@ -1,0 +1,28 @@
+
+name: Node.js Build Test
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'data/react-ui/**'
+  pull_request:
+    paths:
+      - 'data/react-ui/**'
+
+jobs:
+  build-node:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Install Dependencies and Build Node App
+      run: |
+        cd data/react-ui
+        npm install
+        npm run build

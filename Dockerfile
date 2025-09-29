@@ -1,38 +1,45 @@
 # Stage 1: Build Go binary
-FROM golang:1.22 AS builder
+FROM golang:1.22-alpine AS go-builder
 WORKDIR /app
-COPY config/atlas_go /app
-# If you have go.mod in config/atlas_go, this is enough; otherwise add module init
-RUN if [ ! -f go.mod ]; then go mod init atlas || true; fi
-RUN go build -o atlas .
+# Copy module files and download dependencies first to leverage Docker cache
+COPY config/atlas_go/go.mod config/atlas_go/go.sum ./
+RUN go mod download
+# Copy the rest of the source code
+COPY config/atlas_go/ ./
+# Build the binary
+ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
+RUN apk add --no-cache build-base \
+    && CGO_ENABLED=1 go build -o atlas .
 
-# Stage 2: Runtime
-FROM python:3.11-slim
+# Stage 2: Build React Frontend
+FROM node:20-alpine AS frontend-builder
+WORKDIR /app
+COPY data/react-ui/package.json data/react-ui/package-lock.json ./
+# Use npm ci for cleaner, reproducible installs
+RUN npm install -g npm@11.6.1 && npm ci
+COPY data/react-ui/ ./
+RUN npm run build
 
-RUN apt update && apt install -y \
-    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq ca-certificates \
-    && pip install --no-cache-dir fastapi uvicorn \
-    && apt install -y docker.io \
-    && apt clean && rm -rf /var/lib/apt/lists/*
+# Stage 3: Final Runtime Image
+FROM alpine:3.22.1
 
-# Remove default Nginx config
-RUN rm -f /etc/nginx/conf.d/default.conf /etc/nginx/sites-enabled/default || true
+RUN apk add --no-cache nginx iputils-ping traceroute nmap \
+    sqlite net-tools curl jq ca-certificates docker \
+    py3-pip gettext && python3 -m venv /opt/venv
 
-# Copy template & static UI content
-COPY config/nginx/default.conf.template /config/nginx/default.conf.template
-COPY data/html/ /usr/share/nginx/html/
-
-# Copy scripts and binary
+# Copy items from previous stages and local context
 COPY config/scripts /config/scripts
-COPY --from=builder /app/atlas /config/bin/atlas
+COPY config/nginx/default.conf.template /config/nginx/default.conf.template
+COPY --from=go-builder /app/atlas /config/bin/atlas
+COPY --from=frontend-builder /app/dist /usr/share/nginx/html/
 
-# Make all shell scripts executable
-RUN chmod +x /config/scripts/*.sh
+# Install python packages and set permissions
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir fastapi uvicorn \
+    && mkdir -p /etc/nginx/http.d || true \
+    && chmod +x /config/scripts/*.sh
 
-# Set default ports (can be overridden at runtime)
-ENV ATLAS_UI_PORT=8888
-ENV ATLAS_API_PORT=8889
-
-# Entrypoint: initializes DB, runs scans, launches FastAPI and Nginx
-EXPOSE 8888 8889
+# Expose ports and define command
+EXPOSE 8888
 CMD ["/config/scripts/atlas_check.sh"]
