@@ -16,7 +16,7 @@ FROM node:20-alpine AS frontend-builder
 WORKDIR /app
 COPY data/react-ui/package.json data/react-ui/package-lock.json ./
 # Use npm ci for cleaner, reproducible installs
-RUN npm install -g npm && npm ci
+RUN npm install -g npm@10 && npm ci
 COPY data/react-ui/ ./
 RUN npm run build
 
