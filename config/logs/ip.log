@@ -1,4 +1,0 @@
-1: lo    inet 127.0.0.1/8 scope host lo\       valid_lft forever preferred_lft forever
-2: ens18    inet 192.168.2.81/24 brd 192.168.2.255 scope global ens18\       valid_lft forever preferred_lft forever
-3: docker_gwbridge    inet 172.18.0.1/16 brd 172.18.255.255 scope global docker_gwbridge\       valid_lft forever preferred_lft forever
-4: docker0    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0\       valid_lft forever preferred_lft forever
