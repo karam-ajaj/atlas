@@ -8,22 +8,22 @@ import (
     "sort"
     "strings"
     "time"
+    "strconv"
 
     _ "github.com/mattn/go-sqlite3"
 )
 
-import "atlas/internal/utils"
-
 type DockerContainer struct {
     ID      string
-    Name    string
-    Image   string
-    OS      string
     IP      string
+    Name    string
+    OS      string
     MAC     string
     Ports   string
-    NetName string
     NextHop string
+    NetName string
+    LastSeen   string
+    State   string
 }
 
 func runCmd(cmd string, args ...string) ([]byte, error) {
@@ -31,7 +31,7 @@ func runCmd(cmd string, args ...string) ([]byte, error) {
 }
 
 func getDockerContainers() ([]string, error) {
-    out, err := runCmd("docker", "ps", "-q")
+    out, err := runCmd("docker", "ps", "-a", "-q")
     if err != nil {
         return nil, err
     }
@@ -62,11 +62,19 @@ func inspectContainer(id string) ([]DockerContainer, error) {
         name = strings.TrimPrefix(n, "/")
     }
 
-    // Image
-    image := ""
-    if cfg, ok := info["Config"].(map[string]interface{}); ok {
-        if img, ok := cfg["Image"].(string); ok {
-            image = img
+    // Container ID
+    cid := ""
+    if rawId, ok := info["Id"].(string); ok {
+        cid = rawId
+    } else {
+        cid = id
+    }
+
+    // State
+    state := "unknown"
+    if stateObj, ok := info["State"].(map[string]interface{}); ok {
+        if s, ok := stateObj["Status"].(string); ok {
+            state = s
         }
     }
 
@@ -88,12 +96,20 @@ func inspectContainer(id string) ([]DockerContainer, error) {
             mac = v
         }
 
-        // OS
-        osOut, _ := runCmd("docker", "image", "inspect", image, "--format", "{{.Os}}")
-        osName := strings.TrimSpace(string(osOut))
-        if osName == "" {
-            osName = "unknown"
+        // OS (show the image name/tag without digest instead of the OS)
+        image := ""
+        osName := "unknown"
+        if cfg, ok := info["Config"].(map[string]interface{}); ok {
+            if img, ok := cfg["Image"].(string); ok {
+                image = img
+        // Only keep name:tag, drop digest if present
+        if strings.Contains(image, "@") {
+            osName = strings.Split(image, "@")[0]
+        } else {
+            osName = image
         }
+    }
+}
 
         // Ports
         portOut, _ := runCmd("docker", "inspect", id)
@@ -138,15 +154,32 @@ func inspectContainer(id string) ([]DockerContainer, error) {
         nextHop := getGateway(netName, ip)
 
         results = append(results, DockerContainer{
-            ID:      id,
-            Name:    name,
-            Image:   image,
-            OS:      osName,
+            ID:      cid,
             IP:      ip,
+            Name:    name,
+            OS:      osName,
             MAC:     mac,
             Ports:   portStr,
-            NetName: netName,
             NextHop: nextHop,
+            NetName: netName,
+            LastSeen: "", // will be set in DB update step
+            State:   state,
+        })
+    }
+
+    // If no network found, fallback with blank network
+    if len(networks) == 0 {
+        results = append(results, DockerContainer{
+            ID:      cid,
+            IP:      "",
+            Name:    name,
+            OS:      "unknown",
+            MAC:     "",
+            Ports:   "no_ports",
+            NextHop: "unavailable",
+            NetName: "",
+            LastSeen: "",
+            State:   state,
         })
     }
 
@@ -156,20 +189,30 @@ func inspectContainer(id string) ([]DockerContainer, error) {
 var gatewayCache = make(map[string]string)
 
 func getGateway(network, ip string) string {
+    // Return the host LAN IP (first IP from `hostname -I`)
     out, err := runCmd("hostname", "-I")
     if err != nil {
         return "unavailable"
     }
-    fields := strings.Fields(string(out))
-    for _, addr := range fields {
-        if strings.HasPrefix(addr, "192.168.") {
-            return addr
-        }
-    }
-    if len(fields) > 0 {
-        return fields[0]
+    ips := strings.Fields(string(out))
+    if len(ips) > 0 {
+        return ips[0]
     }
     return "unavailable"
+}
+
+func isDockerInternalGateway(gateway string) bool {
+    // Matches 172.16.0.1 - 172.31.0.1
+    if strings.HasPrefix(gateway, "172.") && strings.HasSuffix(gateway, ".0.1") {
+        octets := strings.Split(gateway, ".")
+        if len(octets) == 4 {
+            second, _ := strconv.Atoi(octets[1])
+            if second >= 16 && second <= 31 {
+                return true
+            }
+        }
+    }
+    return false
 }
 
 func updateDockerDB(containers []DockerContainer) error {
@@ -179,16 +222,20 @@ func updateDockerDB(containers []DockerContainer) error {
     }
     defer db.Close()
 
-    knownIPs := []string{}
+    knownIDs := []string{}
     for _, c := range containers {
-        knownIPs = append(knownIPs, c.IP)
+        knownIDs = append(knownIDs, c.ID)
 
-        status := utils.PingHost(c.IP)
+        onlineStatus := "offline"
+        if c.State == "running" {
+            onlineStatus = "online"
+        }
 
         _, err = db.Exec(`
-            INSERT INTO docker_hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'online')
-            ON CONFLICT(ip) DO UPDATE SET
+            INSERT INTO docker_hosts (id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                ip=excluded.ip,
                 name=excluded.name,
                 os_details=excluded.os_details,
                 mac_address=excluded.mac_address,
@@ -197,16 +244,21 @@ func updateDockerDB(containers []DockerContainer) error {
                 network_name=excluded.network_name,
                 last_seen=excluded.last_seen,
                 online_status=excluded.online_status
-        `, c.IP, c.Name, c.OS, c.MAC, c.Ports, c.NextHop, c.NetName, time.Now().Format("2006-01-02 15:04:05"), status)
+        `, c.ID, c.IP, c.Name, c.OS, c.MAC, c.Ports, c.NextHop, c.NetName, time.Now().Format("2006-01-02 15:04:05"), onlineStatus)
         if err != nil {
-            fmt.Printf("Insert/update failed for %s: %v\n", c.IP, err)
+            fmt.Printf("Insert/update failed for %s: %v\n", c.ID, err)
         }
     }
 
-    // Clean up old records
-    ipList := "'" + strings.Join(knownIPs, "','") + "'"
-    _, err = db.Exec(fmt.Sprintf("DELETE FROM docker_hosts WHERE ip NOT IN (%s);", ipList))
-    return err
+    // Clean up old records by container id
+    if len(knownIDs) > 0 {
+        idList := "'" + strings.Join(knownIDs, "','") + "'"
+        _, err = db.Exec(fmt.Sprintf("DELETE FROM docker_hosts WHERE id NOT IN (%s);", idList))
+        if err != nil {
+            fmt.Printf("Cleanup failed: %v\n", err)
+        }
+    }
+    return nil
 }
 
 func DockerScan() error {
