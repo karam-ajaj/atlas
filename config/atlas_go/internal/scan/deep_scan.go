@@ -83,7 +83,7 @@ func scanAllTcp(ip string, logProgress *os.File) (string, string) {
 	rePorts := regexp.MustCompile(`Ports: ([^ ]+)`)
 	reOS := regexp.MustCompile(`OS: (.*)`)
 
-	// --- FIX: Accumulate all matching Ports fields ---
+	// FIX: Accumulate all open ports in case there are multiple lines
 	var portList []string
 
 	scanner := bufio.NewScanner(file)
@@ -105,9 +105,9 @@ func scanAllTcp(ip string, logProgress *os.File) (string, string) {
 			osInfo = strings.TrimSpace(osInfo)
 		}
 	}
+	// Join all ports found into a comma-separated string
 	ports = "Unknown"
 	if len(portList) > 0 {
-		// Join all port lists, in case multiple lines matched
 		ports = strings.Join(portList, ", ")
 	}
 	return ports, osInfo
