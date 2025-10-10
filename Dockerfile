@@ -10,7 +10,7 @@ RUN go build -o atlas .
 FROM python:3.11-slim
 
 RUN apt update && apt install -y \
-    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq ca-certificates \
+    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq ca-certificates nbtscan \
     && pip install --no-cache-dir fastapi uvicorn \
     && apt install -y docker.io \
     && apt clean && rm -rf /var/lib/apt/lists/*

@@ -20,21 +20,64 @@ import (
 const tcpPortArg = "-"
 // const udpPortArg = "-" // UDP scan commented 
 
-func discoverLiveHosts(subnet string) ([]string, error) {
+type HostInfo struct {
+	IP   string
+	Name string
+}
+
+// Try NetBIOS (nbtscan) for hostname resolution
+func getNetBIOSName(ip string) string {
+	out, err := exec.Command("nbtscan", ip).Output()
+	if err != nil {
+		return ""
+	}
+	lines := strings.Split(string(out), "\n")
+	for _, line := range lines {
+		fields := strings.Fields(line)
+		// nbtscan output format: IP Name <other info>
+		if len(fields) >= 2 && fields[0] == ip {
+			return fields[1]
+		}
+	}
+	return ""
+}
+
+// Returns best available host name using nmap, reverse DNS, NetBIOS
+func bestHostName(ip string, nmapName string) string {
+	if nmapName != "" && nmapName != "NoName" {
+		return nmapName
+	}
+	name := getHostName(ip)
+	if name != "" && name != "NoName" {
+		return name
+	}
+	name = getNetBIOSName(ip)
+	if name != "" {
+		return name
+	}
+	return "NoName"
+}
+
+func discoverLiveHosts(subnet string) ([]HostInfo, error) {
 	out, err := exec.Command("nmap", "-sn", subnet).Output()
 	if err != nil {
 		return nil, err
 	}
-	var ips []string
+	var hosts []HostInfo
 	for _, line := range strings.Split(string(out), "\n") {
 		if strings.HasPrefix(line, "Nmap scan report for") {
 			fields := strings.Fields(line)
-			ip := fields[len(fields)-1]
-			ip = strings.Trim(ip, "()")
-			ips = append(ips, ip)
+			if len(fields) == 6 && strings.HasPrefix(fields[5], "(") {
+				name := fields[4]
+				ip := strings.Trim(fields[5], "()")
+				hosts = append(hosts, HostInfo{IP: ip, Name: name})
+			} else if len(fields) == 5 {
+				ip := fields[4]
+				hosts = append(hosts, HostInfo{IP: ip, Name: "NoName"})
+			}
 		}
 	}
-	return ips, nil
+	return hosts, nil
 }
 
 // Parse nmap port string to human-readable form (show only open/filtered)
@@ -65,45 +108,45 @@ func parseNmapPorts(s string) string {
 }
 
 func scanAllTcp(ip string, logProgress *os.File) (string, string) {
-    logFile := fmt.Sprintf("/config/logs/nmap_tcp_%s.log", strings.ReplaceAll(ip, ".", "_"))
-    nmapArgs := []string{"-O", "-p-", ip, "-oG", logFile}
-    start := time.Now()
-    cmd := exec.Command("nmap", nmapArgs...)
-    cmd.Run()
-    elapsed := time.Since(start)
-    fmt.Fprintf(logProgress, "TCP scan for %s finished in %s\n", ip, elapsed)
+	logFile := fmt.Sprintf("/config/logs/nmap_tcp_%s.log", strings.ReplaceAll(ip, ".", "_"))
+	nmapArgs := []string{"-O", "-p-", ip, "-oG", logFile}
+	start := time.Now()
+	cmd := exec.Command("nmap", nmapArgs...)
+	cmd.Run()
+	elapsed := time.Since(start)
+	fmt.Fprintf(logProgress, "TCP scan for %s finished in %s\n", ip, elapsed)
 
-    file, err := os.Open(logFile)
-    if err != nil {
-        return "Unknown", "Unknown"
-    }
-    defer file.Close()
+	file, err := os.Open(logFile)
+	if err != nil {
+		return "Unknown", "Unknown"
+	}
+	defer file.Close()
 
-    var ports string
-    var osInfo string
-    // FIX: Match all text between Ports: and Ignored State: 
-    rePorts := regexp.MustCompile(`Ports: ([^I]+)Ignored State:`)
-    reOS := regexp.MustCompile(`OS: (.*)`)
+	var ports string
+	var osInfo string
+	// Match all text between Ports: and Ignored State: 
+	rePorts := regexp.MustCompile(`Ports: ([^I]+)Ignored State:`)
+	reOS := regexp.MustCompile(`OS: (.*)`)
 
-    scanner := bufio.NewScanner(file)
-    for scanner.Scan() {
-        line := scanner.Text()
-        if m := rePorts.FindStringSubmatch(line); m != nil {
-            ports = parseNmapPorts(m[1])
-        }
-        if m := reOS.FindStringSubmatch(line); m != nil {
-            rawOs := m[1]
-            osInfo = strings.SplitN(rawOs, "\t", 2)[0]
-            if idx := strings.Index(osInfo, "Seq Index:"); idx != -1 {
-                osInfo = strings.TrimSpace(osInfo[:idx])
-            }
-            osInfo = strings.TrimSpace(osInfo)
-        }
-    }
-    if ports == "" {
-        ports = "Unknown"
-    }
-    return ports, osInfo
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if m := rePorts.FindStringSubmatch(line); m != nil {
+			ports = parseNmapPorts(m[1])
+		}
+		if m := reOS.FindStringSubmatch(line); m != nil {
+			rawOs := m[1]
+			osInfo = strings.SplitN(rawOs, "\t", 2)[0]
+			if idx := strings.Index(osInfo, "Seq Index:"); idx != -1 {
+				osInfo = strings.TrimSpace(osInfo[:idx])
+			}
+			osInfo = strings.TrimSpace(osInfo)
+		}
+	}
+	if ports == "" {
+		ports = "Unknown"
+	}
+	return ports, osInfo
 }
 
 // func scanAllUdp(ip string, logProgress *os.File) string {
@@ -170,12 +213,12 @@ func DeepScan() error {
 	defer lf.Close()
 
 	fmt.Fprintf(lf, "Discovering live hosts on %s...\n", subnet)
-	liveHosts, err := discoverLiveHosts(subnet)
+	hostInfos, err := discoverLiveHosts(subnet)
 	if err != nil {
 		fmt.Fprintf(lf, "Failed to discover hosts: %v\n", err)
 		return err
 	}
-	total := len(liveHosts)
+	total := len(hostInfos)
 	fmt.Fprintf(lf, "Discovered %d hosts in %s\n", total, time.Since(startTime))
 
 	dbPath := "/config/db/atlas.db"
@@ -187,16 +230,17 @@ func DeepScan() error {
 	defer db.Close()
 
 	var wg sync.WaitGroup
-	for idx, ip := range liveHosts {
+	for idx, host := range hostInfos {
 		wg.Add(1)
-		go func(idx int, ip string) {
+		go func(idx int, host HostInfo) {
 			defer wg.Done()
 			hostStart := time.Now()
+			ip := host.IP
+			// Use bestHostName for all fallback methods
+			name := bestHostName(ip, host.Name)
 			fmt.Fprintf(lf, "Scanning host %d/%d: %s\n", idx+1, total, ip)
 
 			tcpPorts, osInfo := scanAllTcp(ip, lf)
-			// udpPorts := scanAllUdp(ip, lf) // UDP scan commented for now
-			name := getHostName(ip)
 			mac := getMacAddress(ip)
 			status := utils.PingHost(ip)
 			elapsed := time.Since(startTime)
@@ -206,13 +250,9 @@ func DeepScan() error {
 				estLeft = (elapsed / time.Duration(idx+1)) * time.Duration(hostsLeft)
 			}
 			fmt.Fprintf(lf, "Host %s: TCP ports: %s, OS: %s\n", ip, tcpPorts, osInfo)
-			// fmt.Fprintf(lf, "Host %s: UDP ports: %s\n", ip, udpPorts) // UDP scan commented for now
 			fmt.Fprintf(lf, "Progress: %d/%d hosts, elapsed: %s, estimated left: %s\n", idx+1, total, elapsed, estLeft)
 
 			openPorts := tcpPorts
-			// if udpPorts != "Unknown" {
-			//	openPorts += ", UDP: " + udpPorts
-			// }
 			if openPorts == "" {
 				openPorts = "Unknown"
 			}
@@ -232,7 +272,7 @@ func DeepScan() error {
 				fmt.Fprintf(lf, "❌ Update failed for %s: %v\n", ip, err)
 			}
 			fmt.Fprintf(lf, "Host %s scanned in %s\n", ip, time.Since(hostStart))
-		}(idx, ip)
+		}(idx, host)
 	}
 	wg.Wait()
 
