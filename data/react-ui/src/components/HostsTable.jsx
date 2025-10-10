@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { apiGet } from "../api";
 
 function ipToNum(ip) {
@@ -62,6 +62,78 @@ function sortRows(rows, key, dir) {
   });
 }
 
+// Categorical columns for dropdowns
+const dropdownCols = [
+  "group",
+  "network",
+  "online_status",
+  "subnet"
+];
+
+function FilterDropdown({ values, value, onChange, placeholder = "All", width = "w-32" }) {
+  const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const ref = useRef();
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  const filtered = values.filter(v => v.toLowerCase().includes(search.toLowerCase()));
+
+  function handleSelect(v) {
+    onChange(v);
+    setOpen(false);
+    setSearch("");
+  }
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        className={`w-full px-1 py-1 border rounded text-xs bg-white text-left ${width}`}
+        onClick={() => setOpen(o => !o)}
+        tabIndex={0}
+      >
+        {value || placeholder}
+        <span className="ml-1">&#9662;</span>
+      </button>
+      {open && (
+        <div className={`absolute left-0 top-full z-30 mt-1 bg-white border rounded shadow-md ${width} max-h-48 overflow-auto`}>
+          <input
+            className="w-full px-2 py-1 border-b text-xs"
+            placeholder="Search..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            autoFocus
+          />
+          <div>
+            <div
+              className={`cursor-pointer px-2 py-1 text-xs ${!value ? "bg-blue-50" : ""}`}
+              onClick={() => handleSelect("")}
+            >
+              All
+            </div>
+            {filtered.map(v => (
+              <div
+                key={v}
+                className={`cursor-pointer px-2 py-1 text-xs ${v === value ? "bg-blue-100" : ""}`}
+                onClick={() => handleSelect(v)}
+              >
+                {v}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function HostsTable() {
   const [raw, setRaw] = useState({ hosts: [], docker: [] });
   const [q, setQ] = useState("");
@@ -69,6 +141,7 @@ function HostsTable() {
   const [sortDir, setSortDir] = useState("asc");
   const [mode, setMode] = useState("basic"); // basic | advanced
   const [density, setDensity] = useState("comfortable"); // comfortable | compact
+  const [filters, setFilters] = useState({}); // column filters
 
   useEffect(() => {
     let abort = false;
@@ -85,29 +158,81 @@ function HostsTable() {
     return () => { abort = true; };
   }, []);
 
+  const columns = [
+    "name",
+    "ip",
+    "os",
+    "mac",
+    "group",
+    "ports",
+    "nextHop",
+    "subnet",
+    "network",
+    "lastSeen",
+    "online_status"
+  ];
+  const colTitles = {
+    name: "Name",
+    ip: "IP",
+    os: "OS",
+    mac: "MAC",
+    group: "Group",
+    ports: "Ports",
+    nextHop: "Next hop",
+    subnet: "Subnet",
+    network: "Network",
+    lastSeen: "Last seen",
+    online_status: "Online Status"
+  };
+  const basicCols = [
+    "name", "ip", "os", "group", "ports"
+  ];
+
+  const allRows = useMemo(() => [
+    ...raw.hosts.map((r) => normalizeRow(r, "normal")),
+    ...raw.docker.map((r) => normalizeRow(r, "docker")),
+  ], [raw]);
+
+  // Get unique values for dropdown columns
+  const dropdownValues = useMemo(() => {
+    const values = {};
+    dropdownCols.forEach(col => {
+      values[col] = Array.from(
+        new Set(
+          allRows
+            .map(r => r[col])
+            .filter(v => v && v !== "unknown" && v !== "—")
+        )
+      ).sort();
+    });
+    return values;
+  }, [allRows]);
+
   const rows = useMemo(() => {
-    const merged = [
-      ...raw.hosts.map((r) => normalizeRow(r, "normal")),
-      ...raw.docker.map((r) => normalizeRow(r, "docker")),
-    ];
-
-    const filtered = q
-      ? merged.filter((r) => {
-          const needle = q.toLowerCase();
-          return (
-            r.name.toLowerCase().includes(needle) ||
-            r.ip.toLowerCase().includes(needle) ||
-            r.os.toLowerCase().includes(needle) ||
-            r.mac.toLowerCase().includes(needle) ||
-            r.ports.toLowerCase().includes(needle) ||
-            r.network.toLowerCase().includes(needle) ||
-            r.subnet.toLowerCase().includes(needle) ||
-            r.group.toLowerCase().includes(needle) ||
-            (r.online_status ?? "").toLowerCase().includes(needle)
-          );
-        })
-      : merged;
-
+    let filtered = allRows;
+    if (q) {
+      const needle = q.toLowerCase();
+      filtered = filtered.filter((r) =>
+        r.name.toLowerCase().includes(needle) ||
+        r.ip.toLowerCase().includes(needle) ||
+        r.os.toLowerCase().includes(needle) ||
+        r.mac.toLowerCase().includes(needle) ||
+        r.ports.toLowerCase().includes(needle) ||
+        r.network.toLowerCase().includes(needle) ||
+        r.subnet.toLowerCase().includes(needle) ||
+        r.group.toLowerCase().includes(needle) ||
+        (r.online_status ?? "").toLowerCase().includes(needle)
+      );
+    }
+    Object.entries(filters).forEach(([col, value]) => {
+      if (value && value !== "__all__") {
+        filtered = filtered.filter(r =>
+          dropdownCols.includes(col)
+            ? r[col] === value
+            : (r[col] ?? "").toString().toLowerCase().includes(value.toLowerCase())
+        );
+      }
+    });
     if (sortKey === "group") {
       const primary = [...filtered].sort((a, b) => {
         const ga = a.group === "normal" ? 0 : 1;
@@ -118,7 +243,7 @@ function HostsTable() {
       return sortDir === "desc" ? primary.reverse() : primary;
     }
     return sortRows(filtered, sortKey, sortDir);
-  }, [raw, q, sortKey, sortDir]);
+  }, [allRows, q, sortKey, sortDir, filters]);
 
   function toggleSort(key) {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -129,36 +254,12 @@ function HostsTable() {
   }
 
   function exportCSV() {
-    const header = [
-      "name",
-      "ip",
-      "os",
-      "mac",
-      "group",
-      "ports",
-      "nextHop",
-      "subnet",
-      "network",
-      "lastSeen",
-      "online_status",
-    ];
+    const header = columns;
     const csv = [
       header.join(","),
       ...rows.map((r) =>
-        [
-          r.name,
-            r.ip,
-            r.os,
-            r.mac,
-            r.group,
-            r.ports,
-            r.nextHop,
-            r.subnet,
-            r.network,
-            r.lastSeen,
-            r.online_status,
-        ]
-          .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
+        header
+          .map((col) => `"${String(r[col] ?? "").replace(/"/g, '""')}"`)
           .join(",")
       ),
     ].join("\n");
@@ -170,7 +271,6 @@ function HostsTable() {
     URL.revokeObjectURL(a.href);
   }
 
-  // UI helpers
   const thBase =
     "px-3 text-[11px] leading-4 font-semibold uppercase tracking-wide text-gray-600 bg-gray-100 border-b-2 border-gray-200 sticky top-0 z-20 whitespace-nowrap";
   const tdBase = "px-3 border-b border-gray-200 align-middle";
@@ -246,22 +346,45 @@ function HostsTable() {
               <col style={{ width: "10%" }} />
               <col style={{ width: "10%" }} />
               <col style={{ width: "10%" }} />
-              <col style={{ width: "10%" }} /> {/* new col for online_status */}
+              <col style={{ width: "10%" }} />
             </colgroup>
 
             <thead className="bg-gray-100">
               <tr>
-                <th className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("name")}>Name</th>
-                <th className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("ip")}>IP</th>
-                <th className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("os")}>OS</th>
-                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("mac")}>MAC</th>
-                <th className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("group")}>Group</th>
-                <th className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("ports")}>Ports</th>
-                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("nextHop")}>Next hop</th>
-                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("subnet")}>Subnet</th>
-                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("network")}>Network</th>
-                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("lastSeen")}>Last seen</th>
-                <th className={`${thBase} ${thH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} onClick={() => toggleSort("online_status")}>Online Status</th>
+                {columns.map(col =>
+                  (isAdvanced || basicCols.includes(col)) ? (
+                    <th
+                      key={col}
+                      className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`}
+                    >
+                      <div className="flex flex-col gap-1">
+                        <span
+                          className="cursor-pointer"
+                          onClick={() => toggleSort(col)}
+                          style={{ userSelect: "none" }}
+                        >
+                          {colTitles[col]}
+                        </span>
+                        {dropdownCols.includes(col) ? (
+                          <FilterDropdown
+                            values={dropdownValues[col]}
+                            value={filters[col] ?? ""}
+                            onChange={v => setFilters(f => ({ ...f, [col]: v }))}
+                            placeholder="All"
+                          />
+                        ) : (
+                          <input
+                            className="w-full px-1 py-1 border rounded text-xs mt-1"
+                            style={{ minWidth: 0 }}
+                            placeholder="Filter"
+                            value={filters[col] ?? ""}
+                            onChange={e => setFilters(f => ({ ...f, [col]: e.target.value }))}
+                          />
+                        )}
+                      </div>
+                    </th>
+                  ) : null
+                )}
               </tr>
             </thead>
 
@@ -270,72 +393,104 @@ function HostsTable() {
                 const key = `${r.group}-${r.ip}-${r.name}`;
                 return (
                   <tr key={key} className="select-text">
-                    <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0`}>
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className={`inline-block h-2 w-2 rounded-full ${r.group === "docker" ? "bg-emerald-500" : "bg-gray-400"}`} />
-                        <span className="min-w-0 block truncate" title={r.name}>
-                          {r.name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0 whitespace-nowrap font-mono`} title={r.ip}>
-                      {r.ip}
-                    </td>
-                    <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0`}>
-                      <span className={`block truncate ${(!r.os || /^unknown$/i.test(r.os)) ? "text-gray-400" : ""}`} title={r.os || "—"}>
-                        {r.os && !/^unknown$/i.test(r.os) ? r.os : "—"}
-                      </span>
-                    </td>
-                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`}>
-                      <span className={`block whitespace-nowrap ${(!r.mac || /^unknown$/i.test(r.mac)) ? "text-gray-400" : ""}`} title={r.mac || "—"}>
-                        {r.mac && !/^unknown$/i.test(r.mac) ? r.mac : "—"}
-                      </span>
-                    </td>
-                    <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0 capitalize`}>
-                      {r.group}
-                    </td>
-                    <td className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0`}>
-                      <div title={r.ports} className="min-w-0">
-                        <div
-                          className="block"
-                          style={{
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }}
+                    {columns.map(col => {
+                      if (!isAdvanced && !basicCols.includes(col)) return null;
+                      let content;
+                      if (col === "os") {
+                        content = (
+                          <span className={`block truncate ${(!r.os || /^unknown$/i.test(r.os)) ? "text-gray-400" : ""}`} title={r.os || "—"}>
+                            {r.os && !/^unknown$/i.test(r.os) ? r.os : "—"}
+                          </span>
+                        );
+                      } else if (col === "mac") {
+                        content = (
+                          <span className={`block whitespace-nowrap ${(!r.mac || /^unknown$/i.test(r.mac)) ? "text-gray-400" : ""}`} title={r.mac || "—"}>
+                            {r.mac && !/^unknown$/i.test(r.mac) ? r.mac : "—"}
+                          </span>
+                        );
+                      } else if (col === "group") {
+                        content = (
+                          <span className="capitalize">{r.group}</span>
+                        );
+                      } else if (col === "ports") {
+                        content = (
+                          <div title={r.ports} className="min-w-0">
+                            <div
+                              className="block"
+                              style={{
+                                display: "-webkit-box",
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: "vertical",
+                                overflow: "hidden",
+                              }}
+                            >
+                              {r.ports}
+                            </div>
+                          </div>
+                        );
+                      } else if (col === "nextHop") {
+                        content = (
+                          <span className={`block truncate ${(!r.nextHop || /^unknown$/i.test(r.nextHop) || r.nextHop === "unavailable") ? "text-gray-400" : ""}`} title={r.nextHop || "—"}>
+                            {r.nextHop && !/^unknown$/i.test(r.nextHop) && r.nextHop !== "unavailable" ? r.nextHop : "—"}
+                          </span>
+                        );
+                      } else if (col === "subnet") {
+                        content = r.subnet || <span className="text-gray-400">—</span>;
+                      } else if (col === "network") {
+                        content = (
+                          <span className={`block truncate ${(!r.network || /^unknown$/i.test(r.network)) ? "text-gray-400" : ""}`} title={r.network || "—"}>
+                            {r.network && !/^unknown$/i.test(r.network) ? r.network : "—"}
+                          </span>
+                        );
+                      } else if (col === "lastSeen") {
+                        content = fmtLastSeen(r.lastSeen);
+                      } else if (col === "online_status") {
+                        content = (
+                          <span className={`block truncate ${(!r.online_status || /^unknown$/i.test(r.online_status)) ? "text-gray-400" : ""}`}>
+                            {r.online_status && !/^unknown$/i.test(r.online_status) ? r.online_status : "—"}
+                          </span>
+                        );
+                      } else if (col === "name") {
+                        const statusColor =
+                          r.online_status && r.online_status.toLowerCase() === "online"
+                            ? "bg-emerald-500"
+                            : "bg-red-500";
+                        content = (
+                          <div className="flex items-center gap-2 min-w-0">
+                            {/* vertical line, green if online, red if offline */}
+                            <span
+                              className={`inline-block h-6 w-1 rounded ${statusColor}`}
+                              style={{ minWidth: "4px", marginRight: "8px" }}
+                            />
+                            <span className="min-w-0 block truncate" title={r.name}>
+  {r.name}
+</span>
+                          </div>
+                        );
+                      } else if (col === "ip") {
+                        content = (
+                          <span className="whitespace-nowrap font-mono" title={r.ip}>
+                            {r.ip}
+                          </span>
+                        );
+                      } else {
+                        content = r[col] ?? "—";
+                      }
+                      return (
+                        <td
+                          key={col}
+                          className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0`}
                         >
-                          {r.ports}
-                        </div>
-                      </div>
-                    </td>
-                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`}>
-                      <span className={`block truncate ${(!r.nextHop || /^unknown$/i.test(r.nextHop) || r.nextHop === "unavailable") ? "text-gray-400" : ""}`} title={r.nextHop || "—"}>
-                        {r.nextHop && !/^unknown$/i.test(r.nextHop) && r.nextHop !== "unavailable" ? r.nextHop : "—"}
-                      </span>
-                    </td>
-                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} title={r.subnet}>
-                      {r.subnet || <span className="text-gray-400">—</span>}
-                    </td>
-                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`}>
-                      <span className={`block truncate ${(!r.network || /^unknown$/i.test(r.network)) ? "text-gray-400" : ""}`} title={r.network || "—"}>
-                        {r.network && !/^unknown$/i.test(r.network) ? r.network : "—"}
-                      </span>
-                    </td>
-                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} title={r.lastSeen}>
-                      {fmtLastSeen(r.lastSeen)}
-                    </td>
-                    <td className={`${tdBase} ${rowH} ${isAdvanced ? "" : "hidden"} border-r border-gray-200 last:border-r-0`} title={r.online_status}>
-                      <span className={`block truncate ${(!r.online_status || /^unknown$/i.test(r.online_status)) ? "text-gray-400" : ""}`}>
-                        {r.online_status && !/^unknown$/i.test(r.online_status) ? r.online_status : "—"}
-                      </span>
-                    </td>
+                          {content}
+                        </td>
+                      );
+                    })}
                   </tr>
                 );
               })}
               {rows.length === 0 && (
                 <tr>
-                  <td className="px-3 py-6 text-center text-gray-500" colSpan={11}>
+                  <td className="px-3 py-6 text-center text-gray-500" colSpan={columns.length}>
                     No data.
                   </td>
                 </tr>

@@ -1,7 +1,6 @@
 # Ignore DB and logs
-config/db/
-config/logs/
-*.log
+config/db/*.db
+config/logs/*.log
 
 # Ignore Python cache
 config/scripts/__pycache__/

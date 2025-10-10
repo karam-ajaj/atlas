@@ -4,31 +4,30 @@ import (
     "database/sql"
     "fmt"
     "os/exec"
-    "regexp"
     "strings"
     "time"
 
     _ "github.com/mattn/go-sqlite3"
+    "atlas/internal/utils"
 )
 
-func getLocalSubnet() (string, error) {
-    out, err := exec.Command("ip", "-o", "-f", "inet", "addr", "show").Output()
+// POINT 1: Get the default gateway IP (internal)
+func getDefaultGateway() (string, error) {
+    out, err := exec.Command("ip", "route").Output()
     if err != nil {
         return "", err
     }
-
-    re := regexp.MustCompile(`(?m)^\d+: (\w+).*?inet (\d+\.\d+\.\d+\.\d+/\d+)`)
-    matches := re.FindAllStringSubmatch(string(out), -1)
-
-    for _, match := range matches {
-        iface := match[1]
-        subnet := match[2]
-        if iface != "lo" {
-            return subnet, nil
+    for _, line := range strings.Split(string(out), "\n") {
+        if strings.HasPrefix(line, "default") {
+            fields := strings.Fields(line)
+            for i, f := range fields {
+                if f == "via" && i+1 < len(fields) {
+                    return fields[i+1], nil
+                }
+            }
         }
     }
-
-    return "", fmt.Errorf("no valid non-loopback subnet found")
+    return "", fmt.Errorf("no default gateway found")
 }
 
 func runNmap(subnet string) (map[string]string, error) {
@@ -55,7 +54,8 @@ func runNmap(subnet string) (map[string]string, error) {
     return hosts, nil
 }
 
-func updateSQLiteDB(hosts map[string]string) error {
+// POINT 2: Assign next_hop for LAN hosts to the gateway IP
+func updateSQLiteDB(hosts map[string]string, gatewayIP string) error {
     dbPath := "/config/db/atlas.db"
     db, err := sql.Open("sqlite3", dbPath)
     if err != nil {
@@ -66,12 +66,13 @@ func updateSQLiteDB(hosts map[string]string) error {
     for ip, name := range hosts {
         _, err = db.Exec(`
             INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)
-            VALUES (?, ?, 'Unknown', 'Unknown', 'Unknown', '', 'LAN', CURRENT_TIMESTAMP, 'online')
+            VALUES (?, ?, 'Unknown', 'Unknown', 'Unknown', ?, 'LAN', CURRENT_TIMESTAMP, 'online')
             ON CONFLICT(ip) DO UPDATE SET
                 name=excluded.name,
                 last_seen=excluded.last_seen,
-                online_status=excluded.online_status
-        `, ip, name, time.Now().Format("2006-01-02 15:04:05"))
+                online_status=excluded.online_status,
+                next_hop=excluded.next_hop
+        `, ip, name, gatewayIP, time.Now().Format("2006-01-02 15:04:05"))
         if err != nil {
             fmt.Printf("Insert/update failed for %s: %v\n", ip, err)
         }
@@ -122,7 +123,7 @@ func updateExternalIPInDB(dbPath string) {
 }
 
 func FastScan() error {
-    subnet, err := getLocalSubnet()
+    subnet, err := utils.GetLocalSubnet()
     if err != nil {
         return err
     }
@@ -133,7 +134,13 @@ func FastScan() error {
         return err
     }
 
-    err = updateSQLiteDB(hosts)
+    gatewayIP, err := getDefaultGateway()
+    if err != nil {
+        fmt.Println("⚠️ Could not determine gateway:", err)
+        gatewayIP = ""
+    }
+
+    err = updateSQLiteDB(hosts, gatewayIP)
     if err != nil {
         return err
     }
