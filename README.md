@@ -77,7 +77,7 @@ docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e ATLAS_UI_PORT=8884 \
   -e ATLAS_API_PORT=8885 \
-  keinstien/atlas:3.2.18
+  keinstien/atlas:3.2.29
 ```
 
 **Environment Variables:**
