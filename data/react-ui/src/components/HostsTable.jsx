@@ -30,20 +30,42 @@ function fmtLastSeen(v) {
   return `${days}d`;
 }
 function normalizeRow(r, group) {
-  return {
-    id: r[0],
-    ip: r[1] || "",
-    name: r[2] || "NoName",
-    os: r[3] || "Unknown",
-    mac: r[4] || "Unknown",
-    ports: r[5] || "no_ports",
-    nextHop: r[6] || "Unknown",
-    network: r[7] || (group === "docker" ? "docker" : ""),
-    lastSeen: r[8] || "Invalid",
-    online_status: r[9] || "unknown",
-    group,
-    subnet: subnetOf(r[1] || ""),
-  };
+  // Schema for docker_hosts: [id, container_id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status]
+  // Schema for hosts: [id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status]
+  // We normalize both to use the same format, adjusting for docker_hosts having an extra container_id field
+  
+  if (group === "docker") {
+    return {
+      id: r[0],
+      container_id: r[1] || "",
+      ip: r[2] || "",
+      name: r[3] || "NoName",
+      os: r[4] || "Unknown",
+      mac: r[5] || "Unknown",
+      ports: r[6] || "no_ports",
+      nextHop: r[7] || "Unknown",
+      network: r[8] || "docker",
+      lastSeen: r[9] || "Invalid",
+      online_status: r[10] || "unknown",
+      group,
+      subnet: subnetOf(r[2] || ""),
+    };
+  } else {
+    return {
+      id: r[0],
+      ip: r[1] || "",
+      name: r[2] || "NoName",
+      os: r[3] || "Unknown",
+      mac: r[4] || "Unknown",
+      ports: r[5] || "no_ports",
+      nextHop: r[6] || "Unknown",
+      network: r[7] || "",
+      lastSeen: r[8] || "Invalid",
+      online_status: r[9] || "unknown",
+      group,
+      subnet: subnetOf(r[1] || ""),
+    };
+  }
 }
 function sortRows(rows, key, dir) {
   const sign = dir === "desc" ? -1 : 1;
@@ -390,7 +412,9 @@ function HostsTable() {
 
             <tbody>
               {rows.map((r) => {
-                const key = `${r.group}-${r.ip}-${r.name}`;
+                const key = r.group === "docker" && r.container_id 
+                  ? `${r.group}-${r.container_id}-${r.network}` 
+                  : `${r.group}-${r.ip}-${r.name}`;
                 return (
                   <tr key={key} className="select-text">
                     {columns.map(col => {
