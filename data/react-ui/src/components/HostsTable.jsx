@@ -62,7 +62,6 @@ function sortRows(rows, key, dir) {
   });
 }
 
-// Categorical columns for dropdowns
 const dropdownCols = [
   "group",
   "network",
@@ -70,66 +69,99 @@ const dropdownCols = [
   "subnet"
 ];
 
-function FilterDropdown({ values, value, onChange, placeholder = "All", width = "w-32" }) {
+const colTitles = {
+  name: "Name",
+  ip: "IP",
+  os: "OS",
+  mac: "MAC",
+  group: "Group",
+  ports: "Ports",
+  nextHop: "Next hop",
+  subnet: "Subnet",
+  network: "Network",
+  lastSeen: "Last seen",
+  online_status: "Online Status"
+};
+
+function InlineSearchDropdown({ values, value, onChange, placeholder = "All", onClose, colTitle }) {
   const [search, setSearch] = useState("");
-  const [open, setOpen] = useState(false);
   const ref = useRef();
 
+  const filtered = useMemo(() => {
+    if (!search) return values;
+    const lower = search.toLowerCase();
+    return values.filter(v => v.toLowerCase().includes(lower));
+  }, [values, search]);
+
   useEffect(() => {
-    function handleClick(e) {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    function handle(e) {
+      if (ref.current && !ref.current.contains(e.target)) onClose();
     }
-    if (open) document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [open]);
-
-  const filtered = values.filter(v => v.toLowerCase().includes(search.toLowerCase()));
-
-  function handleSelect(v) {
-    onChange(v);
-    setOpen(false);
-    setSearch("");
-  }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [onClose]);
 
   return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        className={`w-full px-1 py-1 border rounded text-xs bg-white text-left ${width}`}
-        onClick={() => setOpen(o => !o)}
-        tabIndex={0}
-      >
-        {value || placeholder}
-        <span className="ml-1">&#9662;</span>
-      </button>
-      {open && (
-        <div className={`absolute left-0 top-full z-30 mt-1 bg-white border rounded shadow-md ${width} max-h-48 overflow-auto`}>
-          <input
-            className="w-full px-2 py-1 border-b text-xs"
-            placeholder="Search..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            autoFocus
-          />
-          <div>
-            <div
-              className={`cursor-pointer px-2 py-1 text-xs ${!value ? "bg-blue-50" : ""}`}
-              onClick={() => handleSelect("")}
-            >
-              All
-            </div>
-            {filtered.map(v => (
-              <div
-                key={v}
-                className={`cursor-pointer px-2 py-1 text-xs ${v === value ? "bg-blue-100" : ""}`}
-                onClick={() => handleSelect(v)}
-              >
-                {v}
-              </div>
-            ))}
-          </div>
+    <div ref={ref} className="relative">
+      <input
+        autoFocus
+        type="text"
+        className="w-full px-1 py-1 border rounded text-xs bg-white"
+        placeholder={`Search ${colTitle}...`}
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        onBlur={onClose}
+      />
+      <div className="absolute left-0 top-full z-30 mt-1 bg-white border rounded shadow-md w-full max-h-48 overflow-auto">
+        <div
+          className={`cursor-pointer px-2 py-1 text-xs ${!value ? "bg-blue-50" : ""}`}
+          onMouseDown={() => { onChange(""); onClose(); }}
+        >
+          {`ALL ${colTitle}`}
         </div>
-      )}
+        {filtered.map(v => (
+          <div
+            key={v}
+            className={`cursor-pointer px-2 py-1 text-xs ${v === value ? "bg-blue-100" : ""}`}
+            onMouseDown={() => { onChange(v); onClose(); }}
+          >
+            {v}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SortToolbar({ sortKey, setSortKey, sortDir, setSortDir, columns, colTitles }) {
+  return (
+    <div className="flex items-center gap-2 mb-2 ml-2">
+      <label className="font-semibold text-gray-700 mr-2">Sort by</label>
+      <select
+        value={sortKey}
+        onChange={e => setSortKey(e.target.value)}
+        className="px-2 py-1 rounded border border-gray-400 bg-white text-xs font-semibold"
+      >
+        {columns.map(col =>
+          <option key={col} value={col}>{colTitles[col]}</option>
+        )}
+      </select>
+      <div className="flex gap-1 items-center ml-2">
+        <button
+          onClick={() => setSortDir("asc")}
+          className={`px-2 py-1 rounded border text-xs font-semibold ${sortDir === "asc" ? "bg-blue-500 text-white" : "bg-white text-gray-700"}`}
+          title="Sort ascending"
+        >
+          <span style={{ display: "inline-block" }}>▲</span> Ascending
+        </button>
+        <button
+          onClick={() => setSortDir("desc")}
+          className={`px-2 py-1 rounded border text-xs font-semibold ${sortDir === "desc" ? "bg-blue-500 text-white" : "bg-white text-gray-700"}`}
+          title="Sort descending"
+        >
+          <span style={{ display: "inline-block" }}>▼</span> Descending
+        </button>
+      </div>
     </div>
   );
 }
@@ -139,9 +171,10 @@ function HostsTable() {
   const [q, setQ] = useState("");
   const [sortKey, setSortKey] = useState("group");
   const [sortDir, setSortDir] = useState("asc");
-  const [mode, setMode] = useState("basic"); // basic | advanced
-  const [density, setDensity] = useState("comfortable"); // comfortable | compact
-  const [filters, setFilters] = useState({}); // column filters
+  const [mode, setMode] = useState("basic");
+  const [density, setDensity] = useState("comfortable");
+  const [filters, setFilters] = useState({});
+  const [filteringCol, setFilteringCol] = useState(null);
 
   useEffect(() => {
     let abort = false;
@@ -171,19 +204,6 @@ function HostsTable() {
     "lastSeen",
     "online_status"
   ];
-  const colTitles = {
-    name: "Name",
-    ip: "IP",
-    os: "OS",
-    mac: "MAC",
-    group: "Group",
-    ports: "Ports",
-    nextHop: "Next hop",
-    subnet: "Subnet",
-    network: "Network",
-    lastSeen: "Last seen",
-    online_status: "Online Status"
-  };
   const basicCols = [
     "name", "ip", "os", "group", "ports"
   ];
@@ -193,7 +213,6 @@ function HostsTable() {
     ...raw.docker.map((r) => normalizeRow(r, "docker")),
   ], [raw]);
 
-  // Get unique values for dropdown columns
   const dropdownValues = useMemo(() => {
     const values = {};
     dropdownCols.forEach(col => {
@@ -207,6 +226,18 @@ function HostsTable() {
     });
     return values;
   }, [allRows]);
+
+  const columnValues = useMemo(() => {
+    const values = {};
+    columns.forEach(col => {
+      if (dropdownCols.includes(col)) {
+        values[col] = dropdownValues[col];
+      } else {
+        values[col] = Array.from(new Set(allRows.map(r => (r[col] ?? "").toString()).filter(v => v))).sort();
+      }
+    });
+    return values;
+  }, [columns, allRows, dropdownValues]);
 
   const rows = useMemo(() => {
     let filtered = allRows;
@@ -233,25 +264,9 @@ function HostsTable() {
         );
       }
     });
-    if (sortKey === "group") {
-      const primary = [...filtered].sort((a, b) => {
-        const ga = a.group === "normal" ? 0 : 1;
-        const gb = b.group === "normal" ? 0 : 1;
-        if (ga !== gb) return ga - gb;
-        return ipToNum(a.ip) - ipToNum(b.ip);
-      });
-      return sortDir === "desc" ? primary.reverse() : primary;
-    }
+    // Now sort by any column, not just group
     return sortRows(filtered, sortKey, sortDir);
   }, [allRows, q, sortKey, sortDir, filters]);
-
-  function toggleSort(key) {
-    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else {
-      setSortKey(key);
-      setSortDir("asc");
-    }
-  }
 
   function exportCSV() {
     const header = columns;
@@ -280,7 +295,6 @@ function HostsTable() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Toolbar */}
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <input
           type="text"
@@ -330,8 +344,15 @@ function HostsTable() {
           </button>
         </div>
       </div>
-
-      {/* Scroll container */}
+      {/* Sort toolbar above table */}
+      <SortToolbar
+        sortKey={sortKey}
+        setSortKey={setSortKey}
+        sortDir={sortDir}
+        setSortDir={setSortDir}
+        columns={columns}
+        colTitles={colTitles}
+      />
       <div className="relative flex-1 overflow-auto rounded border border-gray-200">
         <div className="min-w-full overflow-x-auto">
           <table className="w-full min-w-[1280px] table-fixed border-separate border-spacing-0">
@@ -348,7 +369,6 @@ function HostsTable() {
               <col style={{ width: "10%" }} />
               <col style={{ width: "10%" }} />
             </colgroup>
-
             <thead className="bg-gray-100">
               <tr>
                 {columns.map(col =>
@@ -356,30 +376,38 @@ function HostsTable() {
                     <th
                       key={col}
                       className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`}
+                      style={{ position: "relative", minWidth: "100px", background: "#f7fafc" }}
                     >
-                      <div className="flex flex-col gap-1">
-                        <span
-                          className="cursor-pointer"
-                          onClick={() => toggleSort(col)}
-                          style={{ userSelect: "none" }}
-                        >
-                          {colTitles[col]}
-                        </span>
-                        {dropdownCols.includes(col) ? (
-                          <FilterDropdown
-                            values={dropdownValues[col]}
+                      <div
+                        className="w-full"
+                        style={{ minWidth: "100px", minHeight: "32px" }}
+                        onClick={() => {
+                          if (filteringCol !== col) setFilteringCol(col);
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Filter by ${colTitles[col]}`}
+                      >
+                        {filteringCol === col ? (
+                          <InlineSearchDropdown
+                            values={columnValues[col]}
                             value={filters[col] ?? ""}
                             onChange={v => setFilters(f => ({ ...f, [col]: v }))}
-                            placeholder="All"
+                            placeholder={`Search ${colTitles[col]}...`}
+                            onClose={() => setFilteringCol(null)}
+                            colTitle={colTitles[col]}
                           />
                         ) : (
-                          <input
-                            className="w-full px-1 py-1 border rounded text-xs mt-1"
-                            style={{ minWidth: 0 }}
-                            placeholder="Filter"
-                            value={filters[col] ?? ""}
-                            onChange={e => setFilters(f => ({ ...f, [col]: e.target.value }))}
-                          />
+                          <div className="flex items-center gap-1 w-full h-full cursor-pointer hover:bg-blue-50 rounded px-1 py-1"
+                            title={`Click to filter by ${colTitles[col]}`}>
+                            <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
+                              className="inline mr-1 opacity-70"
+                              style={{ marginRight: "4px" }}>
+                              <circle cx="9" cy="9" r="7" stroke="#333" strokeWidth="2" />
+                              <line x1="15" y1="15" x2="19" y2="19" stroke="#333" strokeWidth="2" />
+                            </svg>
+                            <span className="font-semibold">{colTitles[col]}</span>
+                          </div>
                         )}
                       </div>
                     </th>
@@ -387,7 +415,6 @@ function HostsTable() {
                 )}
               </tr>
             </thead>
-
             <tbody>
               {rows.map((r) => {
                 const key = `${r.group}-${r.ip}-${r.name}`;
@@ -457,14 +484,13 @@ function HostsTable() {
                             : "bg-red-500";
                         content = (
                           <div className="flex items-center gap-2 min-w-0">
-                            {/* vertical line, green if online, red if offline */}
                             <span
                               className={`inline-block h-6 w-1 rounded ${statusColor}`}
                               style={{ minWidth: "4px", marginRight: "8px" }}
                             />
                             <span className="min-w-0 block truncate" title={r.name}>
-  {r.name}
-</span>
+                              {r.name}
+                            </span>
                           </div>
                         );
                       } else if (col === "ip") {
