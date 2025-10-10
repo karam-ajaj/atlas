@@ -70,13 +70,11 @@ const dropdownCols = [
   "subnet"
 ];
 
-// Custom dropdown with search for column filters
 function FilterDropdown({ values, value, onChange, placeholder = "All", width = "w-32" }) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useRef();
 
-  // For click outside: close dropdown
   useEffect(() => {
     function handleClick(e) {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
@@ -453,12 +451,20 @@ function HostsTable() {
                           </span>
                         );
                       } else if (col === "name") {
+                        const statusColor =
+                          r.online_status && r.online_status.toLowerCase() === "online"
+                            ? "bg-emerald-500"
+                            : "bg-red-500";
                         content = (
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className={`inline-block h-2 w-2 rounded-full ${r.group === "docker" ? "bg-emerald-500" : "bg-gray-400"}`} />
+                            {/* vertical line, green if online, red if offline */}
+                            <span
+                              className={`inline-block h-6 w-1 rounded ${statusColor}`}
+                              style={{ minWidth: "4px", marginRight: "8px" }}
+                            />
                             <span className="min-w-0 block truncate" title={r.name}>
-                              {r.name}
-                            </span>
+  {r.name}
+</span>
                           </div>
                         );
                       } else if (col === "ip") {
