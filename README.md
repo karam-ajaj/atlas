@@ -87,8 +87,9 @@ docker run -d \
 If not set, defaults are used (UI: 8888, API: 8889).
 
 Example endpoints:
-- UI:         http://localhost:8884
-- API:        http://localhost:8885/api
+- UI:                              http://localhost:ATLAS_UI_PORT
+- API(from exposed API port):      http://localhost:ATLAS_API_PORT/api/docs
+- API(based on nginx conf):        http://localhost:ATLAS_UI_PORT/api/docs
 
 Auto-scanning of Docker and local subnets runs on container start.
 
