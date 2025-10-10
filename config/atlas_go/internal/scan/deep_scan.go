@@ -65,41 +65,52 @@ func parseNmapPorts(s string) string {
 }
 
 func scanAllTcp(ip string, logProgress *os.File) (string, string) {
-    nmapArgs := []string{"-O", "-p-", ip, "-oG", "/config/logs/nmap_tcp.log"}
-    start := time.Now()
-    cmd := exec.Command("nmap", nmapArgs...)
-    cmd.Run()
-    elapsed := time.Since(start)
-    fmt.Fprintf(logProgress, "TCP scan for %s finished in %s\n", ip, elapsed)
+	nmapArgs := []string{"-O", "-p-", ip, "-oG", "/config/logs/nmap_tcp.log"}
+	start := time.Now()
+	cmd := exec.Command("nmap", nmapArgs...)
+	cmd.Run()
+	elapsed := time.Since(start)
+	fmt.Fprintf(logProgress, "TCP scan for %s finished in %s\n", ip, elapsed)
 
-    file, err := os.Open("/config/logs/nmap_tcp.log")
-    if err != nil {
-        return "Unknown", "Unknown"
-    }
-    defer file.Close()
+	file, err := os.Open("/config/logs/nmap_tcp.log")
+	if err != nil {
+		return "Unknown", "Unknown"
+	}
+	defer file.Close()
 
-    var ports string
-    var osInfo string
-    rePorts := regexp.MustCompile(`Ports: ([^ ]+)`)
-    reOS := regexp.MustCompile(`OS: (.*)`)
+	var ports string
+	var osInfo string
+	rePorts := regexp.MustCompile(`Ports: ([^ ]+)`)
+	reOS := regexp.MustCompile(`OS: (.*)`)
 
-    scanner := bufio.NewScanner(file)
-    for scanner.Scan() {
-        line := scanner.Text()
-        if m := rePorts.FindStringSubmatch(line); m != nil {
-            ports = parseNmapPorts(m[1])
-        }
-        if m := reOS.FindStringSubmatch(line); m != nil {
-            rawOs := m[1]
-            // Only keep part before tab or "Seq Index:"
-            osInfo = strings.SplitN(rawOs, "\t", 2)[0]
-            if idx := strings.Index(osInfo, "Seq Index:"); idx != -1 {
-                osInfo = strings.TrimSpace(osInfo[:idx])
-            }
-            osInfo = strings.TrimSpace(osInfo)
-        }
-    }
-    return ports, osInfo
+	// --- FIX: Accumulate all matching Ports fields ---
+	var portList []string
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if m := rePorts.FindStringSubmatch(line); m != nil {
+			parsed := parseNmapPorts(m[1])
+			if parsed != "Unknown" {
+				portList = append(portList, parsed)
+			}
+		}
+		if m := reOS.FindStringSubmatch(line); m != nil {
+			rawOs := m[1]
+			// Only keep part before tab or "Seq Index:"
+			osInfo = strings.SplitN(rawOs, "\t", 2)[0]
+			if idx := strings.Index(osInfo, "Seq Index:"); idx != -1 {
+				osInfo = strings.TrimSpace(osInfo[:idx])
+			}
+			osInfo = strings.TrimSpace(osInfo)
+		}
+	}
+	ports = "Unknown"
+	if len(portList) > 0 {
+		// Join all port lists, in case multiple lines matched
+		ports = strings.Join(portList, ", ")
+	}
+	return ports, osInfo
 }
 
 // func scanAllUdp(ip string, logProgress *os.File) string {
