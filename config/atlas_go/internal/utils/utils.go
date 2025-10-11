@@ -1,9 +1,9 @@
 package utils
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
-	"fmt"
 )
 
 // Shared function for subnet detection
@@ -20,6 +20,8 @@ func GetLocalSubnet() (string, error) {
 				if !strings.HasPrefix(subnet, "127.") {
 					parts := strings.Split(subnet, "/")
 					if len(parts) == 2 {
+						return subnet, nil
+					} else {
 						return parts[0] + "/24", nil
 					}
 				}
