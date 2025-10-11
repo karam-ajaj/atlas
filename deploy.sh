@@ -9,13 +9,14 @@ UI_DIR="${REPO_ROOT}/data/react-ui"
 HTML_DIR="${REPO_ROOT}/data/html"
 IMAGE="keinstien/atlas"
 CONTAINER_NAME="atlas-dev"
+CURRENT_VERSION=$(awk -F'"' '{print $4}' $HTML_DIR/build-info.json)
 
 echo "📁 Repo root: $REPO_ROOT"
 echo "🧩 UI dir:    $UI_DIR"
 echo "🗂️  HTML dir:   $HTML_DIR"
 
 # Prompt for version
-read -p "👉 Enter the version tag (e.g. v3.3): " VERSION
+read -p "👉 Enter the version tag (current version: $CURRENT_VERSION): " VERSION
 if [[ -z "${VERSION:-}" ]]; then
   echo "❌ Version tag is required. Exiting..."
   exit 1
@@ -27,6 +28,14 @@ if [[ "${TAG_LATEST:-}" =~ ^([yY][eE][sS]|[yY])$ ]]; then
   DO_LATEST=true
 else
   DO_LATEST=false
+fi
+
+# Ask whether to push this version to Docker Hub
+read -p "👉 Push this version to Docker Hub? (Y/n): " PUSH_D
+if [[ "${PUSH_D:-}" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+  DO_PUSH=true
+else
+  DO_PUSH=false
 fi
 
 # Sanity checks
@@ -86,10 +95,15 @@ else
 fi
 
 # Step 6: Push image(s) to Docker Hub
-echo "📤 Pushing Docker image(s) to Docker Hub..."
-docker push "$IMAGE:$VERSION"
-if $DO_LATEST; then
-  docker push "$IMAGE:latest"
+if ! $DO_PUSH; then
+  echo "⏭️ Skipping Docker push as requested"
+  exit 0
+else
+  echo "📤 Pushing Docker image(s) to Docker Hub..."
+  docker push "$IMAGE:$VERSION"
+  if $DO_LATEST; then
+    docker push "$IMAGE:latest"
+  fi
 fi
 
 # Step 7: Run new container
