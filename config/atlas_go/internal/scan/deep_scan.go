@@ -125,7 +125,7 @@ func scanAllTcp(ip string, logProgress *os.File) (string, string) {
 	var ports string
 	var osInfo string
 	// Match all text between Ports: and Ignored State: 
-	rePorts := regexp.MustCompile(`Ports: ([^I]+)Ignored State:`)
+	rePorts := regexp.MustCompile(`Ports: ([^\n]*?)Ignored State:`)
 	reOS := regexp.MustCompile(`OS: (.*)`)
 
 	scanner := bufio.NewScanner(file)
