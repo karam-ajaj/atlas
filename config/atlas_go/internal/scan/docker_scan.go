@@ -232,16 +232,15 @@ func updateDockerDB(containers []DockerContainer) error {
         }
 
         _, err = db.Exec(`
-            INSERT INTO docker_hosts (id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)
+            INSERT INTO docker_hosts (container_id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
+            ON CONFLICT(container_id, network_name) DO UPDATE SET
                 ip=excluded.ip,
                 name=excluded.name,
                 os_details=excluded.os_details,
                 mac_address=excluded.mac_address,
                 open_ports=excluded.open_ports,
                 next_hop=excluded.next_hop,
-                network_name=excluded.network_name,
                 last_seen=excluded.last_seen,
                 online_status=excluded.online_status
         `, c.ID, c.IP, c.Name, c.OS, c.MAC, c.Ports, c.NextHop, c.NetName, time.Now().Format("2006-01-02 15:04:05"), onlineStatus)
@@ -253,7 +252,7 @@ func updateDockerDB(containers []DockerContainer) error {
     // Clean up old records by container id
     if len(knownIDs) > 0 {
         idList := "'" + strings.Join(knownIDs, "','") + "'"
-        _, err = db.Exec(fmt.Sprintf("DELETE FROM docker_hosts WHERE id NOT IN (%s);", idList))
+        _, err = db.Exec(fmt.Sprintf("DELETE FROM docker_hosts WHERE container_id NOT IN (%s);", idList))
         if err != nil {
             fmt.Printf("Cleanup failed: %v\n", err)
         }

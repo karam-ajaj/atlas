@@ -12,11 +12,12 @@
 Atlas performs three key functions:
 
 1. **Scans Docker Containers** running on the host to extract:
-   - IP addresses
-   - MAC addresses
+   - IP addresses **(supports multiple IPs per container)**
+   - MAC addresses **(supports multiple MACs per container)**
    - Open ports
    - Network names
    - OS type (from image metadata)
+   - **Each network interface is tracked separately**
 
 2. **Scans Local & Neighboring Hosts** on the subnet to:
    - Detect reachable devices
@@ -225,7 +226,8 @@ To deploy a new version and upload it to Docker Hub, use the provided CI/CD scri
 ## ✅ Features
 
 - [x] Fast network scans (ping/ARP)
-- [x] Docker container inspection
+- [x] Docker container inspection with **multi-network support**
+- [x] **Multiple IPs and MACs per container** - Containers on multiple networks show all interfaces
 - [x] External IP discovery
 - [x] Deep port scans with OS enrichment
 - [x] React-based dynamic frontend

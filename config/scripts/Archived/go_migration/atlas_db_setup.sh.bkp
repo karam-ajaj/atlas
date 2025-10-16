@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS hosts (
 );
 
 CREATE TABLE IF NOT EXISTS docker_hosts (
-    id TEXT PRIMARY KEY,             -- Use container ID as primary key!
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    container_id TEXT NOT NULL,
     ip TEXT,
     name TEXT,
     os_details TEXT,
@@ -27,7 +28,8 @@ CREATE TABLE IF NOT EXISTS docker_hosts (
     next_hop TEXT,
     network_name TEXT,
     last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
-    online_status TEXT DEFAULT 'online'
+    online_status TEXT DEFAULT 'online',
+    UNIQUE(container_id, network_name)
 );
 
 CREATE TABLE IF NOT EXISTS external_networks (

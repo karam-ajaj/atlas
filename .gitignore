@@ -10,3 +10,6 @@
 
 # Ignore Python bytecode
 /config/scripts/__pycache__/
+
+# Ignore Go compiled binary
+/config/atlas_go/atlas

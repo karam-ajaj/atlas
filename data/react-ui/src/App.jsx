@@ -31,7 +31,13 @@ function Sidebar({ activeTab, setActiveTab }) {
       <div className="mt-auto text-sm pt-6 border-t border-gray-700">
         <h2 className="font-semibold mb-1">Network Stats:</h2>
         <p>Total Hosts: {stats.total}</p>
-        <p>Docker Hosts: {stats.docker}</p>
+        <p>
+          Docker Hosts: {stats.docker}{" "}
+          <span className="text-xs ml-1">
+            (<span className="text-green-400">{stats.dockerRunning} </span>,{" "}
+            <span className="text-red-400">{stats.dockerStopped} </span>)
+          </span>
+        </p>
         <p>Normal Hosts: {stats.normal}</p>
         <p>Unique Subnets: {stats.subnets}</p>
         <p>Duplicate IPs: {stats.duplicateIps}</p>

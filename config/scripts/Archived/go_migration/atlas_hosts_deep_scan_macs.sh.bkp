@@ -12,7 +12,7 @@ ip -o -f inet addr show > "$LOG_DIR/ip.log"
 arp -a > "$LOG_DIR/arp.log"
 df -h > "$LOG_DIR/df.log"
 
-SUBNET=$(ip -o -f inet addr show | awk '/scope global/ {split($4,a,"/"); print a[1]"/24"; exit}')
+SUBNET=$(ip -o -f inet addr show | awk '/scope global/ {print $4; exit}')
 
 # Enhanced scan with open ports, OS, and MAC
 nmap -O -sS "$SUBNET" -oG "$NMAP_LOG"

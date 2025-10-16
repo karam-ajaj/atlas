@@ -16,7 +16,7 @@ arp -a > "$LOG_DIR/arp.log"
 df -h > "$LOG_DIR/df.log"
 
 # Get local subnet (e.g., 192.168.2.1/24)
-SUBNET=$(ip -o -f inet addr show | awk '/scope global/ {split($4,a,"/"); print a[1]"/24"; exit}')
+SUBNET=$(ip -o -f inet addr show | awk '/scope global/ {print $4; exit}')
 
 # Nmap ping scan
 nmap -sn "$SUBNET" -oG "$NMAP_LOG"
