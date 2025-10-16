@@ -110,7 +110,6 @@ function InlineSearchDropdown({ values, value, onChange, placeholder = "All", on
         placeholder={`Search ${colTitle}...`}
         value={search}
         onChange={e => setSearch(e.target.value)}
-        onBlur={onClose}
       />
       <div className="absolute left-0 top-full z-30 mt-1 bg-white border rounded shadow-md w-full max-h-48 overflow-auto">
         <div
