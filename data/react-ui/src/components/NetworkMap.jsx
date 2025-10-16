@@ -236,9 +236,14 @@ export function NetworkMap() {
       ([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
         addHost(id, ip, name, os, "normal", ports, mac, nexthop, network_name, last_seen)
     );
+
+    // NOTE: docker_hosts schema changed (migration). New rows look like:
+    // [id, container_id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status]
+    // The code below maps the new positions: prefer container_id as the host id (unique container identifier),
+    // and use the correct "ip" column from the new schema.
     rawData.dockerHosts.forEach(
-      ([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
-        addHost(id, ip, name, os, "docker", ports, mac, nexthop, network_name, last_seen)
+      ([id, container_id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
+        addHost(container_id || id, ip, name, os, "docker", ports, mac, nexthop, network_name, last_seen)
     );
 
     // External / Internet node
