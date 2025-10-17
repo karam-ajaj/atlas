@@ -1,15 +1,32 @@
-# Ignore React build artifacts and dependencies
-# /data/react-ui/node_modules/
-# /data/react-ui/dist/
+# Build and UI output
+data/html/
+data/react-ui/dist/
+data/react-ui/node_modules/
 
-# Ignore log files
-/config/logs/
+# Runtime logs and state
+config/logs/
+config/db/
+*.log
+*.db
 
-# Ignore database files
-/config/db/*.db
+# Go build output and binaries
+config/bin/
+*.exe
+*.out
+
+# Node modules, env, OS junk
+node_modules/
+.env
+.DS_Store
+
+# Archives (optional)
+*.tar
+*.tar.gz
+*.zip
+
 
 # Ignore Python bytecode
-/config/scripts/__pycache__/
+config/scripts/__pycache__/
 
 # Ignore Go compiled binary
-/config/atlas_go/atlas
+config/atlas_go/atlas
