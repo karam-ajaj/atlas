@@ -18,8 +18,8 @@ function LogFileDropdown({ files, value, onChange }) {
     function handleClick(e) {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     }
-    if (open) document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    if (open) document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
   }, [open]);
 
   // Show label for selected file (same logic as before)
@@ -37,7 +37,7 @@ function LogFileDropdown({ files, value, onChange }) {
         value={open ? search : label}
         onChange={e => setSearch(e.target.value)}
         onFocus={() => setOpen(true)}
-        onClick={() => setOpen(o => !o)}
+        // onClick={() => setOpen(o => !o)}
         readOnly={!open}
       />
       {open && (

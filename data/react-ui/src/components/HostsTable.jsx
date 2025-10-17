@@ -136,7 +136,7 @@ function InlineSearchDropdown({ values, value, onChange, placeholder = "All", on
       <div className="absolute left-0 top-full z-30 mt-1 bg-white border rounded shadow-md w-full max-h-48 overflow-auto">
         <div
           className={`cursor-pointer px-2 py-1 text-xs ${!value ? "bg-blue-50" : ""}`}
-          onMouseDown={() => { onChange(""); onClose(); }}
+          onClick={() => { onChange(""); onClose(); }}
         >
           {`ALL ${colTitle}`}
         </div>
@@ -144,7 +144,7 @@ function InlineSearchDropdown({ values, value, onChange, placeholder = "All", on
           <div
             key={v}
             className={`cursor-pointer px-2 py-1 text-xs ${v === value ? "bg-blue-100" : ""}`}
-            onMouseDown={() => { onChange(v); onClose(); }}
+            onClick={() => { onChange(v); onClose(); }}
           >
             {v}
           </div>

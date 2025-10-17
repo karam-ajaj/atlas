@@ -31,7 +31,7 @@ else
 fi
 
 # Ask whether to push this version to Docker Hub
-read -p "👉 Push this version to Docker Hub? (Y/n): " PUSH_D
+read -p "👉 Push this version to Docker Hub? (y/N): " PUSH_D
 if [[ "${PUSH_D:-}" =~ ^([yY][eE][sS]|[yY])$ ]]; then
   DO_PUSH=true
 else
@@ -97,7 +97,7 @@ fi
 # Step 6: Push image(s) to Docker Hub
 if ! $DO_PUSH; then
   echo "⏭️ Skipping Docker push as requested"
-  exit 0
+  # exit 0
 else
   echo "📤 Pushing Docker image(s) to Docker Hub..."
   docker push "$IMAGE:$VERSION"
