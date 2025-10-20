@@ -136,6 +136,8 @@ export const AtlasAPI = {
   getLog: (filename) => apiGet(`/logs/${encodeURIComponent(filename)}`),
   lastScanStatus: () => apiGet("/scripts/last-scan-status"),
   health: () => apiGet("/health"),
+  getScanInterval: () => apiGet("/config/scan-interval"),
+  setScanInterval: (minutes) => apiPost("/config/scan-interval", { json: { interval_minutes: minutes } }),
 };
 
 // Composite health (API + optional UI healthz)

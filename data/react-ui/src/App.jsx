@@ -3,11 +3,12 @@ import { NetworkMap } from "./components/NetworkMap";
 import { HostsTable } from "./components/HostsTable";
 import { ScriptsPanel } from "./components/ScriptsPanel";
 import { LogsPanel } from "./components/LogsPanel";
+import { SettingsPanel } from "./components/SettingsPanel";
 import { useNetworkStats } from "./hooks/useNetworkStats";
 import BuildTag from "./components/BuildTag";
 import ThemeToggle from "./components/ThemeToggle";
 
-const tabs = ["Network Map", "Hosts Table", "Scripts", "Logs"];
+const tabs = ["Network Map", "Hosts Table", "Scripts", "Logs", "Settings"];
 
 function Sidebar({ activeTab, setActiveTab, visible, setVisible }) {
   const stats = useNetworkStats();
@@ -125,6 +126,7 @@ export default function App() {
         )}
         {activeTab === "Scripts" && <ScriptsPanel />}
         {activeTab === "Logs" && <LogsPanel />}
+        {activeTab === "Settings" && <SettingsPanel />}
       </div>
     </div>
   );

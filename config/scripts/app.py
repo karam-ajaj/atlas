@@ -255,3 +255,28 @@ def stream_log(filename: str):
             yield f"data: [ERROR] {str(e)}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+@app.get("/config/scan-interval", tags=["Config"])
+def get_scan_interval():
+    """Get the current scan interval in minutes"""
+    interval = os.getenv("SCAN_INTERVAL_MINUTES", "30")
+    try:
+        return {"interval_minutes": int(interval)}
+    except ValueError:
+        return {"interval_minutes": 30}
+
+@app.post("/config/scan-interval", tags=["Config"])
+def set_scan_interval(interval_minutes: int):
+    """
+    Set the scan interval. This requires restarting the scheduler to take effect.
+    Note: This sets it for the current session only. To persist, update the container's env vars.
+    """
+    if interval_minutes < 1 or interval_minutes > 1440:
+        raise HTTPException(status_code=400, detail="Interval must be between 1 and 1440 minutes (24 hours)")
+    
+    os.environ["SCAN_INTERVAL_MINUTES"] = str(interval_minutes)
+    return {
+        "status": "success",
+        "interval_minutes": interval_minutes,
+        "note": "Scheduler needs to be restarted for this to take effect. Restart the container or manually restart the scheduler process."
+    }
