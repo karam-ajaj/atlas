@@ -32,6 +32,7 @@ RUN chmod +x /config/scripts/*.sh
 # Set default ports (can be overridden at runtime)
 ENV ATLAS_UI_PORT=8888
 ENV ATLAS_API_PORT=8889
+ENV SCAN_INTERVAL_MINUTES=30
 
 # Entrypoint: initializes DB, runs scans, launches FastAPI and Nginx
 EXPOSE 8888 8889

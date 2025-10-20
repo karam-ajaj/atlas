@@ -78,14 +78,16 @@ docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e ATLAS_UI_PORT=8884 \
   -e ATLAS_API_PORT=8885 \
+  -e SCAN_INTERVAL_MINUTES=30 \
   keinstien/atlas:3.2.29
 ```
 
 **Environment Variables:**
 - `ATLAS_UI_PORT` – Sets the port for the Atlas UI (Nginx). Default: 8888.
 - `ATLAS_API_PORT` – Sets the port for the FastAPI backend. Default: 8889.
+- `SCAN_INTERVAL_MINUTES` – Sets the interval (in minutes) for automatic scans. Default: 30.
 
-If not set, defaults are used (UI: 8888, API: 8889).
+If not set, defaults are used (UI: 8888, API: 8889, Scan Interval: 30 minutes).
 
 Example endpoints:
 - UI:                              http://localhost:ATLAS_UI_PORT
