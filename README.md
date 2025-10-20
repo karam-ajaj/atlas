@@ -107,12 +107,14 @@ Auto-scanning of Docker and local subnets runs on container start.
     - `fastscan`: Fast host scan using ARP/Nmap
     - `dockerscan`: Gathers Docker container info from `docker inspect`
     - `deepscan`: Enriches data with port scans, OS info, etc.
+    - `scheduler`: Background service for automated periodic scans
 
 - **FastAPI Backend**
   - Runs on `port 8889`
   - Serves:
     - `/api/hosts` – all discovered hosts (regular + Docker)
     - `/api/external` – external IP and metadata
+    - `/api/scheduler/config` – get/update scheduler configuration
 
 - **NGINX**
   - Serves frontend (React static build) on `port 8888`
@@ -233,7 +235,7 @@ To deploy a new version and upload it to Docker Hub, use the provided CI/CD scri
 - [x] React-based dynamic frontend
 - [x] NGINX + FastAPI routing
 - [x] SQLite persistence
-- [x] Scheduled auto scans using Go timers
+- [x] **Configurable auto-scan scheduler** with UI and environment variable configuration
 
 ---
 
@@ -252,17 +254,61 @@ To edit UI:
 - _automated deplolyment and publish to dockerhub using the script deploy.sh_
 ---
 
-## ⚙️ Automation Notes
-- Atlas runs automatically on container start.
+## ⚙️ Automation & Scheduler
 
-- All Go scan tasks run sequentially:
-   - `initdb → fastscan → deepscan → dockerscan`
+Atlas includes a built-in scheduler that automatically runs scans at configurable intervals.
 
-- Scheduled scans are run every 30 minutes via Go timers.
+### Scheduler Features
 
-- No cron dependency required inside the container.
+- **Auto-start on deployment**: The scheduler starts automatically when the container launches
+- **Configurable interval**: Set scan frequency via environment variable or UI
+- **Enable/disable**: Turn the scheduler on or off without restarting the container
+- **Persistent storage**: Configuration is stored in SQLite and survives container restarts
 
-- Scans can also be manually triggered via the UI using API post request.
+### Configuration Options
+
+#### 1. Environment Variable (Recommended for Initial Setup)
+
+Set the scan interval when deploying the container:
+
+```bash
+docker run -d \
+  -p 8888:8888 \
+  -e ATLAS_SCAN_INTERVAL=60 \
+  keinstien/atlas:latest
+```
+
+- **Variable**: `ATLAS_SCAN_INTERVAL`
+- **Unit**: Minutes
+- **Default**: 60 minutes
+- **Min**: 1 minute
+
+#### 2. UI Configuration (Adjust Anytime)
+
+After deployment, you can change the scheduler settings from the **Scripts** tab in the UI:
+
+1. Navigate to the Scripts tab
+2. Find the "⏰ Auto-Scan Scheduler" section
+3. Enable/disable automatic scans
+4. Set scan interval (in minutes)
+5. Click "Save"
+
+Changes take effect immediately without requiring a container restart.
+
+### How It Works
+
+- The scheduler runs in the background as a separate Go service
+- Every minute, it checks if enough time has passed since the last scan
+- When the interval expires, it runs all three scans sequentially:
+  - `fastscan` - Fast host discovery
+  - `dockerscan` - Docker container inspection
+  - `deepscan` - Detailed port and OS scanning
+- Scan results are logged to `/config/logs/scheduler.log`
+- Manual scans via the UI are independent and don't affect the scheduler
+
+### Manual Scans
+
+You can still trigger individual scans manually from the UI at any time, regardless of the scheduler state.
 ---
 ## 👨‍💻 Author
 
