@@ -74,18 +74,6 @@ func runNmap(subnet string) (map[string]string, error) {
 }
 
 // POINT 2: Assign next_hop for LAN hosts to the gateway IP and track interface/subnet
-func updateSQLiteDB(hosts map[string]string, gatewayIP string, interfaceName string, subnet string) error {
-	dbPath := "/config/db/atlas.db"
-	db, err := sql.Open("sqlite3", dbPath)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
-	for ip, name := range hosts {
-		_, err = db.Exec(`
-            INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, interface_name, subnet, last_seen, online_status)
-            VALUES (?, ?, 'Unknown', 'Unknown', 'Unknown', ?, 'LAN', ?, ?, CURRENT_TIMESTAMP, 'online')
 // POINT 2: Assign next_hop for LAN hosts to the gateway IP
 func updateSQLiteDB(hosts map[string]string, gatewayIP string) error {
     dbPath := "/config/db/atlas.db"
