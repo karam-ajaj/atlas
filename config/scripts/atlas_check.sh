@@ -43,20 +43,14 @@ export PYTHONPATH=/config
 uvicorn scripts.app:app --host 0.0.0.0 --port "$ATLAS_API_PORT" > /config/logs/uvicorn.log 2>&1 &
 API_PID=$!
 
-# Kick off scans (non-blocking)
+# Start scheduler service (runs scans on schedule)
 if [[ -x /config/bin/atlas ]]; then
-  (
-    log "⚡ Running fast scan..."
-    /config/bin/atlas fastscan >> /config/logs/scan_audit.log 2>&1 && log "✅ Fast scan complete."
-
-    log "🐳 Running Docker scan..."
-    /config/bin/atlas dockerscan >> /config/logs/scan_audit.log 2>&1 && log "✅ Docker scan complete."
-
-    log "🔍 Running deep host scan..."
-    /config/bin/atlas deepscan >> /config/logs/scan_audit.log 2>&1 && log "✅ Deep scan complete."
-  ) &
+  log "🕐 Starting scheduler service..."
+  /config/bin/atlas scheduler >> /config/logs/scheduler.log 2>&1 &
+  SCHEDULER_PID=$!
+  log "✅ Scheduler started (PID: $SCHEDULER_PID)"
 else
-  log "⏭️ Skipping scans (atlas binary missing)."
+  log "⏭️ Skipping scheduler (atlas binary missing)."
 fi
 
 # Start Nginx in foreground

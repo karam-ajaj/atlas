@@ -7,11 +7,12 @@ import (
 
     "atlas/internal/scan"
     "atlas/internal/db"
+    "atlas/internal/scheduler"
 )
 
 func main() {
     if len(os.Args) < 2 {
-        log.Fatalf("Usage: ./atlas <command>\nAvailable commands: fastscan, dockerscan")
+        log.Fatalf("Usage: ./atlas <command>\nAvailable commands: fastscan, dockerscan, deepscan, initdb, scheduler")
     }
 
     switch os.Args[1] {
@@ -43,6 +44,9 @@ func main() {
             log.Fatalf("❌ DB init failed: %v", err)
         }
         fmt.Println("✅ Database initialized.")
+    case "scheduler":
+        fmt.Println("🕐 Starting scheduler service...")
+        scheduler.Start()
     default:
         log.Fatalf("Unknown command: %s", os.Args[1])
     }

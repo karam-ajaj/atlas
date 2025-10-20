@@ -166,6 +166,62 @@ def last_scan_status():
         "docker": get_latest("docker_hosts")
     }
 
+@app.get("/scheduler/config", tags=["Scheduler"])
+def get_scheduler_config():
+    """Get the current scheduler configuration"""
+    try:
+        conn = sqlite3.connect("/config/db/atlas.db")
+        cur = conn.cursor()
+        cur.execute("SELECT scan_interval_minutes, enabled, last_run FROM scheduler_config WHERE id = 1")
+        row = cur.fetchone()
+        conn.close()
+        
+        if row:
+            return {
+                "scan_interval_minutes": row[0],
+                "enabled": bool(row[1]),
+                "last_run": row[2]
+            }
+        else:
+            # Return defaults if not found
+            return {
+                "scan_interval_minutes": 60,
+                "enabled": True,
+                "last_run": None
+            }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/scheduler/config", tags=["Scheduler"])
+def update_scheduler_config(config: dict):
+    """Update the scheduler configuration"""
+    try:
+        scan_interval_minutes = config.get("scan_interval_minutes")
+        enabled = config.get("enabled")
+        
+        if scan_interval_minutes is None or enabled is None:
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        if scan_interval_minutes < 1:
+            raise HTTPException(status_code=400, detail="Scan interval must be at least 1 minute")
+        
+        conn = sqlite3.connect("/config/db/atlas.db")
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE scheduler_config SET scan_interval_minutes = ?, enabled = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1",
+            (scan_interval_minutes, 1 if enabled else 0)
+        )
+        conn.commit()
+        conn.close()
+        
+        return {
+            "status": "success",
+            "scan_interval_minutes": scan_interval_minutes,
+            "enabled": enabled
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/logs/list", tags=["Logs"])
 def list_logs():
     files = []

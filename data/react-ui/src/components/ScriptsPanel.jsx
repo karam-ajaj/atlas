@@ -1,11 +1,11 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import useEventSource from "../hooks/useEventSource";
 
 // Script executor with live output only
 // - Primary: stream from GET /api/scripts/run/{script}/stream (if backend supports it)
 // - Fallback: POST /api/scripts/run/{script} and display the response output
 
-import { apiGet } from "../api"; // NEW: centralized API helper (uses VITE_ envs)
+import { apiGet, apiPost } from "../api"; // NEW: centralized API helper (uses VITE_ envs)
 
 const API = "/api";
 
@@ -20,11 +20,61 @@ export function ScriptsPanel() {
   const [liveLines, setLiveLines] = useState([]);
   const [isLive, setIsLive] = useState(false);
   const [busy, setBusy] = useState(false);
+  
+  // Scheduler state
+  const [schedulerConfig, setSchedulerConfig] = useState(null);
+  const [schedulerInterval, setSchedulerInterval] = useState(60);
+  const [schedulerEnabled, setSchedulerEnabled] = useState(true);
+  const [schedulerSaving, setSchedulerSaving] = useState(false);
 
   // Refs to avoid stale closures and to control single-fallback behavior
   const gotLiveDataRef = useRef(false);
   const fallbackTriggeredRef = useRef(false);
   const terminatedRef = useRef(false); // set when we decide the run is finished
+  
+  // Load scheduler config on mount
+  useEffect(() => {
+    loadSchedulerConfig();
+  }, []);
+  
+  async function loadSchedulerConfig() {
+    try {
+      const config = await apiGet("/scheduler/config");
+      setSchedulerConfig(config);
+      setSchedulerInterval(config.scan_interval_minutes);
+      setSchedulerEnabled(config.enabled);
+    } catch (e) {
+      console.error("Failed to load scheduler config:", e);
+    }
+  }
+  
+  async function saveSchedulerConfig() {
+    try {
+      setSchedulerSaving(true);
+      const response = await fetch(`${API}/scheduler/config`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          scan_interval_minutes: schedulerInterval,
+          enabled: schedulerEnabled
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to save: ${response.statusText}`);
+      }
+      
+      await loadSchedulerConfig();
+      alert("Scheduler configuration saved successfully!");
+    } catch (e) {
+      console.error("Failed to save scheduler config:", e);
+      alert("Failed to save scheduler configuration: " + e.message);
+    } finally {
+      setSchedulerSaving(false);
+    }
+  }
 
   // Primary live streaming URL (starts the scan and streams)
   const liveUrl = useMemo(
@@ -145,8 +195,55 @@ export function ScriptsPanel() {
 
   return (
     <div className="flex flex-col gap-4 h-full">
+      {/* Scheduler Configuration Panel */}
       <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold mb-2">Script executor</h2>
+        <h2 className="text-lg font-semibold mb-2">⏰ Auto-Scan Scheduler</h2>
+        <div className="flex flex-wrap items-center gap-3 mb-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={schedulerEnabled}
+              onChange={(e) => setSchedulerEnabled(e.target.checked)}
+              disabled={schedulerSaving}
+              className="h-4 w-4"
+            />
+            <span className="font-medium">Enable automatic scans</span>
+          </label>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="font-medium">Run scans every</label>
+          <input
+            type="number"
+            min="1"
+            max="10080"
+            value={schedulerInterval}
+            onChange={(e) => setSchedulerInterval(parseInt(e.target.value) || 1)}
+            disabled={schedulerSaving}
+            className="border rounded px-2 py-1 w-20"
+          />
+          <span className="font-medium">minutes</span>
+          <button
+            className="px-3 py-1 rounded bg-green-600 text-white disabled:opacity-50"
+            onClick={saveSchedulerConfig}
+            disabled={schedulerSaving}
+          >
+            {schedulerSaving ? "Saving..." : "Save"}
+          </button>
+        </div>
+        {schedulerConfig && schedulerConfig.last_run && (
+          <p className="text-xs text-gray-500 mt-2">
+            Last scheduled run: {new Date(schedulerConfig.last_run).toLocaleString()}
+          </p>
+        )}
+        <p className="text-xs text-gray-500 mt-1">
+          The scheduler runs all three scans (fast, docker, deep) automatically at the configured interval.
+          You can also set the interval via the ATLAS_SCAN_INTERVAL environment variable (in minutes).
+        </p>
+      </div>
+
+      {/* Script executor panel */}
+      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <h2 className="text-lg font-semibold mb-2">🚀 Manual Script Executor</h2>
         <div className="flex flex-wrap items-center gap-3">
           <label className="font-medium">Script</label>
           <select

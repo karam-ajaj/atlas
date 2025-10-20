@@ -69,8 +69,19 @@ CREATE TABLE IF NOT EXISTS logs (
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS scheduler_config (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    scan_interval_minutes INTEGER NOT NULL DEFAULT 60,
+    enabled INTEGER NOT NULL DEFAULT 1,
+    last_run DATETIME,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_hosts_ip ON hosts(ip);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_external_networks_ip ON external_networks(public_ip);
+
+-- Insert default scheduler config if not exists
+INSERT OR IGNORE INTO scheduler_config (id, scan_interval_minutes, enabled) VALUES (1, 60, 1);
 `
 
 	if _, err := db.Exec(schema); err != nil {
