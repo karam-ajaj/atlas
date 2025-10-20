@@ -12,13 +12,14 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
 	"atlas/internal/utils"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // Use - for all ports (TCP/UDP)
 const tcpPortArg = "-"
-// const udpPortArg = "-" // UDP scan commented 
+
+// const udpPortArg = "-" // UDP scan commented
 
 type HostInfo struct {
 	IP   string
@@ -124,7 +125,7 @@ func scanAllTcp(ip string, logProgress *os.File) (string, string) {
 
 	var ports string
 	var osInfo string
-	// Match all text between Ports: and Ignored State: 
+	// Match all text between Ports: and Ignored State:
 	rePorts := regexp.MustCompile(`Ports: ([^\n]*?)Ignored State:`)
 	reOS := regexp.MustCompile(`OS: (.*)`)
 
@@ -208,7 +209,7 @@ func DeepScan() error {
 		fmt.Println("⚠️ Failed to get local subnets, using default")
 		interfaces = []utils.InterfaceInfo{{Name: "unknown", Subnet: "192.168.2.0/24"}}
 	}
-	
+
 	startTime := time.Now()
 	logFile := "/config/logs/deep_scan_progress.log"
 	lf, _ := os.Create(logFile)
@@ -223,11 +224,11 @@ func DeepScan() error {
 	defer db.Close()
 
 	fmt.Printf("Found %d network interface(s) to scan\n", len(interfaces))
-	
+
 	for _, iface := range interfaces {
 		fmt.Fprintf(lf, "Discovering live hosts on %s (interface: %s)...\n", iface.Subnet, iface.Name)
 		fmt.Printf("🔍 Scanning subnet: %s on interface: %s\n", iface.Subnet, iface.Name)
-		
+
 		hostInfos, err := discoverLiveHosts(iface.Subnet)
 		if err != nil {
 			fmt.Fprintf(lf, "Failed to discover hosts on %s: %v\n", iface.Subnet, err)

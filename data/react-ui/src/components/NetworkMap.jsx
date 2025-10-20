@@ -150,11 +150,16 @@ export function NetworkMap() {
       mac = "",
       nexthop,
       network_name,
-      last_seen = ""
+      last_seen = "",
+      interface_name = "",
+      subnet_from_db = ""
     ) => {
       if (!ip || ip === "Unknown" || !ip.includes(".")) return;
 
-      const subnet = getSubnet(ip);
+      // Use subnet from database if available, otherwise derive from IP
+      const subnet = subnet_from_db && subnet_from_db.includes("/") 
+        ? subnet_from_db.split("/")[0].split(".").slice(0, 3).join(".")
+        : getSubnet(ip);
       const nodeId = `${group[0]}-${id}-${ip}`;
       const level = group === "docker" ? 4 : 2;
 
@@ -179,7 +184,7 @@ export function NetworkMap() {
         matchingNodeIds.add(nodeId);
       }
 
-      const hubId = group === "normal" ? ensureSubnetHub(subnet) : null;
+      const hubId = group === "normal" ? ensureSubnetHub(subnet, interface_name) : null;
 
       if (group === "normal") {
         edges.add({ from: hubId, to: nodeId });
@@ -202,6 +207,7 @@ export function NetworkMap() {
         nexthop,
         network_name,
         last_seen,
+        interface_name,
       };
 
       // Inter-subnet links (based on nexthop)
@@ -231,10 +237,11 @@ export function NetworkMap() {
       }
     };
 
-    // Hosts
+    // Hosts (schema with new interface_name and subnet columns)
+    // [id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, interface_name, subnet, last_seen, online_status]
     rawData.nonDockerHosts.forEach(
-      ([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
-        addHost(id, ip, name, os, "normal", ports, mac, nexthop, network_name, last_seen)
+      ([id, ip, name, os, mac, ports, nexthop, network_name, interface_name, subnet, last_seen]) =>
+        addHost(id, ip, name, os, "normal", ports, mac, nexthop, network_name, last_seen, interface_name, subnet)
     );
 
     // NOTE: docker_hosts schema changed (migration). New rows look like:

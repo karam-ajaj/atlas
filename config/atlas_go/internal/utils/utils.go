@@ -18,7 +18,7 @@ func GetLocalSubnets() ([]InterfaceInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var interfaces []InterfaceInfo
 	for _, line := range strings.Split(string(out), "\n") {
 		if line == "" {
@@ -28,10 +28,10 @@ func GetLocalSubnets() ([]InterfaceInfo, error) {
 		if len(fields) < 4 {
 			continue
 		}
-		
+
 		// fields[1] is the interface name (e.g., eth0, ens160)
 		ifaceName := fields[1]
-		
+
 		for i, f := range fields {
 			if f == "inet" && i+1 < len(fields) {
 				subnet := fields[i+1]
@@ -53,11 +53,11 @@ func GetLocalSubnets() ([]InterfaceInfo, error) {
 			}
 		}
 	}
-	
+
 	if len(interfaces) == 0 {
 		return nil, fmt.Errorf("no valid non-loopback subnet found")
 	}
-	
+
 	return interfaces, nil
 }
 

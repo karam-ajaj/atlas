@@ -31,7 +31,7 @@ function fmtLastSeen(v) {
 }
 function normalizeRow(r, group) {
   // Schema for docker_hosts: [id, container_id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status]
-  // Schema for hosts: [id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status]
+  // Schema for hosts: [id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, interface_name, subnet, last_seen, online_status]
   // We normalize both to use the same format, adjusting for docker_hosts having an extra container_id field
   
   if (group === "docker") {
@@ -49,6 +49,7 @@ function normalizeRow(r, group) {
       online_status: r[10] || "unknown",
       group,
       subnet: subnetOf(r[2] || ""),
+      interfaceName: "",
     };
   } else {
     return {
@@ -60,10 +61,11 @@ function normalizeRow(r, group) {
       ports: r[5] || "no_ports",
       nextHop: r[6] || "Unknown",
       network: r[7] || "",
-      lastSeen: r[8] || "Invalid",
-      online_status: r[9] || "unknown",
+      interfaceName: r[8] || "",
+      subnet: r[9] || subnetOf(r[1] || ""),
+      lastSeen: r[10] || "Invalid",
+      online_status: r[11] || "unknown",
       group,
-      subnet: subnetOf(r[1] || ""),
     };
   }
 }
@@ -88,7 +90,8 @@ const dropdownCols = [
   "group",
   "network",
   "online_status",
-  "subnet"
+  "subnet",
+  "interfaceName"
 ];
 
 const colTitles = {
@@ -100,6 +103,7 @@ const colTitles = {
   ports: "Ports",
   nextHop: "Next hop",
   subnet: "Subnet",
+  interfaceName: "Interface",
   network: "Network",
   lastSeen: "Last seen",
   online_status: "Online Status"
@@ -221,6 +225,7 @@ function HostsTable() {
     "ports",
     "nextHop",
     "subnet",
+    "interfaceName",
     "network",
     "lastSeen",
     "online_status"
@@ -273,6 +278,7 @@ function HostsTable() {
         r.network.toLowerCase().includes(needle) ||
         r.subnet.toLowerCase().includes(needle) ||
         r.group.toLowerCase().includes(needle) ||
+        (r.interfaceName ?? "").toLowerCase().includes(needle) ||
         (r.online_status ?? "").toLowerCase().includes(needle)
       );
     }
@@ -389,6 +395,7 @@ function HostsTable() {
               <col style={{ width: "10%" }} />
               <col style={{ width: "10%" }} />
               <col style={{ width: "10%" }} />
+              <col style={{ width: "10%" }} />
             </colgroup>
             <thead className="bg-gray-100">
               <tr>
@@ -486,6 +493,12 @@ function HostsTable() {
                         );
                       } else if (col === "subnet") {
                         content = r.subnet || <span className="text-gray-400">—</span>;
+                      } else if (col === "interfaceName") {
+                        content = (
+                          <span className={`block truncate ${(!r.interfaceName || /^unknown$/i.test(r.interfaceName)) ? "text-gray-400" : ""}`} title={r.interfaceName || "—"}>
+                            {r.interfaceName && !/^unknown$/i.test(r.interfaceName) ? r.interfaceName : "—"}
+                          </span>
+                        );
                       } else if (col === "network") {
                         content = (
                           <span className={`block truncate ${(!r.network || /^unknown$/i.test(r.network)) ? "text-gray-400" : ""}`} title={r.network || "—"}>
