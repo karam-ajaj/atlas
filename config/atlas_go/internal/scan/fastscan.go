@@ -63,6 +63,12 @@ func updateSQLiteDB(hosts map[string]string, gatewayIP string) error {
     }
     defer db.Close()
 
+    // Mark all hosts as offline before scanning
+    _, err = db.Exec("UPDATE hosts SET online_status = 'offline'")
+    if err != nil {
+        fmt.Printf("Failed to mark hosts as offline: %v\n", err)
+    }
+
     for ip, name := range hosts {
         _, err = db.Exec(`
             INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)

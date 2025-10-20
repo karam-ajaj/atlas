@@ -229,6 +229,12 @@ func DeepScan() error {
 	}
 	defer db.Close()
 
+	// Mark all hosts as offline before scanning
+	_, err = db.Exec("UPDATE hosts SET online_status = 'offline'")
+	if err != nil {
+		fmt.Fprintf(lf, "Failed to mark hosts as offline: %v\n", err)
+	}
+
 	var wg sync.WaitGroup
 	for idx, host := range hostInfos {
 		wg.Add(1)
