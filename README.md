@@ -130,14 +130,20 @@ Auto-scanning of Docker and local subnets runs on container start.
 atlas/
 ├── config/
 │   ├── atlas_go/        # Go source code (main.go, scan, db)
+│   │   ├── main.go      # CLI with fastscan, dockerscan, deepscan, schedule commands
+│   │   └── internal/    # scan and db packages
 │   ├── bin/             # Compiled Go binary (atlas)
 │   ├── db/              # SQLite file created on runtime
 │   ├── logs/            # Uvicorn logs
 │   ├── nginx/           # default.conf for port 8888
-│   └── scripts/         # startup shell scripts
+│   └── scripts/         # startup shell scripts & FastAPI app
+│       ├── atlas_check.sh  # Entrypoint script that starts scheduler
+│       └── app.py          # FastAPI backend with scan & config endpoints
 ├── data/
 │   ├── html/            # Static files served by Nginx
 │   └── react-ui/        # Frontend source (React)
+│       └── src/components/
+│           └── SettingsPanel.jsx  # UI for scan interval configuration
 ├── Dockerfile
 ├── LICENSE
 └── README.md
@@ -153,6 +159,44 @@ atlas/
 └── scripts/atlas_check.sh # Entrypoint shell script
 
 ```
+
+---
+
+## 🕐 Auto-Scan Scheduler
+
+Atlas includes a built-in scheduler that automatically runs network scans at configurable intervals.
+
+### How It Works
+
+1. **On Container Start**: The scheduler starts automatically and immediately runs the first scan
+2. **Periodic Scans**: After the initial scan, it runs scans at the configured interval
+3. **Scan Sequence**: Each scheduled scan runs:
+   - Fast scan (ping/ARP discovery)
+   - Docker scan (container inspection)
+   - Deep scan (port scan + OS detection)
+
+### Configuration
+
+**Via Environment Variable (Recommended for Production):**
+```bash
+docker run -d \
+  --name atlas \
+  --network=host \
+  -e SCAN_INTERVAL_MINUTES=60 \
+  keinstien/atlas:latest
+```
+
+**Via UI Settings Tab:**
+1. Navigate to the "Settings" tab in the Atlas UI
+2. Set your desired scan interval (1-1440 minutes)
+3. Click "Save"
+4. Restart the container for changes to take effect
+
+**Default**: 30 minutes if not specified
+
+### Manual Scans
+
+You can still trigger scans manually via the Scripts tab, independent of the scheduler.
 
 ---
 
@@ -258,13 +302,16 @@ To edit UI:
 - Atlas runs automatically on container start.
 
 - All Go scan tasks run sequentially:
-   - `initdb → fastscan → deepscan → dockerscan`
+   - `initdb → fastscan → dockerscan → deepscan`
 
-- Scheduled scans are run every 30 minutes via Go timers.
+- **Scheduled scans** run automatically via the Go scheduler at a configurable interval:
+  - Default: every 30 minutes
+  - Configurable via `SCAN_INTERVAL_MINUTES` environment variable (1-1440 minutes)
+  - Can also be configured through the UI Settings tab (requires container restart to take effect)
 
 - No cron dependency required inside the container.
 
-- Scans can also be manually triggered via the UI using API post request.
+- Scans can also be manually triggered via the UI using the Scripts panel.
 ---
 ## 👨‍💻 Author
 
