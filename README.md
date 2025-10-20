@@ -260,6 +260,7 @@ curl http://localhost:8888/api/scheduler/status
 ## ✅ Features
 
 - [x] Fast network scans (ping/ARP)
+- [x] **Multi-interface network scanning** - Automatically detects and scans all physical network interfaces
 - [x] Docker container inspection with **multi-network support**
 - [x] **Multiple IPs and MACs per container** - Containers on multiple networks show all interfaces
 - [x] External IP discovery
@@ -269,6 +270,7 @@ curl http://localhost:8888/api/scheduler/status
 - [x] SQLite persistence
 - [x] **Scheduled auto scans with configurable intervals** - Configure via environment variables or UI
 - [x] **Dynamic interval management** - Change scan intervals without restarting the container
+- [x] **Interface tracking** - Each discovered host is tracked with its subnet and network interface information
 
 ---
 

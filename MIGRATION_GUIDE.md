@@ -1,6 +1,14 @@
-# Migration Guide: Multiple IPs and MACs Support
+# Migration Guide
 
 ## Overview
+
+This guide covers two major updates:
+1. **Multiple IPs and MACs Support** for Docker containers with multiple network interfaces
+2. **Multi-Interface Network Scanning** to scan all physical network interfaces on the host
+
+---
+
+## Update 1: Multiple IPs and MACs Support
 
 This update adds support for Docker containers with multiple network interfaces. Each container can now have multiple IP addresses and MAC addresses stored in the database, one entry per network interface.
 
@@ -183,3 +191,153 @@ docker exec atlas pkill -f uvicorn
 ## Questions?
 
 For issues or questions, please open an issue on GitHub: https://github.com/karam-ajaj/atlas/issues
+
+---
+
+## Update 2: Multi-Interface Network Scanning
+
+### Overview
+
+Atlas now automatically detects and scans all physical network interfaces on the host system, not just the first non-loopback interface. This allows comprehensive network discovery on systems with multiple network adapters.
+
+### What Changed
+
+#### Database Schema - hosts table
+The `hosts` table has been updated to track which interface each host was discovered on:
+
+**New Columns Added:**
+- `interface_name TEXT` - Name of the network interface (e.g., eth0, ens160, ens192)
+- `subnet TEXT` - Full subnet CIDR notation (e.g., 192.168.1.0/24)
+
+**Updated Schema:**
+```sql
+CREATE TABLE hosts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ip TEXT,
+    name TEXT,
+    os_details TEXT,
+    mac_address TEXT,
+    open_ports TEXT,
+    next_hop TEXT,
+    network_name TEXT,
+    interface_name TEXT,     -- NEW
+    subnet TEXT,             -- NEW
+    last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
+    online_status TEXT DEFAULT 'online'
+);
+```
+
+### Key Features
+
+1. **Automatic Interface Detection**: Scans all non-loopback, non-docker interfaces
+2. **Per-Interface Gateway Detection**: Identifies the gateway for each interface
+3. **Subnet Tracking**: Stores complete subnet information for each discovered host
+4. **UI Updates**: Interface and subnet information displayed in the hosts table
+
+### Behavior Changes
+
+#### Before
+- Only the first non-loopback interface was scanned
+- Systems with multiple network interfaces (e.g., ens160, ens192) would miss hosts on secondary interfaces
+- No tracking of which interface a host was discovered on
+
+#### After
+- All physical network interfaces are automatically detected and scanned
+- Each interface's subnet is scanned independently
+- Gateway is determined per-interface
+- UI displays interface name and subnet for each host
+
+### Migration Steps
+
+The migration is automatic when you upgrade to the new version:
+
+1. **Backup your database** (recommended):
+   ```bash
+   docker exec atlas cp /config/db/atlas.db /config/db/atlas.db.backup
+   docker cp atlas:/config/db/atlas.db.backup ./atlas-backup-$(date +%Y%m%d).db
+   ```
+
+2. **Update to the latest version:**
+   ```bash
+   docker pull keinstien/atlas:latest
+   docker stop atlas
+   docker rm atlas
+   docker run -d \
+     --name atlas \
+     --network=host \
+     --cap-add=NET_RAW \
+     --cap-add=NET_ADMIN \
+     -v /var/run/docker.sock:/var/run/docker.sock \
+     keinstien/atlas:latest
+   ```
+
+3. **Database schema updates automatically** on first run via `CREATE TABLE IF NOT EXISTS`
+
+4. **Existing hosts will have NULL values** for `interface_name` and `subnet` until the next scan
+
+### Example Output
+
+When running a scan on a system with two network interfaces:
+
+```
+Found 2 network interface(s) to scan
+Scanning subnet: 192.168.1.0/24 on interface: eth0
+Scanning subnet: 10.0.0.0/16 on interface: eth1
+```
+
+### Example Data
+
+After the scan, the hosts table will contain entries like:
+
+| IP          | Name        | Interface | Subnet         | Gateway     |
+|-------------|-------------|-----------|----------------|-------------|
+| 192.168.1.5 | server01    | eth0      | 192.168.1.0/24 | 192.168.1.1 |
+| 192.168.1.8 | workstation | eth0      | 192.168.1.0/24 | 192.168.1.1 |
+| 10.0.0.10   | nas01       | eth1      | 10.0.0.0/16    | 10.0.0.1    |
+
+### UI Changes
+
+The Hosts Table now includes:
+- **Interface** column showing the network interface name
+- **Subnet** column with complete subnet CIDR
+- Filterable by interface and subnet
+- Search includes interface name
+
+### Troubleshooting
+
+#### Issue: Not all interfaces being scanned
+**Solution:** Check that interfaces are not named "docker*" or "br-*" as these are filtered out by default. Check available interfaces with:
+```bash
+docker exec atlas ip -o -f inet addr show
+```
+
+#### Issue: Gateway not detected for an interface
+**Solution:** Verify routing table has a default route for that interface:
+```bash
+docker exec atlas ip route
+```
+
+### Compatibility
+
+- ✅ **Forward Compatible**: New columns have default NULL values
+- ✅ **Backward Compatible**: Old code will ignore new columns
+- 🔄 **Recommended**: Update UI to display new interface information
+
+### Technical Details
+
+**Code Changes:**
+- `GetLocalSubnets()` returns all non-loopback interfaces with subnet information
+- `FastScan()` and `DeepScan()` iterate over all detected interfaces
+- `getGatewayForInterface()` determines the gateway for each specific interface
+- Database inserts include `interface_name` and `subnet` fields
+
+**Filtered Interfaces:**
+- Loopback (127.0.0.0/8)
+- Docker bridges (docker*, br-*)
+
+### Benefits
+
+1. **Complete Network Discovery**: No more missing hosts on secondary interfaces
+2. **Better Network Topology**: Understand which subnet each host belongs to
+3. **Multi-Homed Systems**: Properly scan systems with multiple network connections
+4. **Improved Troubleshooting**: Know which interface is used to reach each host
