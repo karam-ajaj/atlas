@@ -224,6 +224,22 @@ func DeepScan() error {
 	defer db.Close()
 
 	fmt.Printf("Found %d network interface(s) to scan\n", len(interfaces))
+	// Mark all hosts as offline before scanning
+	_, err = db.Exec("UPDATE hosts SET online_status = 'offline'")
+	if err != nil {
+		fmt.Fprintf(lf, "Failed to mark hosts as offline: %v\n", err)
+	}
+
+	var wg sync.WaitGroup
+	for idx, host := range hostInfos {
+		wg.Add(1)
+		go func(idx int, host HostInfo) {
+			defer wg.Done()
+			hostStart := time.Now()
+			ip := host.IP
+			// Use bestHostName for all fallback methods
+			name := bestHostName(ip, host.Name)
+			fmt.Fprintf(lf, "Scanning host %d/%d: %s\n", idx+1, total, ip)
 
 	for _, iface := range interfaces {
 		fmt.Fprintf(lf, "Discovering live hosts on %s (interface: %s)...\n", iface.Subnet, iface.Name)
