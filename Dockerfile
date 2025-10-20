@@ -33,6 +33,11 @@ RUN chmod +x /config/scripts/*.sh
 ENV ATLAS_UI_PORT=8888
 ENV ATLAS_API_PORT=8889
 
+# Set default scan intervals in seconds (can be overridden at runtime)
+ENV FASTSCAN_INTERVAL=3600
+ENV DOCKERSCAN_INTERVAL=3600
+ENV DEEPSCAN_INTERVAL=7200
+
 # Entrypoint: initializes DB, runs scans, launches FastAPI and Nginx
 EXPOSE 8888 8889
 CMD ["/config/scripts/atlas_check.sh"]
