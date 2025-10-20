@@ -238,8 +238,6 @@ func DeepScan() error {
 			hostStart := time.Now()
 			ip := host.IP
 			// Use bestHostName for all fallback methods
-			name := bestHostName(ip, host.Name)
-			fmt.Fprintf(lf, "Scanning host %d/%d: %s\n", idx+1, total, ip)
 
 	for _, iface := range interfaces {
 		fmt.Fprintf(lf, "Discovering live hosts on %s (interface: %s)...\n", iface.Subnet, iface.Name)
