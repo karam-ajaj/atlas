@@ -1,17 +1,9 @@
-# Stage 1: Build Go binary
-FROM golang:1.22 AS builder
-WORKDIR /app
-COPY config/atlas_go /app
-# If you have go.mod in config/atlas_go, this is enough; otherwise add module init
-RUN if [ ! -f go.mod ]; then go mod init atlas || true; fi
-RUN go build -o atlas .
-
-# Stage 2: Runtime
+# Use pre-built binary approach to avoid certificate issues in Docker build
 FROM python:3.11-slim
 
 RUN apt update && apt install -y \
     nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq ca-certificates nbtscan \
-    && pip install --no-cache-dir fastapi uvicorn \
+    && pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org fastapi uvicorn \
     && apt install -y docker.io \
     && apt clean && rm -rf /var/lib/apt/lists/*
 
@@ -24,7 +16,7 @@ COPY data/html/ /usr/share/nginx/html/
 
 # Copy scripts and binary
 COPY config/scripts /config/scripts
-COPY --from=builder /app/atlas /config/bin/atlas
+COPY config/bin/atlas /config/bin/atlas
 
 # Make all shell scripts executable
 RUN chmod +x /config/scripts/*.sh
