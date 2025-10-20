@@ -78,21 +78,33 @@ docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e ATLAS_UI_PORT=8884 \
   -e ATLAS_API_PORT=8885 \
+  -e FASTSCAN_INTERVAL=3600 \
+  -e DOCKERSCAN_INTERVAL=3600 \
+  -e DEEPSCAN_INTERVAL=7200 \
   keinstien/atlas:3.2.29
 ```
 
 **Environment Variables:**
 - `ATLAS_UI_PORT` – Sets the port for the Atlas UI (Nginx). Default: 8888.
 - `ATLAS_API_PORT` – Sets the port for the FastAPI backend. Default: 8889.
+- `FASTSCAN_INTERVAL` – Interval in seconds between fast scans. Default: 3600 (1 hour).
+- `DOCKERSCAN_INTERVAL` – Interval in seconds between Docker scans. Default: 3600 (1 hour).
+- `DEEPSCAN_INTERVAL` – Interval in seconds between deep scans. Default: 7200 (2 hours).
 
-If not set, defaults are used (UI: 8888, API: 8889).
+If not set, defaults are used (UI: 8888, API: 8889, scan intervals as shown above).
 
 Example endpoints:
 - UI:                              http://localhost:ATLAS_UI_PORT
 - API(from exposed API port):      http://localhost:ATLAS_API_PORT/api/docs
 - API(based on nginx conf):        http://localhost:ATLAS_UI_PORT/api/docs
 
-Auto-scanning of Docker and local subnets runs on container start.
+**Scan Scheduling:**
+Atlas automatically runs scans at the configured intervals. You can:
+- Set initial intervals via environment variables (see above)
+- Change intervals dynamically through the Scripts Panel in the UI
+- Manually trigger scans via the UI or API at any time
+
+The scheduler starts automatically when the container starts and runs scans in the background.
 
 ---
 
@@ -221,6 +233,28 @@ To deploy a new version and upload it to Docker Hub, use the provided CI/CD scri
 
 > Default exposed port is: `8888`
 
+### 📡 Scheduler API Endpoints
+
+New scheduler management endpoints:
+
+- `GET /api/scheduler/intervals` - Get current scan intervals for all scan types
+- `PUT /api/scheduler/intervals/{scan_type}` - Update interval for a specific scan type (fastscan, dockerscan, or deepscan)
+- `GET /api/scheduler/status` - Get scheduler status and current intervals
+
+Example:
+```bash
+# Get current intervals
+curl http://localhost:8888/api/scheduler/intervals
+
+# Update fastscan interval to 30 minutes (1800 seconds)
+curl -X PUT http://localhost:8888/api/scheduler/intervals/fastscan \
+  -H "Content-Type: application/json" \
+  -d '{"interval": 1800}'
+
+# Check scheduler status
+curl http://localhost:8888/api/scheduler/status
+```
+
 ---
 
 ## ✅ Features
@@ -233,7 +267,8 @@ To deploy a new version and upload it to Docker Hub, use the provided CI/CD scri
 - [x] React-based dynamic frontend
 - [x] NGINX + FastAPI routing
 - [x] SQLite persistence
-- [x] Scheduled auto scans using Go timers
+- [x] **Scheduled auto scans with configurable intervals** - Configure via environment variables or UI
+- [x] **Dynamic interval management** - Change scan intervals without restarting the container
 
 ---
 
