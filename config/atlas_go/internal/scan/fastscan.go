@@ -11,7 +11,26 @@ import (
     "atlas/internal/utils"
 )
 
-// POINT 1: Get the default gateway IP (internal)
+// POINT 1: Get the default gateway IP for a specific interface
+func getGatewayForInterface(interfaceName string) (string, error) {
+    out, err := exec.Command("ip", "route").Output()
+    if err != nil {
+        return "", err
+    }
+    for _, line := range strings.Split(string(out), "\n") {
+        if strings.HasPrefix(line, "default") && strings.Contains(line, "dev "+interfaceName) {
+            fields := strings.Fields(line)
+            for i, f := range fields {
+                if f == "via" && i+1 < len(fields) {
+                    return fields[i+1], nil
+                }
+            }
+        }
+    }
+    return "", fmt.Errorf("no gateway found for interface %s", interfaceName)
+}
+
+// Get the default gateway IP (internal) - returns first available
 func getDefaultGateway() (string, error) {
     out, err := exec.Command("ip", "route").Output()
     if err != nil {
@@ -54,8 +73,8 @@ func runNmap(subnet string) (map[string]string, error) {
     return hosts, nil
 }
 
-// POINT 2: Assign next_hop for LAN hosts to the gateway IP
-func updateSQLiteDB(hosts map[string]string, gatewayIP string) error {
+// POINT 2: Assign next_hop for LAN hosts to the gateway IP and track interface/subnet
+func updateSQLiteDB(hosts map[string]string, gatewayIP string, interfaceName string, subnet string) error {
     dbPath := "/config/db/atlas.db"
     db, err := sql.Open("sqlite3", dbPath)
     if err != nil {
@@ -65,14 +84,16 @@ func updateSQLiteDB(hosts map[string]string, gatewayIP string) error {
 
     for ip, name := range hosts {
         _, err = db.Exec(`
-            INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)
-            VALUES (?, ?, 'Unknown', 'Unknown', 'Unknown', ?, 'LAN', CURRENT_TIMESTAMP, 'online')
+            INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, interface_name, subnet, last_seen, online_status)
+            VALUES (?, ?, 'Unknown', 'Unknown', 'Unknown', ?, 'LAN', ?, ?, CURRENT_TIMESTAMP, 'online')
             ON CONFLICT(ip) DO UPDATE SET
                 name=excluded.name,
                 last_seen=excluded.last_seen,
                 online_status=excluded.online_status,
-                next_hop=excluded.next_hop
-        `, ip, name, gatewayIP, time.Now().Format("2006-01-02 15:04:05"))
+                next_hop=excluded.next_hop,
+                interface_name=excluded.interface_name,
+                subnet=excluded.subnet
+        `, ip, name, gatewayIP, interfaceName, subnet, time.Now().Format("2006-01-02 15:04:05"))
         if err != nil {
             fmt.Printf("Insert/update failed for %s: %v\n", ip, err)
         }
@@ -123,26 +144,32 @@ func updateExternalIPInDB(dbPath string) {
 }
 
 func FastScan() error {
-    subnet, err := utils.GetLocalSubnet()
+    interfaces, err := utils.GetLocalSubnets()
     if err != nil {
         return err
     }
-    fmt.Printf("Scanning subnet: %s\n", subnet)
+    
+    fmt.Printf("Found %d network interface(s) to scan\n", len(interfaces))
+    
+    for _, iface := range interfaces {
+        fmt.Printf("Scanning subnet: %s on interface: %s\n", iface.Subnet, iface.Name)
 
-    hosts, err := runNmap(subnet)
-    if err != nil {
-        return err
-    }
+        hosts, err := runNmap(iface.Subnet)
+        if err != nil {
+            fmt.Printf("⚠️ Failed to scan %s: %v\n", iface.Subnet, err)
+            continue
+        }
 
-    gatewayIP, err := getDefaultGateway()
-    if err != nil {
-        fmt.Println("⚠️ Could not determine gateway:", err)
-        gatewayIP = ""
-    }
+        gatewayIP, err := getGatewayForInterface(iface.Name)
+        if err != nil {
+            fmt.Printf("⚠️ Could not determine gateway for %s: %v\n", iface.Name, err)
+            gatewayIP = ""
+        }
 
-    err = updateSQLiteDB(hosts, gatewayIP)
-    if err != nil {
-        return err
+        err = updateSQLiteDB(hosts, gatewayIP, iface.Name, iface.Subnet)
+        if err != nil {
+            fmt.Printf("⚠️ Failed to update DB for %s: %v\n", iface.Subnet, err)
+        }
     }
 
     updateExternalIPInDB("/config/db/atlas.db")

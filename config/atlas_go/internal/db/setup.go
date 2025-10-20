@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS hosts (
     open_ports TEXT,
     next_hop TEXT,
     network_name TEXT,
+    interface_name TEXT,
+    subnet TEXT,
     last_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
     online_status TEXT DEFAULT 'online'
 );
