@@ -37,27 +37,18 @@ if [[ -x /config/bin/atlas ]]; then
   fi
 fi
 
-# Start FastAPI
+# Start FastAPI (scheduler will be started automatically on FastAPI startup)
 log "🚀 Starting FastAPI backend on port $ATLAS_API_PORT..."
 export PYTHONPATH=/config
 uvicorn scripts.app:app --host 0.0.0.0 --port "$ATLAS_API_PORT" > /config/logs/uvicorn.log 2>&1 &
 API_PID=$!
 
-# Kick off scans (non-blocking)
-if [[ -x /config/bin/atlas ]]; then
-  (
-    log "⚡ Running fast scan..."
-    /config/bin/atlas fastscan >> /config/logs/scan_audit.log 2>&1 && log "✅ Fast scan complete."
-
-    log "🐳 Running Docker scan..."
-    /config/bin/atlas dockerscan >> /config/logs/scan_audit.log 2>&1 && log "✅ Docker scan complete."
-
-    log "🔍 Running deep host scan..."
-    /config/bin/atlas deepscan >> /config/logs/scan_audit.log 2>&1 && log "✅ Deep scan complete."
-  ) &
-else
-  log "⏭️ Skipping scans (atlas binary missing)."
-fi
+# Note: Scans are now scheduled automatically by the scheduler module
+# The scheduler will run scans at configured intervals (see environment variables)
+log "📅 Scan scheduler will run scans at configured intervals"
+log "   - FASTSCAN_INTERVAL: ${FASTSCAN_INTERVAL:-3600}s (default: 3600s / 1 hour)"
+log "   - DOCKERSCAN_INTERVAL: ${DOCKERSCAN_INTERVAL:-3600}s (default: 3600s / 1 hour)"  
+log "   - DEEPSCAN_INTERVAL: ${DEEPSCAN_INTERVAL:-7200}s (default: 7200s / 2 hours)"
 
 # Start Nginx in foreground
 log "🌐 Starting Nginx server on port $ATLAS_UI_PORT..."

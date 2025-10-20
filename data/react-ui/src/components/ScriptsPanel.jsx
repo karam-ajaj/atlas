@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import useEventSource from "../hooks/useEventSource";
 
 // Script executor with live output only
@@ -10,9 +10,9 @@ import { apiGet } from "../api"; // NEW: centralized API helper (uses VITE_ envs
 const API = "/api";
 
 const SCRIPTS = [
-  { key: "scan-hosts-fast", label: "Fast Scan" },
-  { key: "scan-hosts-deep", label: "Deep Scan" },
-  { key: "scan-docker", label: "Docker Scan" },
+  { key: "scan-hosts-fast", label: "Fast Scan", intervalKey: "fastscan" },
+  { key: "scan-hosts-deep", label: "Deep Scan", intervalKey: "deepscan" },
+  { key: "scan-docker", label: "Docker Scan", intervalKey: "dockerscan" },
 ];
 
 export function ScriptsPanel() {
@@ -20,11 +20,68 @@ export function ScriptsPanel() {
   const [liveLines, setLiveLines] = useState([]);
   const [isLive, setIsLive] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [intervals, setIntervals] = useState({});
+  const [editingInterval, setEditingInterval] = useState({});
+  const [loadingIntervals, setLoadingIntervals] = useState(true);
 
   // Refs to avoid stale closures and to control single-fallback behavior
   const gotLiveDataRef = useRef(false);
   const fallbackTriggeredRef = useRef(false);
   const terminatedRef = useRef(false); // set when we decide the run is finished
+
+  // Fetch intervals on mount
+  useEffect(() => {
+    fetchIntervals();
+  }, []);
+
+  const fetchIntervals = async () => {
+    try {
+      const res = await fetch(`${API}/scheduler/intervals`);
+      if (res.ok) {
+        const data = await res.json();
+        setIntervals(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch intervals:", e);
+    } finally {
+      setLoadingIntervals(false);
+    }
+  };
+
+  const updateInterval = async (scanType, newInterval) => {
+    try {
+      const res = await fetch(`${API}/scheduler/intervals/${scanType}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interval: parseInt(newInterval) }),
+      });
+      
+      if (res.ok) {
+        await fetchIntervals();
+        setEditingInterval({});
+        alert(`✅ ${scanType} interval updated to ${newInterval} seconds`);
+      } else {
+        const error = await res.json();
+        alert(`❌ Failed to update interval: ${error.detail}`);
+      }
+    } catch (e) {
+      alert(`❌ Failed to update interval: ${e.message}`);
+    }
+  };
+
+  const formatInterval = (seconds) => {
+    if (!seconds) return "Not set";
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    const parts = [];
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+    
+    return parts.join(" ");
+  };
 
   // Primary live streaming URL (starts the scan and streams)
   const liveUrl = useMemo(
@@ -145,8 +202,79 @@ export function ScriptsPanel() {
 
   return (
     <div className="flex flex-col gap-4 h-full">
+      {/* Scheduler Status Panel */}
       <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold mb-2">Script executor</h2>
+        <h2 className="text-lg font-semibold mb-3">Scan Scheduler</h2>
+        {loadingIntervals ? (
+          <p className="text-gray-500">Loading intervals...</p>
+        ) : (
+          <div className="space-y-3">
+            {SCRIPTS.map((script) => {
+              const interval = intervals[script.intervalKey] || 0;
+              const isEditing = editingInterval[script.intervalKey];
+              
+              return (
+                <div key={script.intervalKey} className="flex items-center justify-between border-b pb-2">
+                  <div className="flex-1">
+                    <span className="font-medium">{script.label}</span>
+                    <span className="text-sm text-gray-500 ml-2">
+                      ({script.key})
+                    </span>
+                  </div>
+                  
+                  {isEditing ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="60"
+                        step="60"
+                        defaultValue={interval}
+                        className="border rounded px-2 py-1 w-24"
+                        id={`interval-${script.intervalKey}`}
+                      />
+                      <span className="text-sm text-gray-500">seconds</span>
+                      <button
+                        className="px-2 py-1 rounded bg-green-600 text-white text-sm"
+                        onClick={() => {
+                          const input = document.getElementById(`interval-${script.intervalKey}`);
+                          updateInterval(script.intervalKey, input.value);
+                        }}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="px-2 py-1 rounded bg-gray-300 text-gray-800 text-sm"
+                        onClick={() => setEditingInterval({})}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                        Every {formatInterval(interval)}
+                      </span>
+                      <button
+                        className="px-2 py-1 rounded bg-blue-500 text-white text-sm"
+                        onClick={() => setEditingInterval({ [script.intervalKey]: true })}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <p className="text-xs text-gray-500 mt-2">
+              Scans run automatically at the configured intervals. Changes take effect immediately.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Manual Script Executor Panel */}
+      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <h2 className="text-lg font-semibold mb-2">Manual Script Executor</h2>
         <div className="flex flex-wrap items-center gap-3">
           <label className="font-medium">Script</label>
           <select
