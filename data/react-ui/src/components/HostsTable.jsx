@@ -31,8 +31,9 @@ function fmtLastSeen(v) {
 }
 function normalizeRow(r, group) {
   // Schema for docker_hosts: [id, container_id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status]
-  // Schema for hosts: [id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status]
+  // Schema for hosts: [id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, interface_name, last_seen, online_status]
   // We normalize both to use the same format, adjusting for docker_hosts having an extra container_id field
+  // and hosts having an interface_name field
   
   if (group === "docker") {
     return {
@@ -47,6 +48,7 @@ function normalizeRow(r, group) {
       network: r[8] || "docker",
       lastSeen: r[9] || "Invalid",
       online_status: r[10] || "unknown",
+      interface_name: "N/A", // Docker containers don't have interface names
       group,
       subnet: subnetOf(r[2] || ""),
     };
@@ -60,8 +62,9 @@ function normalizeRow(r, group) {
       ports: r[5] || "no_ports",
       nextHop: r[6] || "Unknown",
       network: r[7] || "",
-      lastSeen: r[8] || "Invalid",
-      online_status: r[9] || "unknown",
+      interface_name: r[8] || "N/A",
+      lastSeen: r[9] || "Invalid",
+      online_status: r[10] || "unknown",
       group,
       subnet: subnetOf(r[1] || ""),
     };
@@ -88,7 +91,8 @@ const dropdownCols = [
   "group",
   "network",
   "online_status",
-  "subnet"
+  "subnet",
+  "interface_name"
 ];
 
 const colTitles = {
@@ -101,6 +105,7 @@ const colTitles = {
   nextHop: "Next hop",
   subnet: "Subnet",
   network: "Network",
+  interface_name: "Interface",
   lastSeen: "Last seen",
   online_status: "Online Status"
 };
@@ -222,11 +227,12 @@ function HostsTable() {
     "nextHop",
     "subnet",
     "network",
+    "interface_name",
     "lastSeen",
     "online_status"
   ];
   const basicCols = [
-    "name", "ip", "os", "group", "ports"
+    "name", "ip", "os", "group", "interface_name", "ports"
   ];
 
   const allRows = useMemo(() => [

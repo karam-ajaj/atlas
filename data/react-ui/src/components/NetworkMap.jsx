@@ -150,19 +150,24 @@ export function NetworkMap() {
       mac = "",
       nexthop,
       network_name,
-      last_seen = ""
+      last_seen = "",
+      interface_name = ""
     ) => {
       if (!ip || ip === "Unknown" || !ip.includes(".")) return;
 
       const subnet = getSubnet(ip);
-      const nodeId = `${group[0]}-${id}-${ip}`;
+      // Include interface in node ID to allow multiple instances of the same host on different interfaces
+      const nodeId = `${group[0]}-${id}-${ip}-${interface_name || "default"}`;
       const level = group === "docker" ? 4 : 2;
 
       if (!nodes.get(nodeId)) {
+        const hostLabel = interface_name 
+          ? `${name.split(".").slice(0, 2).join(".")}\n(${interface_name})`
+          : `${name.split(".").slice(0, 2).join(".")}`;
         nodes.add({
           id: nodeId,
-          label: `${name.split(".").slice(0, 2).join(".")}`,
-          title: `${os}\nPorts: ${ports}`,
+          label: hostLabel,
+          title: `${os}\nPorts: ${ports}\nInterface: ${interface_name || "N/A"}`,
           group,
           level,
         });
@@ -202,6 +207,7 @@ export function NetworkMap() {
         nexthop,
         network_name,
         last_seen,
+        interface_name: interface_name || "N/A",
       };
 
       // Inter-subnet links (based on nexthop)
@@ -231,10 +237,10 @@ export function NetworkMap() {
       }
     };
 
-    // Hosts
+    // Hosts - new schema: [id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, interface_name, last_seen, online_status]
     rawData.nonDockerHosts.forEach(
-      ([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
-        addHost(id, ip, name, os, "normal", ports, mac, nexthop, network_name, last_seen)
+      ([id, ip, name, os, mac, ports, nexthop, network_name, interface_name, last_seen, online_status]) =>
+        addHost(id, ip, name, os, "normal", ports, mac, nexthop, network_name, last_seen, interface_name)
     );
 
     // NOTE: docker_hosts schema changed (migration). New rows look like:
