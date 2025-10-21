@@ -46,9 +46,9 @@ function normalizeRow(r, group) {
       ports: r[6] || "no_ports",
       nextHop: r[7] || "Unknown",
       network: r[8] || "docker",
+      interface_name: "N/A", // Docker containers don't have interface names
       lastSeen: r[9] || "Invalid",
       online_status: r[10] || "unknown",
-      interface_name: "N/A", // Docker containers don't have interface names
       group,
       subnet: subnetOf(r[2] || ""),
     };
@@ -391,6 +391,7 @@ function HostsTable() {
               <col style={{ width: "8%" }} />
               <col style={{ width: "30%" }} />
               <col style={{ width: "14%" }} />
+              <col style={{ width: "10%" }} />
               <col style={{ width: "10%" }} />
               <col style={{ width: "10%" }} />
               <col style={{ width: "10%" }} />
