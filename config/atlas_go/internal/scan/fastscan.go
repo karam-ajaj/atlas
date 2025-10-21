@@ -55,7 +55,7 @@ func runNmap(subnet string) (map[string]string, error) {
 }
 
 // POINT 2: Assign next_hop for LAN hosts to the gateway IP
-func updateSQLiteDB(hosts map[string]string, gatewayIP string) error {
+func updateSQLiteDB(hosts map[string]string, gatewayIP string, interfaceName string) error {
     dbPath := "/config/db/atlas.db"
     db, err := sql.Open("sqlite3", dbPath)
     if err != nil {
@@ -65,16 +65,16 @@ func updateSQLiteDB(hosts map[string]string, gatewayIP string) error {
 
     for ip, name := range hosts {
         _, err = db.Exec(`
-            INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)
-            VALUES (?, ?, 'Unknown', 'Unknown', 'Unknown', ?, 'LAN', CURRENT_TIMESTAMP, 'online')
-            ON CONFLICT(ip) DO UPDATE SET
+            INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, interface_name, last_seen, online_status)
+            VALUES (?, ?, 'Unknown', 'Unknown', 'Unknown', ?, 'LAN', ?, CURRENT_TIMESTAMP, 'online')
+            ON CONFLICT(ip, interface_name) DO UPDATE SET
                 name=excluded.name,
                 last_seen=excluded.last_seen,
                 online_status=excluded.online_status,
                 next_hop=excluded.next_hop
-        `, ip, name, gatewayIP, time.Now().Format("2006-01-02 15:04:05"))
+        `, ip, name, gatewayIP, interfaceName, time.Now().Format("2006-01-02 15:04:05"))
         if err != nil {
-            fmt.Printf("Insert/update failed for %s: %v\n", ip, err)
+            fmt.Printf("Insert/update failed for %s on %s: %v\n", ip, interfaceName, err)
         }
     }
 
@@ -123,13 +123,7 @@ func updateExternalIPInDB(dbPath string) {
 }
 
 func FastScan() error {
-    subnet, err := utils.GetLocalSubnet()
-    if err != nil {
-        return err
-    }
-    fmt.Printf("Scanning subnet: %s\n", subnet)
-
-    hosts, err := runNmap(subnet)
+    interfaces, err := utils.GetAllNetworkInterfaces()
     if err != nil {
         return err
     }
@@ -140,9 +134,21 @@ func FastScan() error {
         gatewayIP = ""
     }
 
-    err = updateSQLiteDB(hosts, gatewayIP)
-    if err != nil {
-        return err
+    // Scan each interface
+    for _, iface := range interfaces {
+        fmt.Printf("Scanning subnet: %s on interface: %s\n", iface.Subnet, iface.Name)
+
+        hosts, err := runNmap(iface.Subnet)
+        if err != nil {
+            fmt.Printf("⚠️ Failed to scan %s on %s: %v\n", iface.Subnet, iface.Name, err)
+            continue
+        }
+
+        err = updateSQLiteDB(hosts, gatewayIP, iface.Name)
+        if err != nil {
+            fmt.Printf("⚠️ Failed to update DB for interface %s: %v\n", iface.Name, err)
+            continue
+        }
     }
 
     updateExternalIPInDB("/config/db/atlas.db")

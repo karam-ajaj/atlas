@@ -156,23 +156,15 @@ func getMacAddress(ip string) string {
 }
 
 func DeepScan() error {
-	subnet, err := utils.GetLocalSubnet()
+	interfaces, err := utils.GetAllNetworkInterfaces()
 	if err != nil {
-		subnet = "192.168.2.0/24"
+		return fmt.Errorf("failed to get network interfaces: %v", err)
 	}
+	
 	startTime := time.Now()
 	logFile := "/config/logs/deep_scan_progress.log"
 	lf, _ := os.Create(logFile)
 	defer lf.Close()
-
-	fmt.Fprintf(lf, "Discovering live hosts on %s...\n", subnet)
-	liveHosts, err := discoverLiveHosts(subnet)
-	if err != nil {
-		fmt.Fprintf(lf, "Failed to discover hosts: %v\n", err)
-		return err
-	}
-	total := len(liveHosts)
-	fmt.Fprintf(lf, "Discovered %d hosts in %s\n", total, time.Since(startTime))
 
 	dbPath := "/config/db/atlas.db"
 	db, err := sql.Open("sqlite3", dbPath)
@@ -182,55 +174,70 @@ func DeepScan() error {
 	}
 	defer db.Close()
 
-	var wg sync.WaitGroup
-	for idx, ip := range liveHosts {
-		wg.Add(1)
-		go func(idx int, ip string) {
-			defer wg.Done()
-			hostStart := time.Now()
-			fmt.Fprintf(lf, "Scanning host %d/%d: %s\n", idx+1, total, ip)
+	// Scan each interface
+	for _, iface := range interfaces {
+		fmt.Fprintf(lf, "Discovering live hosts on %s (interface: %s)...\n", iface.Subnet, iface.Name)
+		fmt.Printf("🔍 Discovering live hosts on %s (interface: %s)...\n", iface.Subnet, iface.Name)
+		
+		liveHosts, err := discoverLiveHosts(iface.Subnet)
+		if err != nil {
+			fmt.Fprintf(lf, "Failed to discover hosts on %s: %v\n", iface.Name, err)
+			continue
+		}
+		total := len(liveHosts)
+		fmt.Fprintf(lf, "Discovered %d hosts on %s in %s\n", total, iface.Name, time.Since(startTime))
 
-			tcpPorts, osInfo := scanAllTcp(ip, lf)
-			// udpPorts := scanAllUdp(ip, lf) // UDP scan commented for now
-			name := getHostName(ip)
-			mac := getMacAddress(ip)
-			status := utils.PingHost(ip)
-			elapsed := time.Since(startTime)
-			hostsLeft := total - (idx + 1)
-			estLeft := time.Duration(0)
-			if idx+1 > 0 {
-				estLeft = (elapsed / time.Duration(idx+1)) * time.Duration(hostsLeft)
-			}
-			fmt.Fprintf(lf, "Host %s: TCP ports: %s, OS: %s\n", ip, tcpPorts, osInfo)
-			// fmt.Fprintf(lf, "Host %s: UDP ports: %s\n", ip, udpPorts) // UDP scan commented for now
-			fmt.Fprintf(lf, "Progress: %d/%d hosts, elapsed: %s, estimated left: %s\n", idx+1, total, elapsed, estLeft)
+		var wg sync.WaitGroup
+		for idx, ip := range liveHosts {
+			wg.Add(1)
+			go func(idx int, ip string, ifaceName string) {
+				defer wg.Done()
+				hostStart := time.Now()
+				fmt.Fprintf(lf, "Scanning host %d/%d: %s on %s\n", idx+1, total, ip, ifaceName)
 
-			openPorts := tcpPorts
-			// if udpPorts != "Unknown" {
-			//	openPorts += ", UDP: " + udpPorts
-			// }
-			if openPorts == "" {
-				openPorts = "Unknown"
-			}
+				tcpPorts, osInfo := scanAllTcp(ip, lf)
+				// udpPorts := scanAllUdp(ip, lf) // UDP scan commented for now
+				name := getHostName(ip)
+				mac := getMacAddress(ip)
+				status := utils.PingHost(ip)
+				elapsed := time.Since(startTime)
+				hostsLeft := total - (idx + 1)
+				estLeft := time.Duration(0)
+				if idx+1 > 0 {
+					estLeft = (elapsed / time.Duration(idx+1)) * time.Duration(hostsLeft)
+				}
+				fmt.Fprintf(lf, "Host %s: TCP ports: %s, OS: %s\n", ip, tcpPorts, osInfo)
+				// fmt.Fprintf(lf, "Host %s: UDP ports: %s\n", ip, udpPorts) // UDP scan commented for now
+				fmt.Fprintf(lf, "Progress: %d/%d hosts, elapsed: %s, estimated left: %s\n", idx+1, total, elapsed, estLeft)
 
-			_, err = db.Exec(`
-				INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)
-				VALUES (?, ?, ?, ?, ?, '', 'LAN', CURRENT_TIMESTAMP, ?)
-				ON CONFLICT(ip) DO UPDATE SET
-					name=excluded.name,
-					os_details=excluded.os_details,
-					mac_address=excluded.mac_address,
-					open_ports=excluded.open_ports,
-					last_seen=CURRENT_TIMESTAMP,
-					online_status=excluded.online_status
-			`, ip, name, osInfo, mac, openPorts, status)
-			if err != nil {
-				fmt.Fprintf(lf, "❌ Update failed for %s: %v\n", ip, err)
-			}
-			fmt.Fprintf(lf, "Host %s scanned in %s\n", ip, time.Since(hostStart))
-		}(idx, ip)
+				openPorts := tcpPorts
+				// if udpPorts != "Unknown" {
+				//	openPorts += ", UDP: " + udpPorts
+				// }
+				if openPorts == "" {
+					openPorts = "Unknown"
+				}
+
+				_, err = db.Exec(`
+					INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, interface_name, last_seen, online_status)
+					VALUES (?, ?, ?, ?, ?, '', 'LAN', ?, CURRENT_TIMESTAMP, ?)
+					ON CONFLICT(ip, interface_name) DO UPDATE SET
+						name=excluded.name,
+						os_details=excluded.os_details,
+						mac_address=excluded.mac_address,
+						open_ports=excluded.open_ports,
+						last_seen=CURRENT_TIMESTAMP,
+						online_status=excluded.online_status
+				`, ip, name, osInfo, mac, openPorts, ifaceName, status)
+				if err != nil {
+					fmt.Fprintf(lf, "❌ Update failed for %s on %s: %v\n", ip, ifaceName, err)
+				}
+				fmt.Fprintf(lf, "Host %s scanned in %s\n", ip, time.Since(hostStart))
+			}(idx, ip, iface.Name)
+		}
+		wg.Wait()
+		fmt.Fprintf(lf, "Completed scan for interface %s\n", iface.Name)
 	}
-	wg.Wait()
 
 	fmt.Fprintf(lf, "Deep scan complete in %s\n", time.Since(startTime))
 	return nil
