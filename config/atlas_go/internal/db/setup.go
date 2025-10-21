@@ -78,5 +78,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_external_networks_ip ON external_networks(
 		return fmt.Errorf("schema execution failed: %v", err)
 	}
 
+	// Backfill / migrate older DBs that may not have interface_name column or the unique index.
+	// If the column is missing, attempt to add it. SQLite's ALTER TABLE ADD COLUMN is safe when
+	// the column doesn't exist; if it already exists the following will fail which we ignore.
+	_, _ = db.Exec(`ALTER TABLE hosts ADD COLUMN interface_name TEXT;`)
+
+	// Ensure no NULL interface_name values remain (set to 'unknown' for existing records)
+	_, _ = db.Exec(`UPDATE hosts SET interface_name = 'unknown' WHERE interface_name IS NULL OR interface_name = '';`)
+
+	// Recreate unique index if missing (IF NOT EXISTS used above in schema creation, but older DBs may lack it)
+	_, _ = db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_hosts_ip_interface ON hosts(ip, interface_name);`)
+
 	return nil
 }
