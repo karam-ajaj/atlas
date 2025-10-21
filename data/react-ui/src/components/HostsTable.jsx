@@ -30,11 +30,6 @@ function fmtLastSeen(v) {
   return `${days}d`;
 }
 function normalizeRow(r, group) {
-  // Schema for docker_hosts: [id, container_id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status]
-  // Schema for hosts: [id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, interface_name, last_seen, online_status]
-  // We normalize both to use the same format, adjusting for docker_hosts having an extra container_id field
-  // and hosts having an interface_name field
-  
   if (group === "docker") {
     return {
       id: r[0],
@@ -46,7 +41,7 @@ function normalizeRow(r, group) {
       ports: r[6] || "no_ports",
       nextHop: r[7] || "Unknown",
       network: r[8] || "docker",
-      interface_name: "N/A", // Docker containers don't have interface names
+      interface_name: "N/A",
       lastSeen: r[9] || "Invalid",
       online_status: r[10] || "unknown",
       group,
@@ -291,7 +286,6 @@ function HostsTable() {
         );
       }
     });
-    // Now sort by any column, not just group
     return sortRows(filtered, sortKey, sortDir);
   }, [allRows, q, sortKey, sortDir, filters]);
 
@@ -314,11 +308,25 @@ function HostsTable() {
   }
 
   const thBase =
-    "px-3 text-[11px] leading-4 font-semibold uppercase tracking-wide text-gray-600 bg-gray-100 border-b-2 border-gray-200 sticky top-0 z-20 whitespace-nowrap";
+    "px-3 text-[11px] leading-4 font-semibold uppercase tracking-wide text-gray-600 bg-gray-100 border-b-2 border-gray-200 z-20 whitespace-nowrap";
   const tdBase = "px-3 border-b border-gray-200 align-middle";
   const rowH = density === "compact" ? "h-9 text-[13px]" : "h-11 text-sm";
   const thH = density === "compact" ? "h-9" : "h-10";
   const isAdvanced = mode === "advanced";
+
+  // Columns that should be a bit wider (important)
+  const importantCols = ["name", "ip", "os", "ports"];
+
+  // Which columns are currently visible (respect mode)
+  const visibleColumns = columns.filter(c => isAdvanced || basicCols.includes(c));
+
+  // Build grid-template-columns using minmax() so we don't rely on % widths
+  const gridTemplateColumns = visibleColumns
+    .map(col => importantCols.includes(col) ? "minmax(160px, 2fr)" : "minmax(90px, 1fr)")
+    .join(" ");
+
+  // A min-width for the grid container to enable horizontal scrolling when the container is narrower
+  const minGridWidth = visibleColumns.reduce((sum, col) => sum + (importantCols.includes(col) ? 160 : 90), 0);
 
   return (
     <div className="flex flex-col h-full">
@@ -371,7 +379,7 @@ function HostsTable() {
           </button>
         </div>
       </div>
-      {/* Sort toolbar above table */}
+
       <SortToolbar
         sortKey={sortKey}
         setSortKey={setSortKey}
@@ -380,78 +388,82 @@ function HostsTable() {
         columns={columns}
         colTitles={colTitles}
       />
+
       <div className="relative flex-1 overflow-auto rounded border border-gray-200">
         <div className="min-w-full overflow-x-auto">
-          <table className="w-full min-w-[1280px] table-fixed border-separate border-spacing-0">
-            <colgroup>
-              <col style={{ width: "32%" }} />
-              <col style={{ width: "14%" }} />
-              <col style={{ width: "9%" }} />
-              <col style={{ width: "14%" }} />
-              <col style={{ width: "8%" }} />
-              <col style={{ width: "30%" }} />
-              <col style={{ width: "14%" }} />
-              <col style={{ width: "10%" }} />
-              <col style={{ width: "10%" }} />
-              <col style={{ width: "10%" }} />
-              <col style={{ width: "10%" }} />
-              <col style={{ width: "10%" }} />
-            </colgroup>
-            <thead className="bg-gray-100">
-              <tr>
-                {columns.map(col =>
-                  (isAdvanced || basicCols.includes(col)) ? (
-                    <th
-                      key={col}
-                      className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`}
-                      style={{ position: "relative", minWidth: "100px", background: "#f7fafc" }}
-                    >
-                      <div
-                        className="w-full"
-                        style={{ minWidth: "100px", minHeight: "32px" }}
-                        onClick={() => {
-                          if (filteringCol !== col) setFilteringCol(col);
-                        }}
-                        tabIndex={0}
-                        role="button"
-                        aria-label={`Filter by ${colTitles[col]}`}
-                      >
-                        {filteringCol === col ? (
-                          <InlineSearchDropdown
-                            values={columnValues[col]}
-                            value={filters[col] ?? ""}
-                            onChange={v => setFilters(f => ({ ...f, [col]: v }))}
-                            placeholder={`Search ${colTitles[col]}...`}
-                            onClose={() => setFilteringCol(null)}
-                            colTitle={colTitles[col]}
-                          />
-                        ) : (
-                          <div className="flex items-center gap-1 w-full h-full cursor-pointer hover:bg-blue-50 rounded px-1 py-1"
-                            title={`Click to filter by ${colTitles[col]}`}>
-                            <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
-                              className="inline mr-1 opacity-70"
-                              style={{ marginRight: "4px" }}>
-                              <circle cx="9" cy="9" r="7" stroke="#333" strokeWidth="2" />
-                              <line x1="15" y1="15" x2="19" y2="19" stroke="#333" strokeWidth="2" />
-                            </svg>
-                            <span className="font-semibold">{colTitles[col]}</span>
-                          </div>
-                        )}
+          {/* Grid header */}
+          <div
+            role="row"
+            className={`grid gap-0 items-stretch bg-gray-100 sticky top-0`}
+            style={{
+              gridTemplateColumns,
+              minWidth: `${minGridWidth}px`,
+            }}
+          >
+            {visibleColumns.map((col, idx) => {
+              const isLast = idx === visibleColumns.length - 1;
+              return (
+                <div
+                  key={col}
+                  role="columnheader"
+                  aria-label={colTitles[col]}
+                  className={`${thBase} ${thH} border-r border-gray-200 ${isLast ? "last:border-r-0" : ""} flex items-center`}
+                  style={{ position: "relative", minHeight: "32px", padding: "8px" }}
+                >
+                  <div
+                    className="w-full"
+                    onClick={() => {
+                      if (filteringCol !== col) setFilteringCol(col);
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Filter by ${colTitles[col]}`}
+                  >
+                    {filteringCol === col ? (
+                      <InlineSearchDropdown
+                        values={columnValues[col]}
+                        value={filters[col] ?? ""}
+                        onChange={v => setFilters(f => ({ ...f, [col]: v }))}
+                        placeholder={`Search ${colTitles[col]}...`}
+                        onClose={() => setFilteringCol(null)}
+                        colTitle={colTitles[col]}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-1 w-full h-full cursor-pointer hover:bg-blue-50 rounded px-1 py-1"
+                        title={`Click to filter by ${colTitles[col]}`}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
+                          className="inline mr-1 opacity-70"
+                          style={{ marginRight: "4px" }}>
+                          <circle cx="9" cy="9" r="7" stroke="#333" strokeWidth="2" />
+                          <line x1="15" y1="15" x2="19" y2="19" stroke="#333" strokeWidth="2" />
+                        </svg>
+                        <span className="font-semibold">{colTitles[col]}</span>
                       </div>
-                    </th>
-                  ) : null
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => {
-                const key = r.group === "docker" && r.container_id 
-                  ? `${r.group}-${r.container_id}-${r.network}` 
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Rows as grid lines */}
+          <div role="rowgroup">
+            {rows.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">No data.</div>
+            ) : (
+              rows.map((r) => {
+                const key = r.group === "docker" && r.container_id
+                  ? `${r.group}-${r.container_id}-${r.network}`
                   : `${r.group}-${r.ip}-${r.name}`;
                 return (
-                  <tr key={key} className="select-text">
-                    {columns.map(col => {
-                      if (!isAdvanced && !basicCols.includes(col)) return null;
+                  <div
+                    key={key}
+                    role="row"
+                    className={`grid gap-0 items-start even:bg-white odd:bg-gray-50`}
+                    style={{ gridTemplateColumns, minWidth: `${minGridWidth}px` }}
+                  >
+                    {visibleColumns.map((col, idx) => {
+                      const isLast = idx === visibleColumns.length - 1;
                       let content;
                       if (col === "os") {
                         content = (
@@ -532,27 +544,24 @@ function HostsTable() {
                       } else {
                         content = r[col] ?? "—";
                       }
+
                       return (
-                        <td
+                        <div
                           key={col}
-                          className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0`}
+                          role="cell"
+                          className={`${tdBase} ${rowH} border-r border-gray-200 ${isLast ? "last:border-r-0" : ""}`}
+                          style={{ padding: "12px 12px" }}
+                          title={typeof content === "string" ? content : undefined}
                         >
                           {content}
-                        </td>
+                        </div>
                       );
                     })}
-                  </tr>
+                  </div>
                 );
-              })}
-              {rows.length === 0 && (
-                <tr>
-                  <td className="px-3 py-6 text-center text-gray-500" colSpan={columns.length}>
-                    No data.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              })
+            )}
+          </div>
         </div>
       </div>
     </div>
