@@ -3,6 +3,10 @@ set -euo pipefail
 
 echo "🔧 Atlas CI/CD Deployment Script"
 
+# Sync docker group membership for current session
+echo "🔄 Syncing docker group membership..."
+exec sg docker "$0" "$@"
+
 # Resolve repo root from this script's location
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UI_DIR="${REPO_ROOT}/data/react-ui"
