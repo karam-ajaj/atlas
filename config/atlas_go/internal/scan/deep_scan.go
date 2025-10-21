@@ -21,8 +21,9 @@ const tcpPortArg = "-"
 // const udpPortArg = "-" // UDP scan commented 
 
 type HostInfo struct {
-	IP   string
-	Name string
+	IP            string
+	Name          string
+	InterfaceName string
 }
 
 // Try NetBIOS (nbtscan) for hostname resolution
@@ -203,11 +204,12 @@ func getMacAddress(ip string) string {
 }
 
 func DeepScan() error {
-	subnets, err := utils.GetSubnetsToScan()
+	// Get all network interfaces
+	interfaces, err := utils.GetAllInterfaces()
 	if err != nil {
+		fmt.Printf("⚠️ Could not auto-detect interfaces: %v, using fallback\n", err)
 		// Fallback to default subnet if auto-detection fails
-		subnets = []string{"192.168.2.0/24"}
-		fmt.Printf("⚠️ Could not auto-detect subnets, using default: %v\n", subnets)
+		interfaces = []utils.InterfaceInfo{{Name: "unknown", Subnet: "192.168.2.0/24", IP: ""}}
 	}
 	
 	startTime := time.Now()
@@ -217,16 +219,20 @@ func DeepScan() error {
 
 	var hostInfos []HostInfo
 	
-	// Discover live hosts on all configured subnets
-	for _, subnet := range subnets {
-		fmt.Fprintf(lf, "Discovering live hosts on %s...\n", subnet)
-		hosts, err := discoverLiveHosts(subnet)
+	// Discover live hosts on all interfaces
+	for _, iface := range interfaces {
+		fmt.Fprintf(lf, "Discovering live hosts on %s (interface: %s)...\n", iface.Subnet, iface.Name)
+		hosts, err := discoverLiveHosts(iface.Subnet)
 		if err != nil {
-			fmt.Fprintf(lf, "Failed to discover hosts on %s: %v\n", subnet, err)
+			fmt.Fprintf(lf, "Failed to discover hosts on %s: %v\n", iface.Subnet, err)
 			continue
 		}
-		fmt.Fprintf(lf, "Discovered %d hosts on %s\n", len(hosts), subnet)
-		hostInfos = append(hostInfos, hosts...)
+		fmt.Fprintf(lf, "Discovered %d hosts on %s\n", len(hosts), iface.Subnet)
+		// Add interface name to each host
+		for _, host := range hosts {
+			host.InterfaceName = iface.Name
+			hostInfos = append(hostInfos, host)
+		}
 	}
 	
 	total := len(hostInfos)
@@ -275,18 +281,18 @@ func DeepScan() error {
 			}
 
 			_, err = db.Exec(`
-				INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status)
-				VALUES (?, ?, ?, ?, ?, '', 'LAN', CURRENT_TIMESTAMP, ?)
-				ON CONFLICT(ip) DO UPDATE SET
+				INSERT INTO hosts (ip, name, os_details, mac_address, open_ports, next_hop, network_name, interface_name, last_seen, online_status)
+				VALUES (?, ?, ?, ?, ?, '', 'LAN', ?, CURRENT_TIMESTAMP, ?)
+				ON CONFLICT(ip, interface_name) DO UPDATE SET
 					name=excluded.name,
 					os_details=excluded.os_details,
 					mac_address=excluded.mac_address,
 					open_ports=excluded.open_ports,
 					last_seen=CURRENT_TIMESTAMP,
 					online_status=excluded.online_status
-			`, ip, name, osInfo, mac, openPorts, status)
+			`, ip, name, osInfo, mac, openPorts, host.InterfaceName, status)
 			if err != nil {
-				fmt.Fprintf(lf, "❌ Update failed for %s: %v\n", ip, err)
+				fmt.Fprintf(lf, "❌ Update failed for %s on interface %s: %v\n", ip, host.InterfaceName, err)
 			}
 			fmt.Fprintf(lf, "Host %s scanned in %s\n", ip, time.Since(hostStart))
 		}(idx, host)
