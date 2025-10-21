@@ -129,13 +129,7 @@ func updateExternalIPInDB(dbPath string) {
 }
 
 func FastScan() error {
-    subnet, err := utils.GetLocalSubnet()
-    if err != nil {
-        return err
-    }
-    fmt.Printf("Scanning subnet: %s\n", subnet)
-
-    hosts, err := runNmap(subnet)
+    subnets, err := utils.GetSubnetsToScan()
     if err != nil {
         return err
     }
@@ -146,7 +140,23 @@ func FastScan() error {
         gatewayIP = ""
     }
 
-    err = updateSQLiteDB(hosts, gatewayIP)
+    allHosts := make(map[string]string)
+    
+    // Scan all configured subnets
+    for _, subnet := range subnets {
+        fmt.Printf("Scanning subnet: %s\n", subnet)
+        hosts, err := runNmap(subnet)
+        if err != nil {
+            fmt.Printf("⚠️ Failed to scan subnet %s: %v\n", subnet, err)
+            continue
+        }
+        // Merge hosts from this subnet into the overall map
+        for ip, name := range hosts {
+            allHosts[ip] = name
+        }
+    }
+
+    err = updateSQLiteDB(allHosts, gatewayIP)
     if err != nil {
         return err
     }
