@@ -20,10 +20,10 @@ func GetAllInterfaces() ([]InterfaceInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var interfaces []InterfaceInfo
 	seenInterfaces := make(map[string]bool)
-	
+
 	for _, line := range strings.Split(string(out), "\n") {
 		if line == "" {
 			continue
@@ -33,20 +33,25 @@ func GetAllInterfaces() ([]InterfaceInfo, error) {
 		if len(fields) < 4 {
 			continue
 		}
-		
+
 		// Interface name is at index 1
 		ifName := strings.TrimSuffix(fields[1], ":")
-		
+
 		// Find inet keyword and get the subnet
 		for i, f := range fields {
 			if f == "inet" && i+1 < len(fields) {
 				subnet := fields[i+1]
 				if !strings.HasPrefix(subnet, "127.") && !strings.HasPrefix(subnet, "127.0.0.1") {
+					// Skip Docker/internal bridge interfaces and docker-managed subnets
+					// e.g., interface names like "docker_gwbridge", "br-...", or subnets in 172.16.0.0/12
+					if strings.HasPrefix(ifName, "docker") || strings.HasPrefix(ifName, "br-") || isDockerSubnet(subnet) {
+						continue
+					}
 					// Avoid duplicate interfaces
 					key := ifName + subnet
 					if !seenInterfaces[key] {
 						seenInterfaces[key] = true
-						
+
 						// Extract IP and ensure subnet has CIDR notation
 						parts := strings.Split(subnet, "/")
 						ip := parts[0]
@@ -54,7 +59,7 @@ func GetAllInterfaces() ([]InterfaceInfo, error) {
 						if len(parts) == 1 {
 							fullSubnet = ip + "/24"
 						}
-						
+
 						// Convert IP to subnet format (e.g., 192.168.1.5/24 -> 192.168.1.0/24)
 						ipParts := strings.Split(ip, ".")
 						if len(ipParts) == 4 {
@@ -70,12 +75,36 @@ func GetAllInterfaces() ([]InterfaceInfo, error) {
 			}
 		}
 	}
-	
+
 	if len(interfaces) == 0 {
 		return nil, fmt.Errorf("no valid non-loopback interfaces found")
 	}
-	
+
 	return interfaces, nil
+}
+
+// isDockerSubnet attempts to detect Docker-managed IPv4 networks. Docker commonly places
+// containers in the 172.16.0.0/12 range (172.16.0.0 - 172.31.255.255). We treat those
+// as internal/docker subnets to avoid scanning them in host network scans.
+func isDockerSubnet(subnet string) bool {
+	// subnet expected like "172.18.0.0/16" or "172.18.0.1/16"
+	if !strings.HasPrefix(subnet, "172.") {
+		return false
+	}
+	parts := strings.Split(subnet, "/")[0]
+	octets := strings.Split(parts, ".")
+	if len(octets) < 2 {
+		return false
+	}
+	second := octets[1]
+	// second should be numeric
+	// convert safely
+	switch second {
+	case "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31":
+		return true
+	default:
+		return false
+	}
 }
 
 // Shared function for subnet detection (kept for backwards compatibility)
@@ -108,13 +137,13 @@ func GetSubnetsToScan() ([]string, error) {
 			return result, nil
 		}
 	}
-	
+
 	// Fall back to auto-detection of all interfaces if no environment variable is set
 	interfaces, err := GetAllInterfaces()
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var subnets []string
 	for _, iface := range interfaces {
 		subnets = append(subnets, iface.Subnet)
@@ -128,7 +157,7 @@ func GetInterfaceForSubnet(subnet string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	for _, iface := range interfaces {
 		if iface.Subnet == subnet {
 			return iface.Name, nil
