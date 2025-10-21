@@ -203,23 +203,34 @@ func getMacAddress(ip string) string {
 }
 
 func DeepScan() error {
-	subnet, err := utils.GetLocalSubnet()
+	subnets, err := utils.GetSubnetsToScan()
 	if err != nil {
-		subnet = "192.168.2.0/24"
+		// Fallback to default subnet if auto-detection fails
+		subnets = []string{"192.168.2.0/24"}
+		fmt.Printf("⚠️ Could not auto-detect subnets, using default: %v\n", subnets)
 	}
+	
 	startTime := time.Now()
 	logFile := "/config/logs/deep_scan_progress.log"
 	lf, _ := os.Create(logFile)
 	defer lf.Close()
 
-	fmt.Fprintf(lf, "Discovering live hosts on %s...\n", subnet)
-	hostInfos, err := discoverLiveHosts(subnet)
-	if err != nil {
-		fmt.Fprintf(lf, "Failed to discover hosts: %v\n", err)
-		return err
+	var hostInfos []HostInfo
+	
+	// Discover live hosts on all configured subnets
+	for _, subnet := range subnets {
+		fmt.Fprintf(lf, "Discovering live hosts on %s...\n", subnet)
+		hosts, err := discoverLiveHosts(subnet)
+		if err != nil {
+			fmt.Fprintf(lf, "Failed to discover hosts on %s: %v\n", subnet, err)
+			continue
+		}
+		fmt.Fprintf(lf, "Discovered %d hosts on %s\n", len(hosts), subnet)
+		hostInfos = append(hostInfos, hosts...)
 	}
+	
 	total := len(hostInfos)
-	fmt.Fprintf(lf, "Discovered %d hosts in %s\n", total, time.Since(startTime))
+	fmt.Fprintf(lf, "Total discovered: %d hosts in %s\n", total, time.Since(startTime))
 
 	dbPath := "/config/db/atlas.db"
 	db, err := sql.Open("sqlite3", dbPath)

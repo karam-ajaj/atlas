@@ -81,6 +81,7 @@ docker run -d \
   -e FASTSCAN_INTERVAL=3600 \
   -e DOCKERSCAN_INTERVAL=3600 \
   -e DEEPSCAN_INTERVAL=7200 \
+  -e SCAN_SUBNETS="192.168.1.0/24,10.0.0.0/24" \
   keinstien/atlas:3.2.29
 ```
 
@@ -90,6 +91,7 @@ docker run -d \
 - `FASTSCAN_INTERVAL` – Interval in seconds between fast scans. Default: 3600 (1 hour).
 - `DOCKERSCAN_INTERVAL` – Interval in seconds between Docker scans. Default: 3600 (1 hour).
 - `DEEPSCAN_INTERVAL` – Interval in seconds between deep scans. Default: 7200 (2 hours).
+- `SCAN_SUBNETS` – Comma-separated list of subnets to scan (e.g., "192.168.1.0/24,10.0.0.0/24"). If not set, Atlas will auto-detect the local subnet. This allows scanning multiple networks including LAN and remote servers.
 
 If not set, defaults are used (UI: 8888, API: 8889, scan intervals as shown above).
 
@@ -260,6 +262,7 @@ curl http://localhost:8888/api/scheduler/status
 ## ✅ Features
 
 - [x] Fast network scans (ping/ARP)
+- [x] **Multiple subnet scanning** - Scan your LAN, remote servers, and multiple networks simultaneously via SCAN_SUBNETS environment variable
 - [x] Docker container inspection with **multi-network support**
 - [x] **Multiple IPs and MACs per container** - Containers on multiple networks show all interfaces
 - [x] External IP discovery
