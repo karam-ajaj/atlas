@@ -261,10 +261,12 @@ curl http://localhost:8888/api/scheduler/status
 
 ## ✅ Features
 
+- [x] **Multi-interface scanning** - Automatically detects and scans all physical network interfaces on the host
 - [x] Fast network scans (ping/ARP)
 - [x] **Multiple subnet scanning** - Scan your LAN, remote servers, and multiple networks simultaneously via SCAN_SUBNETS environment variable
 - [x] Docker container inspection with **multi-network support**
 - [x] **Multiple IPs and MACs per container** - Containers on multiple networks show all interfaces
+- [x] **Interface-aware host tracking** - Same host on multiple interfaces appears separately with interface labels
 - [x] External IP discovery
 - [x] Deep port scans with OS enrichment
 - [x] React-based dynamic frontend
@@ -315,6 +317,11 @@ Infrastructure & Automation Engineer
 MIT License — free for personal or commercial use.
 
 ---
+
+## 📚 Documentation
+
+- [Multi-Interface Support](MULTI_INTERFACE_SUPPORT.md) - Detailed guide on the multi-interface scanning feature
+- [Migration Guide](MIGRATION_GUIDE.md) - Guide for migrating from bash scripts to Go implementation
 
 ## 🤝 Contributing
 
