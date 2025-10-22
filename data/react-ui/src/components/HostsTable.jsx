@@ -31,10 +31,20 @@ function fmtLastSeen(v) {
 }
 function normalizeRow(r, group) {
   if (group === "docker") {
+    // Docker rows in the API may place the IP at r[2] (new) or r[1] (legacy),
+    // and sometimes embed it elsewhere in the row. Normalize robustly.
+    const looksLikeIp = (v) => /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.test(String(v || ""));
+    const findIpInRow = (row = []) => {
+      for (const cell of row) {
+        if (looksLikeIp(cell)) return String(cell);
+      }
+      return "";
+    };
+    const dockerIp = looksLikeIp(r[2]) ? String(r[2]) : (looksLikeIp(r[1]) ? String(r[1]) : findIpInRow(r));
     return {
       id: r[0],
       container_id: r[1] || "",
-      ip: r[2] || "",
+      ip: dockerIp || "",
       name: r[3] || "NoName",
       os: r[4] || "Unknown",
       mac: r[5] || "Unknown",
@@ -45,7 +55,7 @@ function normalizeRow(r, group) {
       lastSeen: r[9] || "Invalid",
       online_status: r[10] || "unknown",
       group,
-      subnet: subnetOf(r[2] || ""),
+      subnet: subnetOf(dockerIp || ""),
     };
   } else {
     return {
@@ -354,7 +364,6 @@ function HostsTable({ showDuplicates = false, onClearPreset }) {
 
   return (
     <div className="flex flex-col h-full bg-white rounded border border-gray-200 p-4 shadow-sm">
-      <h2 className="text-lg font-semibold mb-3">Hosts</h2>
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <input
           type="text"

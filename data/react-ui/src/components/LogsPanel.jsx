@@ -172,7 +172,6 @@ export function LogsPanel() {
     <div className="p-4 bg-gray-900 text-green-300 font-mono rounded shadow h-full w-full flex flex-col space-y-4">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3">
-        <label className="text-white shrink-0">Select Log:</label>
         <LogFileDropdown
           files={logFiles}
           value={selectedFile}

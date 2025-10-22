@@ -313,9 +313,6 @@ export function ScriptsPanel() {
           </button>
         </div>
 
-        <p className="text-xs text-gray-500 mt-2">
-          Primary: GET /api/scripts/run/{"{script}"}/stream. Fallback: POST /api/scripts/run/{"{script}"} (no tailing here).
-        </p>
 
         {/* Fill remaining space with output; internal scroll */}
         <div className="mt-3 flex-1 min-h-0 overflow-auto whitespace-pre-wrap font-mono rounded border border-gray-200 bg-gray-50 p-3">

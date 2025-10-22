@@ -388,7 +388,6 @@ export function NetworkMap() {
 
   return (
     <div className="relative w-full h-full bg-white border rounded p-4 flex flex-col">
-      <h2 className="text-lg font-semibold mb-2 shrink-0">Network Map</h2>
 
       {/* Layout Selector + Filters */}
       <div className="flex flex-wrap gap-2 mb-4 items-center shrink-0">
