@@ -169,7 +169,7 @@ export function LogsPanel() {
   }, [logLines, lineSearch]);
 
   return (
-    <div className="p-4 bg-gray-900 text-green-300 font-mono rounded shadow h-full flex flex-col space-y-4">
+    <div className="p-4 bg-gray-900 text-green-300 font-mono rounded shadow h-full w-full flex flex-col space-y-4">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3">
         <label className="text-white shrink-0">Select Log:</label>
@@ -203,7 +203,7 @@ export function LogsPanel() {
           className="bg-gray-800 text-white px-2 py-1 rounded border border-gray-600 w-full sm:w-64 md:w-80 shrink-0"
         />
       </div>
-      <div className="overflow-auto bg-black p-4 border border-gray-700 rounded flex-1 whitespace-pre-wrap text-sm">
+      <div className="overflow-auto bg-black p-4 border border-gray-700 rounded flex-1 min-h-0 whitespace-pre-wrap text-sm">
         {loading ? (
           <p className="text-gray-400">Loading...</p>
         ) : filteredLogLines.length > 0 ? (

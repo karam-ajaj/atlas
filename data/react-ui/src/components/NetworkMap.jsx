@@ -387,11 +387,11 @@ export function NetworkMap() {
   }, [rawData, filters, layoutStyle, externalNode]);
 
   return (
-    <div className="relative w-full h-full bg-white border rounded p-4">
-      <h2 className="text-lg font-semibold mb-2">Network Map</h2>
+    <div className="relative w-full h-full bg-white border rounded p-4 flex flex-col">
+      <h2 className="text-lg font-semibold mb-2 shrink-0">Network Map</h2>
 
       {/* Layout Selector + Filters */}
-      <div className="flex flex-wrap gap-2 mb-4 items-center">
+      <div className="flex flex-wrap gap-2 mb-4 items-center shrink-0">
         <select
           value={layoutStyle}
           onChange={(e) => setLayoutStyle(e.target.value)}
@@ -431,12 +431,18 @@ export function NetworkMap() {
         <div className="text-red-500">{error}</div>
       ) : (
         <>
-          <div ref={containerRef} className="w-full h-[80vh] bg-gray-200 rounded" />
-          <SelectedNodePanel
-            node={selectedNode}
-            route={selectedRoute}
-            subnet={selectedSubnet}
-          />
+          {/* Map area flexes to fill available height */}
+          <div ref={containerRef} className="w-full flex-1 min-h-0 bg-gray-200 rounded" />
+
+          {/* Overlay the selected node panel so it doesn't change layout height */}
+          <div className="absolute top-20 left-6 z-10 max-w-sm">
+            <SelectedNodePanel
+              node={selectedNode}
+              route={selectedRoute}
+              subnet={selectedSubnet}
+            />
+          </div>
+
           <div className="absolute bottom-4 right-4 bg-white border shadow rounded p-3 text-sm z-10 w-64">
             <h3 className="font-semibold mb-2">Legend</h3>
             <ul className="space-y-1">

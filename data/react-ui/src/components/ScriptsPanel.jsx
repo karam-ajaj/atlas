@@ -201,9 +201,9 @@ export function ScriptsPanel() {
   }
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-4 h-full w-full">
       {/* Scheduler Status Panel */}
-      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+  <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm w-full shrink-0">
         <h2 className="text-lg font-semibold mb-3">Scan Scheduler</h2>
         {loadingIntervals ? (
           <p className="text-gray-500">Loading intervals...</p>
@@ -273,7 +273,7 @@ export function ScriptsPanel() {
       </div>
 
       {/* Manual Script Executor Panel */}
-      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+  <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm w-full flex-1 min-h-0 flex flex-col">
         <h2 className="text-lg font-semibold mb-2">Manual Script Executor</h2>
         <div className="flex flex-wrap items-center gap-3">
           <label className="font-medium">Script</label>
@@ -317,7 +317,8 @@ export function ScriptsPanel() {
           Primary: GET /api/scripts/run/{"{script}"}/stream. Fallback: POST /api/scripts/run/{"{script}"} (no tailing here).
         </p>
 
-        <div className="mt-3 h-[60vh] overflow-auto whitespace-pre-wrap font-mono rounded border border-gray-200 bg-gray-50 p-3">
+        {/* Fill remaining space with output; internal scroll */}
+        <div className="mt-3 flex-1 min-h-0 overflow-auto whitespace-pre-wrap font-mono rounded border border-gray-200 bg-gray-50 p-3">
           {liveLines.map((l, i) => (
             <div key={i}>{l}</div>
           ))}

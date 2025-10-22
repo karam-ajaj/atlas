@@ -329,7 +329,8 @@ function HostsTable() {
   const minGridWidth = visibleColumns.reduce((sum, col) => sum + (importantCols.includes(col) ? 160 : 90), 0);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white rounded border border-gray-200 p-4 shadow-sm">
+      <h2 className="text-lg font-semibold mb-3">Hosts</h2>
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <input
           type="text"
@@ -389,8 +390,9 @@ function HostsTable() {
         colTitles={colTitles}
       />
 
-      <div className="relative flex-1 overflow-auto rounded border border-gray-200">
-        <div className="min-w-full overflow-x-auto">
+      {/* Table container: independent scrollbars; enable horizontal scroll for advanced columns, fill available height */}
+      <div className="relative flex-1 min-h-0 overflow-x-auto overflow-y-auto rounded border border-gray-200">
+        <div className="min-w-0">
           {/* Grid header */}
           <div
             role="row"
