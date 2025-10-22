@@ -185,8 +185,12 @@ def last_scan_status():
 def list_logs():
     files = []
     for name in os.listdir(LOGS_DIR):
-        if name.endswith(".log"):
-            files.append(name)
+        if not name.endswith(".log"):
+            continue
+        # Hide verbose per-host nmap logs from the UI list
+        if name.startswith("nmap_tcp_") or name.startswith("nmap_udp_"):
+            continue
+        files.append(name)
     try:
         containers = subprocess.check_output(["docker", "ps", "--format", "{{.Names}}"], text=True).splitlines()
         files += [f"container:{c}" for c in containers]

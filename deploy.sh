@@ -3,9 +3,27 @@ set -euo pipefail
 
 echo "🔧 Atlas CI/CD Deployment Script"
 
-# Sync docker group membership for current session
-echo "🔄 Syncing docker group membership..."
-exec sg docker "$0" "$@"
+### Sync docker group membership for current session (avoid infinite recursion)
+# Resolve absolute path to this script for re-exec
+SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "$0")"
+if [[ -z "${ATLAS_IN_SG:-}" ]]; then
+  if command -v id >/dev/null 2>&1 && id -nG 2>/dev/null | grep -qw docker; then
+    echo "✅ Docker group already present; continuing..."
+  elif command -v sg >/dev/null 2>&1; then
+    echo "🔄 Syncing docker group membership..."
+    # Reconstruct quoted args safely
+    QUOTED_ARGS=()
+    for arg in "$@"; do
+      QUOTED_ARGS+=("$(printf '%q' "$arg")")
+    done
+    CMD="ATLAS_IN_SG=1 \"$SCRIPT_PATH\" ${QUOTED_ARGS[*]}"
+    exec sg docker -c "$CMD"
+  else
+    echo "⚠️ 'sg' command not available; proceeding without group switch"
+  fi
+else
+  echo "✅ Running under docker group context"
+fi
 
 # Resolve repo root from this script's location
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,24 +37,30 @@ echo "📁 Repo root: $REPO_ROOT"
 echo "🧩 UI dir:    $UI_DIR"
 echo "🗂️  HTML dir:   $HTML_DIR"
 
-# Prompt for version
-read -p "👉 Enter the version tag (current version: $CURRENT_VERSION): " VERSION
+# Prompt for version (allow env override)
+if [[ -z "${VERSION:-}" ]]; then
+  read -p "👉 Enter the version tag (current version: $CURRENT_VERSION): " VERSION
+fi
 if [[ -z "${VERSION:-}" ]]; then
   echo "❌ Version tag is required. Exiting..."
   exit 1
 fi
 
-# Ask whether to also tag this version as 'latest'
-read -p "👉 Tag this version as 'latest' as well? (y/N): " TAG_LATEST
+# Ask whether to also tag this version as 'latest' (allow env override)
+if [[ -z "${TAG_LATEST:-}" ]]; then
+  read -p "👉 Tag this version as 'latest' as well? (y/N): " TAG_LATEST
+fi
 if [[ "${TAG_LATEST:-}" =~ ^([yY][eE][sS]|[yY])$ ]]; then
   DO_LATEST=true
 else
   DO_LATEST=false
 fi
 
-# Ask whether to push this version to Docker Hub
-read -p "👉 Push this version to Docker Hub? (y/N): " PUSH_D
-if [[ "${PUSH_D:-}" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+# Ask whether to push this version to Docker Hub (allow env override via PUSH_D or DO_PUSH)
+if [[ -z "${PUSH_D:-}" && -z "${DO_PUSH:-}" ]]; then
+  read -p "👉 Push this version to Docker Hub? (y/N): " PUSH_D
+fi
+if [[ "${PUSH_D:-}" =~ ^([yY][eE][sS]|[yY])$ || "${DO_PUSH:-}" =~ ^([tT][rR][uU][eE]|[yY][eE][sS]|[yY])$ ]]; then
   DO_PUSH=true
 else
   DO_PUSH=false

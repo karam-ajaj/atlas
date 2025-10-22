@@ -3,6 +3,7 @@ package scan
 import (
     "database/sql"
     "fmt"
+    "os"
     "os/exec"
     "strings"
     "time"
@@ -129,6 +130,30 @@ func updateExternalIPInDB(dbPath string) {
 }
 
 func FastScan() error {
+    // progress log similar to deep scan
+    logFile := "/config/logs/fast_scan_progress.log"
+    lf, _ := os.Create(logFile)
+    if lf == nil {
+        // fallback to stdout only
+        return fastScanCore(nil)
+    }
+    defer lf.Close()
+    start := time.Now()
+    fmt.Fprintf(lf, "🚀 Fast scan started at %s\n", start.Format(time.RFC3339))
+    err := fastScanCore(lf)
+    fmt.Fprintf(lf, "Fast scan complete in %s\n", time.Since(start))
+    return err
+}
+
+func fastScanCore(lf *os.File) error {
+    logf := func(format string, args ...any) {
+        msg := fmt.Sprintf(format, args...)
+        fmt.Println(msg)
+        if lf != nil {
+            fmt.Fprintln(lf, msg)
+        }
+    }
+
     // Get all network interfaces
     interfaces, err := utils.GetAllInterfaces()
     if err != nil {
@@ -137,27 +162,31 @@ func FastScan() error {
 
     gatewayIP, err := getDefaultGateway()
     if err != nil {
-        fmt.Println("⚠️ Could not determine gateway:", err)
+        logf("⚠️ Could not determine gateway: %v", err)
         gatewayIP = ""
     }
 
+    totalHosts := 0
     // Scan each interface separately
     for _, iface := range interfaces {
-        fmt.Printf("Scanning subnet: %s on interface %s\n", iface.Subnet, iface.Name)
+        logf("Discovering live hosts on %s (interface: %s)...", iface.Subnet, iface.Name)
         hosts, err := runNmap(iface.Subnet)
         if err != nil {
-            fmt.Printf("⚠️ Failed to scan subnet %s on interface %s: %v\n", iface.Subnet, iface.Name, err)
+            logf("⚠️ Failed to scan subnet %s on interface %s: %v", iface.Subnet, iface.Name, err)
             continue
         }
-        
+        logf("Discovered %d hosts on %s", len(hosts), iface.Subnet)
+        totalHosts += len(hosts)
+
         // Update database with hosts from this interface
         err = updateSQLiteDB(hosts, gatewayIP, iface.Name)
         if err != nil {
-            fmt.Printf("⚠️ Failed to update database for interface %s: %v\n", iface.Name, err)
+            logf("⚠️ Failed to update database for interface %s: %v", iface.Name, err)
             continue
         }
     }
 
     updateExternalIPInDB("/config/db/atlas.db")
+    logf("Total hosts updated: %d", totalHosts)
     return nil
 }

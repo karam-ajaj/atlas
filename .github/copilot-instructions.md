@@ -8,16 +8,6 @@ Keep this short and actionable. Prefer small, focused changes and reference the 
 - Frontend: `data/react-ui/` (Vite + React). Build with `npm install && npm run build`, then copy the output into `data/html/` (Dockerfile does this in CI/deploy).
 - Entrypoint & runtime layout: container expects runtime configuration under `/config` (binary at `/config/bin/atlas`, DB at `/config/db/atlas.db`, logs at `/config/logs`). See `Dockerfile` and `config/scripts/atlas_check.sh` for startup.
 
-# copilot / AI agent instructions — atlas
-
-Keep this short and actionable. Prefer small, focused changes and reference the exact files shown below.
-
-1) Big picture
-- Atlas is a single-container app that combines a Go CLI scanner, a FastAPI backend, Nginx, and a React static UI.
-- Main Go CLI: `config/atlas_go/main.go` — commands: `initdb`, `fastscan`, `deepscan`, `dockerscan`.
-- Frontend: `data/react-ui/` (Vite + React). Build with `npm install && npm run build`, then copy the output into `data/html/` (Dockerfile does this in CI/deploy).
-- Entrypoint & runtime layout: container expects runtime configuration under `/config` (binary at `/config/bin/atlas`, DB at `/config/db/atlas.db`, logs at `/config/logs`). See `Dockerfile` and `config/scripts/atlas_check.sh` for startup.
-
 2) Where to change code
 - Backend scanner logic: `config/atlas_go/internal/scan/*.go` (notably `fastscan.go`, `deep_scan.go`, `docker_scan.go`).
 - DB helpers: `config/atlas_go/internal/db/` and SQLite usage is pervasive; queries use `ON CONFLICT(ip, interface_name)` semantics — keep key shapes consistent.
@@ -49,15 +39,19 @@ Keep this short and actionable. Prefer small, focused changes and reference the 
 - Code assumes the container has host network access and tools installed. If a developer runs locally without those tools, mocks or stubs are required.
 - Many scan functions call external CLIs; keep parsing robust to missing/changed output and prefer small, isolated changes.
 
-  7) Test changes quickly (deploy.sh)
-  - Use `./deploy.sh` to build the React UI, write `data/html/build-info.json`, build the Docker image, and run a local container on host network.
-  - The script never tags images as `latest`. Pushing to Docker Hub is optional and only occurs if you answer `y` when prompted.
-  - Non-interactive example (no push):
-    - `printf "pr-62\nn\n" | ./deploy.sh`
-  - After it starts, open:
-    - Local UI: `http://localhost:8884/`
-    - Swagger via Nginx: `http://localhost:8884/api/docs`
-  - You can tag/push by answering `y` to prompts, or pipe `y` values in the printf.
+   7) Test changes quickly (deploy.sh)
+   - Use `./deploy.sh` to build the React UI, write `data/html/build-info.json`, build the Docker image, and run a local container on host network.
+   - Default policy: always test locally, do NOT push by default.
+   - Preferred non-interactive validation (no push):
+   -   `VERSION=dev-local TAG_LATEST=n DO_PUSH=false /home/vscode/atlas/deploy.sh`
+   - To push intentionally, set `DO_PUSH=true` or answer `y` when prompted.
+   - After it starts, open:
+     -   Local UI: `http://192.168.2.81:8884/`
+     -   Swagger via Nginx: `http://192.168.2.81:8884/api/docs`
+    - If you hit Docker socket permission errors (permission denied):
+      - Ensure your user is in the `docker` group, then refresh the session with `newgrp docker` in the same terminal and re-run the command.
+      - Alternatively, start a new login session after running: `sudo usermod -aG docker $USER`
+  - You can tag/push by answering `y` to prompts, or by setting `DO_PUSH=true` explicitly.
 
   8) Small checklist when making changes
 - Update or respect DB schema and `ON CONFLICT` keys (ip + interface_name for hosts).

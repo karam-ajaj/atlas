@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -16,61 +17,112 @@ type InterfaceInfo struct {
 
 // GetAllInterfaces returns all non-loopback network interfaces with their subnets
 func GetAllInterfaces() ([]InterfaceInfo, error) {
+	// First, try parsing via `ip` command for portability across distros
 	out, err := exec.Command("ip", "-o", "-f", "inet", "addr", "show").Output()
-	if err != nil {
-		return nil, err
-	}
-
 	var interfaces []InterfaceInfo
 	seenInterfaces := make(map[string]bool)
 
-	for _, line := range strings.Split(string(out), "\n") {
-		if line == "" {
-			continue
-		}
-		fields := strings.Fields(line)
-		// Expected format: 1: eth0 inet 192.168.1.5/24 ...
-		if len(fields) < 4 {
-			continue
-		}
+	if err == nil {
+		for _, line := range strings.Split(string(out), "\n") {
+			if line == "" {
+				continue
+			}
+			fields := strings.Fields(line)
+			// Expected format: 1: eth0 inet 192.168.1.5/24 ...
+			if len(fields) < 4 {
+				continue
+			}
 
-		// Interface name is at index 1
-		ifName := strings.TrimSuffix(fields[1], ":")
+			// Interface name is at index 1
+			ifName := strings.TrimSuffix(fields[1], ":")
 
-		// Find inet keyword and get the subnet
-		for i, f := range fields {
-			if f == "inet" && i+1 < len(fields) {
-				subnet := fields[i+1]
-				if !strings.HasPrefix(subnet, "127.") && !strings.HasPrefix(subnet, "127.0.0.1") {
-					// Skip Docker/internal bridge interfaces and docker-managed subnets
-					// e.g., interface names like "docker_gwbridge", "br-...", or subnets in 172.16.0.0/12
-					if strings.HasPrefix(ifName, "docker") || strings.HasPrefix(ifName, "br-") || isDockerSubnet(subnet) {
+			// Skip common virtual/bridge interfaces by name
+			if strings.HasPrefix(ifName, "docker") || strings.HasPrefix(ifName, "br-") || strings.HasPrefix(ifName, "veth") || ifName == "lo" {
+				continue
+			}
+
+			// Find inet keyword and get the subnet
+			for i, f := range fields {
+				if f == "inet" && i+1 < len(fields) {
+					subnet := fields[i+1]
+					if strings.HasPrefix(subnet, "127.") {
 						continue
 					}
+
 					// Avoid duplicate interfaces
 					key := ifName + subnet
-					if !seenInterfaces[key] {
-						seenInterfaces[key] = true
-
-						// Extract IP and ensure subnet has CIDR notation
-						parts := strings.Split(subnet, "/")
-						ip := parts[0]
-						fullSubnet := subnet
-						if len(parts) == 1 {
-							fullSubnet = ip + "/24"
-						}
-
-						// Convert IP to subnet format (e.g., 192.168.1.5/24 -> 192.168.1.0/24)
-						ipParts := strings.Split(ip, ".")
-						if len(ipParts) == 4 {
-							subnetBase := fmt.Sprintf("%s.%s.%s.0/%s", ipParts[0], ipParts[1], ipParts[2], strings.Split(fullSubnet, "/")[1])
-							interfaces = append(interfaces, InterfaceInfo{
-								Name:   ifName,
-								Subnet: subnetBase,
-								IP:     ip,
-							})
-						}
+					if seenInterfaces[key] {
+						continue
 					}
+					seenInterfaces[key] = true
+
+					// Extract IP and ensure subnet has CIDR notation
+					parts := strings.Split(subnet, "/")
+					ip := parts[0]
+					fullSubnet := subnet
+					if len(parts) == 1 {
+						fullSubnet = ip + "/24"
+					}
+
+					// Convert IP to subnet base (e.g., 192.168.1.5/24 -> 192.168.1.0/24)
+					ipParts := strings.Split(ip, ".")
+					if len(ipParts) == 4 {
+						maskBits := strings.Split(fullSubnet, "/")[1]
+						subnetBase := fmt.Sprintf("%s.%s.%s.0/%s", ipParts[0], ipParts[1], ipParts[2], maskBits)
+						interfaces = append(interfaces, InterfaceInfo{
+							Name:   ifName,
+							Subnet: subnetBase,
+							IP:     ip,
+						})
+					}
+				}
+			}
+		}
+	}
+
+	// Fallback: if nothing found (or `ip` unavailable), use Go's net package
+	if len(interfaces) == 0 {
+		netIfaces, nerr := net.Interfaces()
+		if nerr == nil {
+			for _, nif := range netIfaces {
+				// Skip loopback and down interfaces
+				if (nif.Flags&net.FlagLoopback) != 0 || (nif.Flags&net.FlagUp) == 0 {
+					continue
+				}
+				if strings.HasPrefix(nif.Name, "docker") || strings.HasPrefix(nif.Name, "br-") || strings.HasPrefix(nif.Name, "veth") {
+					continue
+				}
+				addrs, _ := nif.Addrs()
+				for _, addr := range addrs {
+					ipNet, ok := addr.(*net.IPNet)
+					if !ok {
+						continue
+					}
+					ip4 := ipNet.IP.To4()
+					if ip4 == nil || ip4.IsLoopback() {
+						continue
+					}
+					// Compute network base; if mask unknown, assume /24
+					ones, _ := ipNet.Mask.Size()
+					maskBits := 24
+					if ones > 0 {
+						maskBits = ones
+					}
+					ipParts := strings.Split(ip4.String(), ".")
+					if len(ipParts) != 4 {
+						continue
+					}
+					subnetBase := fmt.Sprintf("%s.%s.%s.0/%d", ipParts[0], ipParts[1], ipParts[2], maskBits)
+					key := nif.Name + subnetBase
+					if seenInterfaces[key] {
+						continue
+					}
+					seenInterfaces[key] = true
+					interfaces = append(interfaces, InterfaceInfo{
+						Name:   nif.Name,
+						Subnet: subnetBase,
+						IP:     ip4.String(),
+					})
 				}
 			}
 		}
@@ -79,33 +131,14 @@ func GetAllInterfaces() ([]InterfaceInfo, error) {
 	if len(interfaces) == 0 {
 		return nil, fmt.Errorf("no valid non-loopback interfaces found")
 	}
-
 	return interfaces, nil
 }
 
 // isDockerSubnet attempts to detect Docker-managed IPv4 networks. Docker commonly places
 // containers in the 172.16.0.0/12 range (172.16.0.0 - 172.31.255.255). We treat those
 // as internal/docker subnets to avoid scanning them in host network scans.
-func isDockerSubnet(subnet string) bool {
-	// subnet expected like "172.18.0.0/16" or "172.18.0.1/16"
-	if !strings.HasPrefix(subnet, "172.") {
-		return false
-	}
-	parts := strings.Split(subnet, "/")[0]
-	octets := strings.Split(parts, ".")
-	if len(octets) < 2 {
-		return false
-	}
-	second := octets[1]
-	// second should be numeric
-	// convert safely
-	switch second {
-	case "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31":
-		return true
-	default:
-		return false
-	}
-}
+// isDockerSubnet kept for backward compatibility (unused)
+func isDockerSubnet(subnet string) bool { return false }
 
 // Shared function for subnet detection (kept for backwards compatibility)
 func GetLocalSubnet() (string, error) {

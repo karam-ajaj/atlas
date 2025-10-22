@@ -22,37 +22,38 @@ function Sidebar({ activeTab, setActiveTab, visible, setVisible }) {
         ></div>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar container (mobile: slide-over, desktop: collapsible rail) */}
       <div
-        className={`fixed lg:static z-40 top-0 left-0 h-full w-64 bg-gray-900 text-white p-4 flex flex-col transform transition-transform duration-300
-        ${visible ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
+        className={`z-40 top-0 left-0 bg-gray-900 text-white flex flex-col transition-all duration-300
+        fixed h-full w-64 transform ${visible ? "translate-x-0" : "-translate-x-full"} lg:static lg:h-auto lg:transform-none
+        ${visible ? "lg:w-64" : "lg:w-16"}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-between mb-4 px-4 py-3">
+          <div className={`flex items-center space-x-2 ${visible ? "lg:flex" : "lg:hidden"}`}>
             <h1 className="text-xl font-bold">Atlas UI</h1>
             <BuildTag />
             <div className="ml-2"><ThemeToggle /></div>
           </div>
-          {/* Collapse button (desktop only) */}
+          {/* Desktop rail expand when collapsed */}
           <button
-            className="hidden lg:block text-gray-400 hover:text-white"
+            className={`hidden lg:flex items-center justify-center text-gray-300 hover:text-white ${visible ? "" : "w-8 h-8"}`}
             onClick={() => setVisible(!visible)}
             title={visible ? "Collapse sidebar" : "Expand sidebar"}
           >
-            {visible ? "«" : "»"}
+            {visible ? "«" : "☰"}
           </button>
           {/* Close (mobile) */}
           <button
-            className="lg:hidden text-gray-400 hover:text-white"
+            className="lg:hidden text-gray-300 hover:text-white"
             onClick={() => setVisible(false)}
           >
             ✕
           </button>
         </div>
 
-        {/* Tabs */}
-        <div className="space-y-2">
+        {/* Tabs (hidden on desktop when collapsed) */}
+        <div className={`space-y-2 px-2 ${visible ? "lg:block" : "lg:hidden"}`}>
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -69,8 +70,8 @@ function Sidebar({ activeTab, setActiveTab, visible, setVisible }) {
           ))}
         </div>
 
-        {/* Stats */}
-        <div className="mt-auto text-sm pt-6 border-t border-gray-700">
+        {/* Stats (hidden on desktop when collapsed) */}
+        <div className={`mt-auto text-sm pt-6 border-t border-gray-700 px-4 ${visible ? "lg:block" : "lg:hidden"}`}>
           <h2 className="font-semibold mb-1">Network Stats:</h2>
           <p>Total Hosts: {stats.total}</p>
           <p>
@@ -107,14 +108,25 @@ export default function App() {
       />
 
       <div className="flex-1 p-4 overflow-hidden">
-        {/* Mobile toggle button */}
+        {/* Top bar */}
         <div className="flex items-center justify-between mb-4">
+          {/* Mobile open button */}
           <button
             className="lg:hidden bg-gray-800 text-white px-3 py-1 rounded shadow"
             onClick={() => setSidebarVisible(true)}
           >
             ☰ Menu
           </button>
+          {/* Desktop open button when collapsed */}
+          {!sidebarVisible && (
+            <button
+              className="hidden lg:inline-flex bg-gray-200 text-gray-800 px-2 py-1 rounded shadow"
+              onClick={() => setSidebarVisible(true)}
+              title="Open menu"
+            >
+              ☰ Menu
+            </button>
+          )}
         </div>
 
         {activeTab === "Network Map" && (
