@@ -44,7 +44,7 @@ function TabIcon({ tab, className = "w-6 h-6" }) {
   }
 }
 
-function Sidebar({ activeTab, setActiveTab, visible, setVisible }) {
+function Sidebar({ activeTab, setActiveTab, visible, setVisible, onShowDuplicates }) {
   const stats = useNetworkStats();
   const sidebarRef = useRef(null);
 
@@ -139,7 +139,16 @@ function Sidebar({ activeTab, setActiveTab, visible, setVisible }) {
           </p>
           <p>Normal Hosts: {stats.normal}</p>
           <p>Unique Subnets: {stats.subnets}</p>
-          <p>Duplicate IPs: {stats.duplicateIps}</p>
+          <p>
+            Duplicate IPs: {" "}
+            <button
+              className="underline text-blue-300 hover:text-blue-200"
+              title="Show duplicate IPs in Hosts table"
+              onClick={() => onShowDuplicates?.()}
+            >
+              {stats.duplicateIps}
+            </button>
+          </p>
           {stats.updatedAt && (
             <p className="mt-2 text-gray-400 italic">Updated: {stats.updatedAt}</p>
           )}
@@ -154,6 +163,7 @@ export default function App() {
   const [selectedNode, setSelectedNode] = useState(null);
   // Default: collapsed on desktop, hidden on mobile
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [hostsShowDuplicates, setHostsShowDuplicates] = useState(false);
 
   return (
     <div className="flex h-screen bg-gray-100 relative">
@@ -162,6 +172,10 @@ export default function App() {
         setActiveTab={setActiveTab}
         visible={sidebarVisible}
         setVisible={setSidebarVisible}
+        onShowDuplicates={() => {
+          setActiveTab("Hosts Table");
+          setHostsShowDuplicates(true);
+        }}
       />
 
   <div className="flex-1 p-6 overflow-hidden flex flex-col">
@@ -183,7 +197,12 @@ export default function App() {
             <NetworkMap onNodeSelect={setSelectedNode} selectedNode={selectedNode} />
           )}
           {activeTab === "Hosts Table" && (
-            <HostsTable selectedNode={selectedNode} onSelectNode={setSelectedNode} />
+            <HostsTable
+              selectedNode={selectedNode}
+              onSelectNode={setSelectedNode}
+              showDuplicates={hostsShowDuplicates}
+              onClearPreset={() => setHostsShowDuplicates(false)}
+            />
           )}
           {activeTab === "Scripts" && <ScriptsPanel />}
           {activeTab === "Logs" && <LogsPanel />}

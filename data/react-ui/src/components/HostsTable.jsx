@@ -187,7 +187,7 @@ function SortToolbar({ sortKey, setSortKey, sortDir, setSortDir, columns, colTit
   );
 }
 
-function HostsTable() {
+function HostsTable({ showDuplicates = false, onClearPreset }) {
   const [raw, setRaw] = useState({ hosts: [], docker: [] });
   const [q, setQ] = useState("");
   const [sortKey, setSortKey] = useState("group");
@@ -288,6 +288,30 @@ function HostsTable() {
     });
     return sortRows(filtered, sortKey, sortDir);
   }, [allRows, q, sortKey, sortDir, filters]);
+
+  // Derive duplicate IP set across active rows (online hosts + running containers), ignoring blank/invalid IPs
+  const duplicateIpSet = useMemo(() => {
+    const ipCounts = new Map();
+    allRows.forEach((r) => {
+      const ip = (r.ip || "").trim();
+      if (!/^\d+\.\d+\.\d+\.\d+$/.test(ip)) return;
+      const status = (r.online_status || "").toLowerCase();
+      const isDocker = r.group === "docker";
+      const isOnline = status === "online" || status === "running";
+      if (!isOnline) return; // exclude offline/stopped
+      ipCounts.set(ip, (ipCounts.get(ip) || 0) + 1);
+    });
+    const dups = new Set();
+    ipCounts.forEach((count, ip) => {
+      if (count > 1) dups.add(ip);
+    });
+    return dups;
+  }, [allRows]);
+
+  const displayRows = useMemo(() => {
+    if (!showDuplicates) return rows;
+    return rows.filter((r) => duplicateIpSet.has(r.ip));
+  }, [rows, showDuplicates, duplicateIpSet]);
 
   function exportCSV() {
     const header = columns;
@@ -390,6 +414,20 @@ function HostsTable() {
         colTitles={colTitles}
       />
 
+      {showDuplicates && (
+        <div className="mb-2 ml-2 text-sm">
+          <span className="inline-flex items-center gap-2 px-2 py-1 rounded bg-yellow-100 text-yellow-900 border border-yellow-300">
+            Showing duplicate IPs
+            <button
+              className="underline text-blue-700"
+              onClick={() => onClearPreset?.()}
+            >
+              Clear
+            </button>
+          </span>
+        </div>
+      )}
+
       {/* Table container: independent scrollbars; enable horizontal scroll for advanced columns, fill available height */}
       <div className="relative flex-1 min-h-0 overflow-x-auto overflow-y-auto rounded border border-gray-200">
         <div className="min-w-0">
@@ -450,10 +488,10 @@ function HostsTable() {
 
           {/* Rows as grid lines */}
           <div role="rowgroup">
-            {rows.length === 0 ? (
+            {displayRows.length === 0 ? (
               <div className="p-6 text-center text-gray-500">No data.</div>
             ) : (
-              rows.map((r) => {
+              displayRows.map((r) => {
                 const key = r.group === "docker" && r.container_id
                   ? `${r.group}-${r.container_id}-${r.network}`
                   : `${r.group}-${r.ip}-${r.name}`;

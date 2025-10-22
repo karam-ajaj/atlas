@@ -70,9 +70,11 @@ export function useNetworkStats(pollIntervalMs = 5000) {
         const normalRows = Array.isArray(json?.[0]) ? json[0] : [];
         const dockerRows = Array.isArray(json?.[1]) ? json[1] : [];
 
-        // Normal unique IPs (hosts table)
+        // Normal unique IPs (hosts table) - ONLY count hosts that are online
         const normalIpsList = normalRows
           .map((r) => {
+            const status = findOnlineStatusInRow(r);
+            if (status !== "online") return "";
             const cand = r[1];
             if (looksLikeIp(String(cand || ""))) return String(cand || "");
             return findIpInRow(r);
@@ -119,7 +121,8 @@ export function useNetworkStats(pollIntervalMs = 5000) {
           if (statuses.some((s) => s === "online")) running += 1;
           else if (statuses.some((s) => s === "offline")) stopped += 1;
           else stopped += 1; // treat unknown as stopped (change if desired)
-          if (ip) dockerCanonicalIps.push(ip);
+          // Only count running containers' IPs for duplicates
+          if (ip && statuses.some((s) => s === "online")) dockerCanonicalIps.push(ip);
         });
 
         // All IPs used for duplicate counting: normalUniqueIps + dockerCanonicalIps
@@ -130,7 +133,7 @@ export function useNetworkStats(pollIntervalMs = 5000) {
 
         const uniqueIps = new Set(allIpsForDup);
         const uniqueSubnets = new Set(Array.from(uniqueIps).map(getSubnet).filter(Boolean));
-        const duplicateIps = Math.max(0, allIpsForDup.length - uniqueIps.size);
+  const duplicateIps = Math.max(0, allIpsForDup.length - uniqueIps.size);
 
         const normalCount = normalUniqueIps.size;
         const dockerCount = uniqueDockerContainers.length;
