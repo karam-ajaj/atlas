@@ -5,6 +5,7 @@ import { ScriptsPanel } from "./components/ScriptsPanel";
 import { LogsPanel } from "./components/LogsPanel";
 import { useNetworkStats } from "./hooks/useNetworkStats";
 import BuildTag from "./components/BuildTag";
+import MobileHeader from "./components/MobileHeader";
 // Theme toggle removed per request
 
 const tabs = ["Network Map", "Hosts Table", "Scripts", "Logs"];
@@ -86,7 +87,7 @@ function Sidebar({ activeTab, setActiveTab, visible, setVisible, onShowDuplicate
         {/* Header */}
         <div className="flex items-center justify-between mb-4 px-4 py-3">
           <div className={`flex items-center space-x-2 ${visible ? "lg:flex" : "lg:hidden"}`}>
-            <h1 className="text-xl font-bold">Atlas UI</h1>
+            <h1 className="text-xl font-bold">Atlas</h1>
             <BuildTag />
           </div>
           {/* Close (mobile) */}
@@ -166,46 +167,51 @@ export default function App() {
   const [hostsShowDuplicates, setHostsShowDuplicates] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gray-100 relative">
-      <Sidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        visible={sidebarVisible}
-        setVisible={setSidebarVisible}
-        onShowDuplicates={() => {
-          setActiveTab("Hosts Table");
-          setHostsShowDuplicates(true);
-        }}
-      />
+    <div className="flex flex-col h-screen bg-gray-100 relative">
+      {/* Mobile Header - only visible on mobile */}
+      <MobileHeader />
 
-  <div className="flex-1 p-6 overflow-hidden flex flex-col">
-        {/* Top bar */}
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          visible={sidebarVisible}
+          setVisible={setSidebarVisible}
+          onShowDuplicates={() => {
+            setActiveTab("Hosts Table");
+            setHostsShowDuplicates(true);
+          }}
+        />
+
+        <div className="flex-1 p-6 overflow-hidden flex flex-col">
+          {/* Top bar */}
           <div className="flex items-center justify-between mb-4 shrink-0">
-          {/* Mobile open button */}
-          <button
-            className="lg:hidden bg-gray-800 text-white px-3 py-1 rounded shadow"
-            onClick={() => setSidebarVisible(true)}
-          >
-            ☰ Menu
-          </button>
-          {/* No desktop button; use the rail toggle inside the sidebar */}
-        </div>
+            {/* Mobile open button */}
+            <button
+              className="lg:hidden bg-gray-800 text-white px-3 py-1 rounded shadow"
+              onClick={() => setSidebarVisible(true)}
+            >
+              ☰ Menu
+            </button>
+            {/* No desktop button; use the rail toggle inside the sidebar */}
+          </div>
 
-        {/* Content area fills remaining height; individual tabs handle their own internal scroll */}
-        <div className="w-full h-full flex-1 min-h-0">
-          {activeTab === "Network Map" && (
-            <NetworkMap onNodeSelect={setSelectedNode} selectedNode={selectedNode} />
-          )}
-          {activeTab === "Hosts Table" && (
-            <HostsTable
-              selectedNode={selectedNode}
-              onSelectNode={setSelectedNode}
-              showDuplicates={hostsShowDuplicates}
-              onClearPreset={() => setHostsShowDuplicates(false)}
-            />
-          )}
-          {activeTab === "Scripts" && <ScriptsPanel />}
-          {activeTab === "Logs" && <LogsPanel />}
+          {/* Content area fills remaining height; individual tabs handle their own internal scroll */}
+          <div className="w-full h-full flex-1 min-h-0">
+            {activeTab === "Network Map" && (
+              <NetworkMap onNodeSelect={setSelectedNode} selectedNode={selectedNode} />
+            )}
+            {activeTab === "Hosts Table" && (
+              <HostsTable
+                selectedNode={selectedNode}
+                onSelectNode={setSelectedNode}
+                showDuplicates={hostsShowDuplicates}
+                onClearPreset={() => setHostsShowDuplicates(false)}
+              />
+            )}
+            {activeTab === "Scripts" && <ScriptsPanel />}
+            {activeTab === "Logs" && <LogsPanel />}
+          </div>
         </div>
       </div>
     </div>
