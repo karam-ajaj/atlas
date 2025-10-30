@@ -23,7 +23,7 @@ export default function MobileHeader() {
             viewBox="0 0 24 24"
             className="w-6 h-6 fill-current"
             role="img"
-            aria-label="User icon"
+            aria-hidden="true"
           >
             <circle cx="12" cy="8" r="4" fill="currentColor" />
             <path
