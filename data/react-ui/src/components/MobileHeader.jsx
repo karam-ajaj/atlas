@@ -6,7 +6,8 @@ export default function MobileHeader() {
     <div className="lg:hidden bg-gray-900 text-white px-4 py-3 flex items-center justify-between shadow-md">
       {/* Left side: Logo and name */}
       <div className="flex items-center space-x-2">
-        <span className="text-2xl">🌐</span>
+        {/* Temporary emoji placeholder - replace with SVG logo when available */}
+        <span className="text-2xl" role="img" aria-label="Atlas logo">🌐</span>
         <h1 className="text-xl font-bold">Atlas</h1>
         <BuildTag />
       </div>
@@ -16,10 +17,12 @@ export default function MobileHeader() {
         <button
           className="text-gray-300 hover:text-white p-2 rounded-full hover:bg-gray-800 transition-colors"
           title="User Login (Coming Soon)"
+          aria-label="User Login"
         >
           <svg
             viewBox="0 0 24 24"
             className="w-6 h-6 fill-current"
+            role="img"
             aria-label="User icon"
           >
             <circle cx="12" cy="8" r="4" fill="currentColor" />
