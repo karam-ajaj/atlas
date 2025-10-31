@@ -6,6 +6,7 @@ import { LogsPanel } from "./components/LogsPanel";
 import { useNetworkStats } from "./hooks/useNetworkStats";
 import BuildTag from "./components/BuildTag";
 import MobileHeader from "./components/MobileHeader";
+import LoginModal from "./components/LoginModal";
 // Theme toggle removed per request
 
 const tabs = ["Network Map", "Hosts Table", "Scripts", "Logs"];
@@ -164,12 +165,16 @@ export default function App() {
   const [selectedNode, setSelectedNode] = useState(null);
   // Default: collapsed on desktop, hidden on mobile
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [loginVisible, setLoginVisible] = useState(false);
   const [hostsShowDuplicates, setHostsShowDuplicates] = useState(false);
+
+  const openLogin = () => setLoginVisible(true);
+  const closeLogin = () => setLoginVisible(false);
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 relative">
-      {/* Mobile Header - only visible on mobile */}
-      <MobileHeader />
+      {/* Mobile Header - only visible on mobile; pass menu opener */}
+  <MobileHeader onOpenMenu={() => setSidebarVisible(true)} onOpenLogin={openLogin} />
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
@@ -186,14 +191,23 @@ export default function App() {
         <div className="flex-1 p-6 overflow-hidden flex flex-col">
           {/* Top bar */}
           <div className="flex items-center justify-between mb-4 shrink-0">
-            {/* Mobile open button */}
-            <button
-              className="lg:hidden bg-gray-800 text-white px-3 py-1 rounded shadow"
-              onClick={() => setSidebarVisible(true)}
-            >
-              ☰ Menu
-            </button>
-            {/* No desktop button; use the rail toggle inside the sidebar */}
+            {/* Left placeholder (kept intentionally empty) */}
+            <div />
+
+            {/* Right: desktop-only login button (placeholder for real auth) */}
+            <div className="flex items-center">
+              <button
+                className="hidden lg:inline-flex bg-transparent text-gray-700 hover:text-gray-900 p-2 rounded-md"
+                title="Login"
+                aria-label="Login"
+                onClick={openLogin}
+              >
+                <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current" role="img" aria-hidden="true">
+                  <circle cx="12" cy="8" r="4" fill="currentColor" />
+                  <path d="M4 20c0-4 3.6-7.3 8-7.3s8 3.3 8 7.3" stroke="currentColor" strokeWidth="2" fill="none" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Content area fills remaining height; individual tabs handle their own internal scroll */}
@@ -214,6 +228,7 @@ export default function App() {
           </div>
         </div>
       </div>
+      <LoginModal open={loginVisible} onClose={closeLogin} />
     </div>
   );
 }
