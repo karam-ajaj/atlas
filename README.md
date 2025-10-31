@@ -32,54 +32,72 @@ Atlas performs three key functions:
 ---
 
 ## 🖼️ Screenshots
-### Dashboard
 
-<div style="display:flex; gap:18px; flex-wrap:wrap; align-items:center">
-  <a href="screenshots/dashboard_big_c.png" target="_blank">
-    <img src="screenshots/dashboard_big_c.png" alt="Dashboard (big, collapsed)" width="360"/>
-  </a>
-  <a href="screenshots/dashboard_big_h.png" target="_blank">
-    <img src="screenshots/dashboard_big_h.png" alt="Dashboard (big, horizontal)" width="360"/>
-  </a>
-  <a href="screenshots/dashboard_small_c.png" target="_blank">
-    <img src="screenshots/dashboard_small_c.png" alt="Dashboard (small, collapsed)" width="180"/>
-  </a>
-  <a href="screenshots/dashboard_small_h.png" target="_blank">
-    <img src="screenshots/dashboard_small_h.png" alt="Dashboard (small, horizontal)" width="180"/>
-  </a>
-</div>
+### 🖥️ Desktop View
 
-### Hosts / Table
+<table>
+<tr>
+<td width="50%">
+<a href="screenshots/dashboard_big_c.png" target="_blank">
+<img src="screenshots/dashboard_big_c.png" alt="Dashboard - Collapsed Layout" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+<p align="center"><em>Dashboard - Circular Layout</em></p>
+</a>
+</td>
+<td width="50%">
+<a href="screenshots/dashboard_big_h.png" target="_blank">
+<img src="screenshots/dashboard_big_h.png" alt="Dashboard - Horizontal Layout" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+<p align="center"><em>Dashboard - Hierarchical Layout</em></p>
+</a>
+</td>
+</tr>
+<tr>
+<td width="50%">
+<a href="screenshots/table_big.png" target="_blank">
+<img src="screenshots/table_big.png" alt="Hosts Table View" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+<p align="center"><em>Hosts Table View</em></p>
+</a>
+</td>
+<td width="50%">
+<a href="screenshots/logs_big.png" target="_blank">
+<img src="screenshots/logs_big.png" alt="Logs Panel" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+<p align="center"><em>Logs Panel</em></p>
+</a>
+</td>
+</tr>
+</table>
 
-<div style="display:flex; gap:18px; flex-wrap:wrap; align-items:center">
-  <a href="screenshots/table_big.png" target="_blank">
-    <img src="screenshots/table_big.png" alt="Hosts Table (big)" width="420"/>
-  </a>
-  <a href="screenshots/table_small.png" target="_blank">
-    <img src="screenshots/table_small.png" alt="Hosts Table (small)" width="200"/>
-  </a>
-</div>
+### 📱 Mobile View
 
-### Logs & Scripts
+<table>
+<tr>
+<td width="25%" align="center">
+<a href="screenshots/dashboard_small_c.png" target="_blank">
+<img src="screenshots/dashboard_small_c.png" alt="Mobile Dashboard - Collapsed" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 250px;" />
+<p align="center"><em>Dashboard - Collapsed</em></p>
+</a>
+</td>
+<td width="25%" align="center">
+<a href="screenshots/dashboard_small_h.png" target="_blank">
+<img src="screenshots/dashboard_small_h.png" alt="Mobile Dashboard - Horizontal" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 250px;" />
+<p align="center"><em>Dashboard - Horizontal</em></p>
+</a>
+</td>
+<td width="25%" align="center">
+<a href="screenshots/table_small.png" target="_blank">
+<img src="screenshots/table_small.png" alt="Mobile Hosts Table" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 250px;" />
+<p align="center"><em>Hosts Table</em></p>
+</a>
+</td>
+<td width="25%" align="center">
+<a href="screenshots/logs_small.png" target="_blank">
+<img src="screenshots/logs_small.png" alt="Mobile Logs Panel" style="border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 250px;" />
+<p align="center"><em>Logs Panel</em></p>
+</a>
+</td>
+</tr>
+</table>
 
-<div style="display:flex; gap:18px; flex-wrap:wrap; align-items:center">
-  <a href="screenshots/logs_big.png" target="_blank">
-    <img src="screenshots/logs_big.png" alt="Logs (big)" width="360"/>
-  </a>
-  <a href="screenshots/logs_small.png" target="_blank">
-    <img src="screenshots/logs_small.png" alt="Logs (small)" width="180"/>
-  </a>
-  <a href="screenshots/scripts_big.png" target="_blank">
-    <img src="screenshots/scripts_big.png" alt="Scripts (big)" width="360"/>
-  </a>
-  <a href="screenshots/scripts_small.png" target="_blank">
-    <img src="screenshots/scripts_small.png" alt="Scripts (small)" width="180"/>
-  </a>
-</div>
-
-You can also open a small gallery with lightbox viewing of all screenshots:
-
-[Open full gallery → screenshots/gallery.html](screenshots/gallery.html)
+> 💡 **Tip:** Click on any screenshot to view the full-size image
 
 ---
 
