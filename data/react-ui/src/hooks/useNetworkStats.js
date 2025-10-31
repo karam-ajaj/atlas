@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { apiGet } from "../api";
 
 /*
-  Improved stats:
+  Improved stats with network-aware duplicate detection:
   - Count docker containers as unique by container_id (fallback name/id)
-  - For duplicate IPs, use one canonical IP per docker container (first found) + unique normal host IPs
+  - Duplicate IPs are checked PER NETWORK: same IP on different networks is NOT a duplicate
+  - Only online hosts and running containers are counted in duplicate statistics
+  - Offline containers are excluded from duplicate counts (per issue feedback)
   - Provide dockerRunning/dockerStopped/total counts
 */
 
