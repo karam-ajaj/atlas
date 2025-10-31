@@ -125,15 +125,55 @@ export function useNetworkStats(pollIntervalMs = 5000) {
           if (ip && statuses.some((s) => s === "online")) dockerCanonicalIps.push(ip);
         });
 
-        // All IPs used for duplicate counting: normalUniqueIps + dockerCanonicalIps
-        const allIpsForDup = [
+        // Network-aware duplicate counting: same IP on different networks is NOT a duplicate
+        // Build a map of network+ip -> count
+        const networkIpCounts = new Map();
+        
+        // Count normal hosts by network+ip
+        normalRows.forEach((r) => {
+          const status = findOnlineStatusInRow(r);
+          if (status !== "online") return; // only count online hosts
+          const ip = looksLikeIp(String(r[1] || "")) ? String(r[1]) : findIpInRow(r);
+          if (!ip) return;
+          const network = String(r[7] || "default"); // network_name is at index 7
+          const key = `${network}:${ip}`;
+          networkIpCounts.set(key, (networkIpCounts.get(key) || 0) + 1);
+        });
+        
+        // Count running containers by network+ip
+        uniqueDockerContainers.forEach((k) => {
+          const { ip, statuses } = containerMap.get(k) || { ip: null, statuses: [] };
+          if (!ip || !statuses.some((s) => s === "online")) return;
+          // Get network from containerMap - we need to track which network this container is on
+          const containerEntry = Array.from(containerMap.entries()).find(([ck]) => ck === k);
+          if (!containerEntry) return;
+          // Find the network for this container from dockerRows
+          const containerRow = dockerRows.find((r) => {
+            const maybeContainerId = String(r[1] ?? "");
+            let containerKey = "";
+            if (maybeContainerId && !looksLikeIp(maybeContainerId)) containerKey = maybeContainerId;
+            else if (r[3]) containerKey = String(r[3]);
+            else containerKey = String(r[0] ?? "");
+            return containerKey === k;
+          });
+          if (!containerRow) return;
+          const network = String(containerRow[8] || "docker"); // network_name at index 8 in docker_hosts
+          const key = `${network}:${ip}`;
+          networkIpCounts.set(key, (networkIpCounts.get(key) || 0) + 1);
+        });
+        
+        // Count duplicates: how many network+ip combinations have count > 1
+        let duplicateIps = 0;
+        networkIpCounts.forEach((count) => {
+          if (count > 1) duplicateIps += (count - 1);
+        });
+
+        const allIpsForUnique = [
           ...Array.from(normalUniqueIps),
           ...dockerCanonicalIps,
         ].filter(Boolean);
-
-        const uniqueIps = new Set(allIpsForDup);
+        const uniqueIps = new Set(allIpsForUnique);
         const uniqueSubnets = new Set(Array.from(uniqueIps).map(getSubnet).filter(Boolean));
-  const duplicateIps = Math.max(0, allIpsForDup.length - uniqueIps.size);
 
         const normalCount = normalUniqueIps.size;
         const dockerCount = uniqueDockerContainers.length;
