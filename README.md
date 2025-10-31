@@ -78,7 +78,11 @@ docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e ATLAS_UI_PORT=8884 \
   -e ATLAS_API_PORT=8885 \
-  keinstien/atlas:latest
+  -e FASTSCAN_INTERVAL=3600 \
+  -e DOCKERSCAN_INTERVAL=3600 \
+  -e DEEPSCAN_INTERVAL=7200 \
+  -e SCAN_SUBNETS="192.168.1.0/24,10.0.0.0/24" \
+  keinstien/atlas:3.2.29
 ```
 
 **Environment Variables:**
