@@ -77,6 +77,10 @@ Atlas performs three key functions:
   </a>
 </div>
 
+You can also open a small gallery with lightbox viewing of all screenshots:
+
+[Open full gallery → screenshots/gallery.html](screenshots/gallery.html)
+
 ---
 
 ## 🚀 Deployment (Docker)
