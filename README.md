@@ -34,32 +34,23 @@ Atlas performs three key functions:
 ## 🖼️ Screenshots
 
 ### Dashboard View
-
 <div style="display: flex; gap: 24px; flex-wrap: wrap;">
-  <a href="screenshots/network-map-1.png" target="_blank">
-    <img src="screenshots/network-map-1.png" alt="Atlas Dashboard 1" width="300"/>
+  <a href="screenshots/dashboard-desktop.svg" target="_blank">
+    <img src="screenshots/dashboard-desktop.svg" alt="Dashboard Desktop" width="300"/>
   </a>
-  <a href="screenshots/network-map-2.png" target="_blank">
-    <img src="screenshots/network-map-2.png" alt="Atlas Dashboard 2" width="300"/>
+  <a href="screenshots/dashboard-mobile.svg" target="_blank">
+    <img src="screenshots/dashboard-mobile.svg" alt="Dashboard Mobile" width="180"/>
   </a>
 </div>
 
 ### Hosts Table
 
 <div style="display: flex; gap: 24px; flex-wrap: wrap;">
-  <a href="screenshots/hosts-table-1.png" target="_blank">
-    <img src="screenshots/hosts-table-1.png" alt="Hosts Table 1" width="300"/>
+  <a href="screenshots/hosts-desktop.svg" target="_blank">
+    <img src="screenshots/hosts-desktop.svg" alt="Hosts Desktop" width="300"/>
   </a>
-  <a href="screenshots/hosts-table-2.png" target="_blank">
-    <img src="screenshots/hosts-table-2.png" alt="Hosts Table 2" width="300"/>
-  </a>
-</div>
-
-### Vis Dashboard (dev)
-
-<div style="display: flex; gap: 24px; flex-wrap: wrap;">
-  <a href="screenshots/vis.png" target="_blank">
-    <img src="screenshots/vis.png" alt="Network Graph" width="300"/>
+  <a href="screenshots/hosts-mobile.svg" target="_blank">
+    <img src="screenshots/hosts-mobile.svg" alt="Hosts Mobile" width="180"/>
   </a>
 </div>
 
