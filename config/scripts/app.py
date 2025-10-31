@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, FileResponse, StreamingResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import sqlite3
 import subprocess
 import logging
 import os
+from scripts.scheduler import get_scheduler
 
 app = FastAPI(
     title="Atlas Network API",
@@ -22,6 +24,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Pydantic models for request/response
+class IntervalUpdate(BaseModel):
+    interval: int
+
+# Initialize scheduler on startup
+scheduler = get_scheduler()
+
+@app.on_event("startup")
+async def startup_event():
+    """Start the scheduler when the API starts."""
+    logging.info("Starting scan scheduler...")
+    scheduler.start()
 
 LOGS_DIR = "/config/logs"
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -170,8 +185,12 @@ def last_scan_status():
 def list_logs():
     files = []
     for name in os.listdir(LOGS_DIR):
-        if name.endswith(".log"):
-            files.append(name)
+        if not name.endswith(".log"):
+            continue
+        # Hide verbose per-host nmap logs from the UI list
+        if name.startswith("nmap_tcp_") or name.startswith("nmap_udp_"):
+            continue
+        files.append(name)
     try:
         containers = subprocess.check_output(["docker", "ps", "--format", "{{.Names}}"], text=True).splitlines()
         files += [f"container:{c}" for c in containers]
@@ -255,3 +274,27 @@ def stream_log(filename: str):
             yield f"data: [ERROR] {str(e)}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+@app.get("/scheduler/intervals", tags=["Scheduler"])
+def get_scheduler_intervals():
+    """Get current scan intervals for all scan types."""
+    return scheduler.get_intervals()
+
+@app.put("/scheduler/intervals/{scan_type}", tags=["Scheduler"])
+def update_scheduler_interval(scan_type: str, data: IntervalUpdate):
+    """Update the interval for a specific scan type."""
+    try:
+        scheduler.update_interval(scan_type, data.interval)
+        return {"status": "success", "scan_type": scan_type, "interval": data.interval}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/scheduler/status", tags=["Scheduler"])
+def get_scheduler_status():
+    """Get scheduler status."""
+    return {
+        "running": scheduler.is_running(),
+        "intervals": scheduler.get_intervals()
+    }

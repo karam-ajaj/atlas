@@ -30,25 +30,32 @@ function fmtLastSeen(v) {
   return `${days}d`;
 }
 function normalizeRow(r, group) {
-  // Schema for docker_hosts: [id, container_id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status]
-  // Schema for hosts: [id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, last_seen, online_status]
-  // We normalize both to use the same format, adjusting for docker_hosts having an extra container_id field
-  
   if (group === "docker") {
+    // Docker rows in the API may place the IP at r[2] (new) or r[1] (legacy),
+    // and sometimes embed it elsewhere in the row. Normalize robustly.
+    const looksLikeIp = (v) => /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.test(String(v || ""));
+    const findIpInRow = (row = []) => {
+      for (const cell of row) {
+        if (looksLikeIp(cell)) return String(cell);
+      }
+      return "";
+    };
+    const dockerIp = looksLikeIp(r[2]) ? String(r[2]) : (looksLikeIp(r[1]) ? String(r[1]) : findIpInRow(r));
     return {
       id: r[0],
       container_id: r[1] || "",
-      ip: r[2] || "",
+      ip: dockerIp || "",
       name: r[3] || "NoName",
       os: r[4] || "Unknown",
       mac: r[5] || "Unknown",
       ports: r[6] || "no_ports",
       nextHop: r[7] || "Unknown",
       network: r[8] || "docker",
+      interface_name: "N/A",
       lastSeen: r[9] || "Invalid",
       online_status: r[10] || "unknown",
       group,
-      subnet: subnetOf(r[2] || ""),
+      subnet: subnetOf(dockerIp || ""),
     };
   } else {
     return {
@@ -60,8 +67,9 @@ function normalizeRow(r, group) {
       ports: r[5] || "no_ports",
       nextHop: r[6] || "Unknown",
       network: r[7] || "",
-      lastSeen: r[8] || "Invalid",
-      online_status: r[9] || "unknown",
+      interface_name: r[8] || "N/A",
+      lastSeen: r[9] || "Invalid",
+      online_status: r[10] || "unknown",
       group,
       subnet: subnetOf(r[1] || ""),
     };
@@ -84,86 +92,120 @@ function sortRows(rows, key, dir) {
   });
 }
 
-// Categorical columns for dropdowns
 const dropdownCols = [
   "group",
   "network",
   "online_status",
-  "subnet"
+  "subnet",
+  "interface_name"
 ];
 
-function FilterDropdown({ values, value, onChange, placeholder = "All", width = "w-32" }) {
+const colTitles = {
+  name: "Name",
+  ip: "IP",
+  os: "OS",
+  mac: "MAC",
+  group: "Group",
+  ports: "Ports",
+  nextHop: "Next hop",
+  subnet: "Subnet",
+  network: "Network",
+  interface_name: "Interface",
+  lastSeen: "Last seen",
+  online_status: "Online Status"
+};
+
+function InlineSearchDropdown({ values, value, onChange, placeholder = "All", onClose, colTitle }) {
   const [search, setSearch] = useState("");
-  const [open, setOpen] = useState(false);
   const ref = useRef();
 
+  const filtered = useMemo(() => {
+    if (!search) return values;
+    const lower = search.toLowerCase();
+    return values.filter(v => v.toLowerCase().includes(lower));
+  }, [values, search]);
+
   useEffect(() => {
-    function handleClick(e) {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    function handle(e) {
+      if (ref.current && !ref.current.contains(e.target)) onClose();
     }
-    if (open) document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [open]);
-
-  const filtered = values.filter(v => v.toLowerCase().includes(search.toLowerCase()));
-
-  function handleSelect(v) {
-    onChange(v);
-    setOpen(false);
-    setSearch("");
-  }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [onClose]);
 
   return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        className={`w-full px-1 py-1 border rounded text-xs bg-white text-left ${width}`}
-        onClick={() => setOpen(o => !o)}
-        tabIndex={0}
-      >
-        {value || placeholder}
-        <span className="ml-1">&#9662;</span>
-      </button>
-      {open && (
-        <div className={`absolute left-0 top-full z-30 mt-1 bg-white border rounded shadow-md ${width} max-h-48 overflow-auto`}>
-          <input
-            className="w-full px-2 py-1 border-b text-xs"
-            placeholder="Search..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            autoFocus
-          />
-          <div>
-            <div
-              className={`cursor-pointer px-2 py-1 text-xs ${!value ? "bg-blue-50" : ""}`}
-              onClick={() => handleSelect("")}
-            >
-              All
-            </div>
-            {filtered.map(v => (
-              <div
-                key={v}
-                className={`cursor-pointer px-2 py-1 text-xs ${v === value ? "bg-blue-100" : ""}`}
-                onClick={() => handleSelect(v)}
-              >
-                {v}
-              </div>
-            ))}
-          </div>
+    <div ref={ref} className="relative">
+      <input
+        autoFocus
+        type="text"
+        className="w-full px-1 py-1 border rounded text-xs bg-white"
+        placeholder={`Search ${colTitle}...`}
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+      />
+      <div className="absolute left-0 top-full z-30 mt-1 bg-white border rounded shadow-md w-full max-h-48 overflow-auto">
+        <div
+          className={`cursor-pointer px-2 py-1 text-xs ${!value ? "bg-blue-50" : ""}`}
+          onClick={() => { onChange(""); onClose(); }}
+        >
+          {`ALL ${colTitle}`}
         </div>
-      )}
+        {filtered.map(v => (
+          <div
+            key={v}
+            className={`cursor-pointer px-2 py-1 text-xs ${v === value ? "bg-blue-100" : ""}`}
+            onClick={() => { onChange(v); onClose(); }}
+          >
+            {v}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-function HostsTable() {
+function SortToolbar({ sortKey, setSortKey, sortDir, setSortDir, columns, colTitles }) {
+  return (
+    <div className="flex items-center gap-2 mb-2 ml-2">
+      <label className="font-semibold text-gray-700 mr-2">Sort by</label>
+      <select
+        value={sortKey}
+        onChange={e => setSortKey(e.target.value)}
+        className="px-2 py-1 rounded border border-gray-400 bg-white text-xs font-semibold"
+      >
+        {columns.map(col =>
+          <option key={col} value={col}>{colTitles[col]}</option>
+        )}
+      </select>
+      <div className="flex gap-1 items-center ml-2">
+        <button
+          onClick={() => setSortDir("asc")}
+          className={`px-2 py-1 rounded border text-xs font-semibold ${sortDir === "asc" ? "bg-blue-500 text-white" : "bg-white text-gray-700"}`}
+          title="Sort ascending"
+        >
+          <span style={{ display: "inline-block" }}>▲</span> Ascending
+        </button>
+        <button
+          onClick={() => setSortDir("desc")}
+          className={`px-2 py-1 rounded border text-xs font-semibold ${sortDir === "desc" ? "bg-blue-500 text-white" : "bg-white text-gray-700"}`}
+          title="Sort descending"
+        >
+          <span style={{ display: "inline-block" }}>▼</span> Descending
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function HostsTable({ showDuplicates = false, onClearPreset }) {
   const [raw, setRaw] = useState({ hosts: [], docker: [] });
   const [q, setQ] = useState("");
   const [sortKey, setSortKey] = useState("group");
   const [sortDir, setSortDir] = useState("asc");
-  const [mode, setMode] = useState("basic"); // basic | advanced
-  const [density, setDensity] = useState("comfortable"); // comfortable | compact
-  const [filters, setFilters] = useState({}); // column filters
+  const [mode, setMode] = useState("basic");
+  const [density, setDensity] = useState("comfortable");
+  const [filters, setFilters] = useState({});
+  const [filteringCol, setFilteringCol] = useState(null);
 
   useEffect(() => {
     let abort = false;
@@ -190,24 +232,12 @@ function HostsTable() {
     "nextHop",
     "subnet",
     "network",
+    "interface_name",
     "lastSeen",
     "online_status"
   ];
-  const colTitles = {
-    name: "Name",
-    ip: "IP",
-    os: "OS",
-    mac: "MAC",
-    group: "Group",
-    ports: "Ports",
-    nextHop: "Next hop",
-    subnet: "Subnet",
-    network: "Network",
-    lastSeen: "Last seen",
-    online_status: "Online Status"
-  };
   const basicCols = [
-    "name", "ip", "os", "group", "ports"
+    "name", "ip", "os", "group", "interface_name", "ports"
   ];
 
   const allRows = useMemo(() => [
@@ -215,7 +245,6 @@ function HostsTable() {
     ...raw.docker.map((r) => normalizeRow(r, "docker")),
   ], [raw]);
 
-  // Get unique values for dropdown columns
   const dropdownValues = useMemo(() => {
     const values = {};
     dropdownCols.forEach(col => {
@@ -229,6 +258,18 @@ function HostsTable() {
     });
     return values;
   }, [allRows]);
+
+  const columnValues = useMemo(() => {
+    const values = {};
+    columns.forEach(col => {
+      if (dropdownCols.includes(col)) {
+        values[col] = dropdownValues[col];
+      } else {
+        values[col] = Array.from(new Set(allRows.map(r => (r[col] ?? "").toString()).filter(v => v))).sort();
+      }
+    });
+    return values;
+  }, [columns, allRows, dropdownValues]);
 
   const rows = useMemo(() => {
     let filtered = allRows;
@@ -255,25 +296,51 @@ function HostsTable() {
         );
       }
     });
-    if (sortKey === "group") {
-      const primary = [...filtered].sort((a, b) => {
-        const ga = a.group === "normal" ? 0 : 1;
-        const gb = b.group === "normal" ? 0 : 1;
-        if (ga !== gb) return ga - gb;
-        return ipToNum(a.ip) - ipToNum(b.ip);
-      });
-      return sortDir === "desc" ? primary.reverse() : primary;
-    }
     return sortRows(filtered, sortKey, sortDir);
   }, [allRows, q, sortKey, sortDir, filters]);
 
-  function toggleSort(key) {
-    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else {
-      setSortKey(key);
-      setSortDir("asc");
-    }
-  }
+  // Network-aware duplicate IP detection: same IP on different networks is NOT a duplicate
+  // Only count online hosts + running containers, ignoring blank/invalid IPs
+  const duplicateNetworkIpSet = useMemo(() => {
+    const networkIpCounts = new Map();
+    allRows.forEach((r) => {
+      const ip = (r.ip || "").trim();
+      if (!/^\d+\.\d+\.\d+\.\d+$/.test(ip)) return;
+      const status = (r.online_status || "").toLowerCase();
+      const isOnline = status === "online" || status === "running";
+      if (!isOnline) return; // exclude offline/stopped
+      
+      // Use network to make duplicate detection network-aware
+      const network = r.network || "default";
+      const key = `${network}:${ip}`;
+      networkIpCounts.set(key, (networkIpCounts.get(key) || 0) + 1);
+    });
+    
+    // Build a set of network:ip combinations that are duplicates
+    const dups = new Set();
+    networkIpCounts.forEach((count, key) => {
+      if (count > 1) dups.add(key);
+    });
+    return dups;
+  }, [allRows]);
+
+  const displayRows = useMemo(() => {
+    if (!showDuplicates) return rows;
+    // When showing duplicates, filter to:
+    // 1. Rows that have duplicate network:ip combinations
+    // 2. Only show online/running rows (filter out offline/stopped)
+    return rows.filter((r) => {
+      const network = r.network || "default";
+      const key = `${network}:${r.ip}`;
+      const isDuplicate = duplicateNetworkIpSet.has(key);
+      if (!isDuplicate) return false;
+      
+      // Filter out offline/stopped containers
+      const status = (r.online_status || "").toLowerCase();
+      const isOnline = status === "online" || status === "running";
+      return isOnline;
+    });
+  }, [rows, showDuplicates, duplicateNetworkIpSet]);
 
   function exportCSV() {
     const header = columns;
@@ -294,15 +361,28 @@ function HostsTable() {
   }
 
   const thBase =
-    "px-3 text-[11px] leading-4 font-semibold uppercase tracking-wide text-gray-600 bg-gray-100 border-b-2 border-gray-200 sticky top-0 z-20 whitespace-nowrap";
+    "px-3 text-[11px] leading-4 font-semibold uppercase tracking-wide text-gray-600 bg-gray-100 border-b-2 border-gray-200 z-20 whitespace-nowrap";
   const tdBase = "px-3 border-b border-gray-200 align-middle";
   const rowH = density === "compact" ? "h-9 text-[13px]" : "h-11 text-sm";
   const thH = density === "compact" ? "h-9" : "h-10";
   const isAdvanced = mode === "advanced";
 
+  // Columns that should be a bit wider (important)
+  const importantCols = ["name", "ip", "os", "ports"];
+
+  // Which columns are currently visible (respect mode)
+  const visibleColumns = columns.filter(c => isAdvanced || basicCols.includes(c));
+
+  // Build grid-template-columns using minmax() so we don't rely on % widths
+  const gridTemplateColumns = visibleColumns
+    .map(col => importantCols.includes(col) ? "minmax(160px, 2fr)" : "minmax(90px, 1fr)")
+    .join(" ");
+
+  // A min-width for the grid container to enable horizontal scrolling when the container is narrower
+  const minGridWidth = visibleColumns.reduce((sum, col) => sum + (importantCols.includes(col) ? 160 : 90), 0);
+
   return (
-    <div className="flex flex-col h-full">
-      {/* Toolbar */}
+    <div className="flex flex-col h-full bg-white rounded border border-gray-200 p-4 shadow-sm">
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <input
           type="text"
@@ -353,72 +433,105 @@ function HostsTable() {
         </div>
       </div>
 
-      {/* Scroll container */}
-      <div className="relative flex-1 overflow-auto rounded border border-gray-200">
-        <div className="min-w-full overflow-x-auto">
-          <table className="w-full min-w-[1280px] table-fixed border-separate border-spacing-0">
-            <colgroup>
-              <col style={{ width: "32%" }} />
-              <col style={{ width: "14%" }} />
-              <col style={{ width: "9%" }} />
-              <col style={{ width: "14%" }} />
-              <col style={{ width: "8%" }} />
-              <col style={{ width: "30%" }} />
-              <col style={{ width: "14%" }} />
-              <col style={{ width: "10%" }} />
-              <col style={{ width: "10%" }} />
-              <col style={{ width: "10%" }} />
-              <col style={{ width: "10%" }} />
-            </colgroup>
+      <SortToolbar
+        sortKey={sortKey}
+        setSortKey={setSortKey}
+        sortDir={sortDir}
+        setSortDir={setSortDir}
+        columns={columns}
+        colTitles={colTitles}
+      />
 
-            <thead className="bg-gray-100">
-              <tr>
-                {columns.map(col =>
-                  (isAdvanced || basicCols.includes(col)) ? (
-                    <th
-                      key={col}
-                      className={`${thBase} ${thH} border-r border-gray-200 last:border-r-0`}
-                    >
-                      <div className="flex flex-col gap-1">
-                        <span
-                          className="cursor-pointer"
-                          onClick={() => toggleSort(col)}
-                          style={{ userSelect: "none" }}
-                        >
-                          {colTitles[col]}
-                        </span>
-                        {dropdownCols.includes(col) ? (
-                          <FilterDropdown
-                            values={dropdownValues[col]}
-                            value={filters[col] ?? ""}
-                            onChange={v => setFilters(f => ({ ...f, [col]: v }))}
-                            placeholder="All"
-                          />
-                        ) : (
-                          <input
-                            className="w-full px-1 py-1 border rounded text-xs mt-1"
-                            style={{ minWidth: 0 }}
-                            placeholder="Filter"
-                            value={filters[col] ?? ""}
-                            onChange={e => setFilters(f => ({ ...f, [col]: e.target.value }))}
-                          />
-                        )}
+      {showDuplicates && (
+        <div className="mb-2 ml-2 text-sm">
+          <span className="inline-flex items-center gap-2 px-2 py-1 rounded bg-yellow-100 text-yellow-900 border border-yellow-300">
+            Showing duplicate IPs
+            <button
+              className="underline text-blue-700"
+              onClick={() => onClearPreset?.()}
+            >
+              Clear
+            </button>
+          </span>
+        </div>
+      )}
+
+      {/* Table container: independent scrollbars; enable horizontal scroll for advanced columns, fill available height */}
+      <div className="relative flex-1 min-h-0 overflow-x-auto overflow-y-auto rounded border border-gray-200">
+        <div className="min-w-0">
+          {/* Grid header */}
+          <div
+            role="row"
+            className={`grid gap-0 items-stretch bg-gray-100 sticky top-0`}
+            style={{
+              gridTemplateColumns,
+              minWidth: `${minGridWidth}px`,
+            }}
+          >
+            {visibleColumns.map((col, idx) => {
+              const isLast = idx === visibleColumns.length - 1;
+              return (
+                <div
+                  key={col}
+                  role="columnheader"
+                  aria-label={colTitles[col]}
+                  className={`${thBase} ${thH} border-r border-gray-200 ${isLast ? "last:border-r-0" : ""} flex items-center`}
+                  style={{ position: "relative", minHeight: "32px", padding: "8px" }}
+                >
+                  <div
+                    className="w-full"
+                    onClick={() => {
+                      if (filteringCol !== col) setFilteringCol(col);
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Filter by ${colTitles[col]}`}
+                  >
+                    {filteringCol === col ? (
+                      <InlineSearchDropdown
+                        values={columnValues[col]}
+                        value={filters[col] ?? ""}
+                        onChange={v => setFilters(f => ({ ...f, [col]: v }))}
+                        placeholder={`Search ${colTitles[col]}...`}
+                        onClose={() => setFilteringCol(null)}
+                        colTitle={colTitles[col]}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-1 w-full h-full cursor-pointer hover:bg-blue-50 rounded px-1 py-1"
+                        title={`Click to filter by ${colTitles[col]}`}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
+                          className="inline mr-1 opacity-70"
+                          style={{ marginRight: "4px" }}>
+                          <circle cx="9" cy="9" r="7" stroke="#333" strokeWidth="2" />
+                          <line x1="15" y1="15" x2="19" y2="19" stroke="#333" strokeWidth="2" />
+                        </svg>
+                        <span className="font-semibold">{colTitles[col]}</span>
                       </div>
-                    </th>
-                  ) : null
-                )}
-              </tr>
-            </thead>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-            <tbody>
-              {rows.map((r) => {
-                const key = r.group === "docker" && r.container_id 
-                  ? `${r.group}-${r.container_id}-${r.network}` 
+          {/* Rows as grid lines */}
+          <div role="rowgroup">
+            {displayRows.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">No data.</div>
+            ) : (
+              displayRows.map((r) => {
+                const key = r.group === "docker" && r.container_id
+                  ? `${r.group}-${r.container_id}-${r.network}`
                   : `${r.group}-${r.ip}-${r.name}`;
                 return (
-                  <tr key={key} className="select-text">
-                    {columns.map(col => {
-                      if (!isAdvanced && !basicCols.includes(col)) return null;
+                  <div
+                    key={key}
+                    role="row"
+                    className={`grid gap-0 items-start even:bg-white odd:bg-gray-50`}
+                    style={{ gridTemplateColumns, minWidth: `${minGridWidth}px` }}
+                  >
+                    {visibleColumns.map((col, idx) => {
+                      const isLast = idx === visibleColumns.length - 1;
                       let content;
                       if (col === "os") {
                         content = (
@@ -481,14 +594,13 @@ function HostsTable() {
                             : "bg-red-500";
                         content = (
                           <div className="flex items-center gap-2 min-w-0">
-                            {/* vertical line, green if online, red if offline */}
                             <span
                               className={`inline-block h-6 w-1 rounded ${statusColor}`}
                               style={{ minWidth: "4px", marginRight: "8px" }}
                             />
                             <span className="min-w-0 block truncate" title={r.name}>
-  {r.name}
-</span>
+                              {r.name}
+                            </span>
                           </div>
                         );
                       } else if (col === "ip") {
@@ -500,27 +612,24 @@ function HostsTable() {
                       } else {
                         content = r[col] ?? "—";
                       }
+
                       return (
-                        <td
+                        <div
                           key={col}
-                          className={`${tdBase} ${rowH} border-r border-gray-200 last:border-r-0`}
+                          role="cell"
+                          className={`${tdBase} ${rowH} border-r border-gray-200 ${isLast ? "last:border-r-0" : ""}`}
+                          style={{ padding: "12px 12px" }}
+                          title={typeof content === "string" ? content : undefined}
                         >
                           {content}
-                        </td>
+                        </div>
                       );
                     })}
-                  </tr>
+                  </div>
                 );
-              })}
-              {rows.length === 0 && (
-                <tr>
-                  <td className="px-3 py-6 text-center text-gray-500" colSpan={columns.length}>
-                    No data.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              })
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ RUN go build -o atlas .
 FROM python:3.11-slim
 
 RUN apt update && apt install -y \
-    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq ca-certificates \
+    nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq ca-certificates nbtscan \
     && pip install --no-cache-dir fastapi uvicorn \
     && apt install -y docker.io \
     && apt clean && rm -rf /var/lib/apt/lists/*
@@ -32,6 +32,11 @@ RUN chmod +x /config/scripts/*.sh
 # Set default ports (can be overridden at runtime)
 ENV ATLAS_UI_PORT=8888
 ENV ATLAS_API_PORT=8889
+
+# Set default scan intervals in seconds (can be overridden at runtime)
+ENV FASTSCAN_INTERVAL=3600
+ENV DOCKERSCAN_INTERVAL=3600
+ENV DEEPSCAN_INTERVAL=7200
 
 # Entrypoint: initializes DB, runs scans, launches FastAPI and Nginx
 EXPOSE 8888 8889

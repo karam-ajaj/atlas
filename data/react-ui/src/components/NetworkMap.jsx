@@ -150,19 +150,24 @@ export function NetworkMap() {
       mac = "",
       nexthop,
       network_name,
-      last_seen = ""
+      last_seen = "",
+      interface_name = ""
     ) => {
       if (!ip || ip === "Unknown" || !ip.includes(".")) return;
 
       const subnet = getSubnet(ip);
-      const nodeId = `${group[0]}-${id}-${ip}`;
+      // Include interface in node ID to allow multiple instances of the same host on different interfaces
+      const nodeId = `${group[0]}-${id}-${ip}-${interface_name || "default"}`;
       const level = group === "docker" ? 4 : 2;
 
       if (!nodes.get(nodeId)) {
+        const hostLabel = interface_name 
+          ? `${name.split(".").slice(0, 2).join(".")}\n(${interface_name})`
+          : `${name.split(".").slice(0, 2).join(".")}`;
         nodes.add({
           id: nodeId,
-          label: `${name.split(".").slice(0, 2).join(".")}`,
-          title: `${os}\nPorts: ${ports}`,
+          label: hostLabel,
+          title: `${os}\nPorts: ${ports}\nInterface: ${interface_name || "N/A"}`,
           group,
           level,
         });
@@ -202,6 +207,7 @@ export function NetworkMap() {
         nexthop,
         network_name,
         last_seen,
+        interface_name: interface_name || "N/A",
       };
 
       // Inter-subnet links (based on nexthop)
@@ -231,10 +237,10 @@ export function NetworkMap() {
       }
     };
 
-    // Hosts
+    // Hosts - new schema: [id, ip, name, os_details, mac_address, open_ports, next_hop, network_name, interface_name, last_seen, online_status]
     rawData.nonDockerHosts.forEach(
-      ([id, ip, name, os, mac, ports, nexthop, network_name, last_seen]) =>
-        addHost(id, ip, name, os, "normal", ports, mac, nexthop, network_name, last_seen)
+      ([id, ip, name, os, mac, ports, nexthop, network_name, interface_name, last_seen, online_status]) =>
+        addHost(id, ip, name, os, "normal", ports, mac, nexthop, network_name, last_seen, interface_name)
     );
 
     // NOTE: docker_hosts schema changed (migration). New rows look like:
@@ -381,11 +387,10 @@ export function NetworkMap() {
   }, [rawData, filters, layoutStyle, externalNode]);
 
   return (
-    <div className="relative w-full h-full bg-white border rounded p-4">
-      <h2 className="text-lg font-semibold mb-2">Network Map</h2>
+    <div className="relative w-full h-full bg-white border rounded p-4 flex flex-col">
 
       {/* Layout Selector + Filters */}
-      <div className="flex flex-wrap gap-2 mb-4 items-center">
+      <div className="flex flex-wrap gap-2 mb-4 items-center shrink-0">
         <select
           value={layoutStyle}
           onChange={(e) => setLayoutStyle(e.target.value)}
@@ -425,12 +430,18 @@ export function NetworkMap() {
         <div className="text-red-500">{error}</div>
       ) : (
         <>
-          <div ref={containerRef} className="w-full h-[80vh] bg-gray-200 rounded" />
-          <SelectedNodePanel
-            node={selectedNode}
-            route={selectedRoute}
-            subnet={selectedSubnet}
-          />
+          {/* Map area flexes to fill available height */}
+          <div ref={containerRef} className="w-full flex-1 min-h-0 bg-gray-200 rounded" />
+
+          {/* Overlay the selected node panel so it doesn't change layout height */}
+          <div className="absolute top-20 left-6 z-10 max-w-sm">
+            <SelectedNodePanel
+              node={selectedNode}
+              route={selectedRoute}
+              subnet={selectedSubnet}
+            />
+          </div>
+
           <div className="absolute bottom-4 right-4 bg-white border shadow rounded p-3 text-sm z-10 w-64">
             <h3 className="font-semibold mb-2">Legend</h3>
             <ul className="space-y-1">

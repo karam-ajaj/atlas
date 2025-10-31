@@ -84,15 +84,25 @@ docker run -d \
 **Environment Variables:**
 - `ATLAS_UI_PORT` – Sets the port for the Atlas UI (Nginx). Default: 8888.
 - `ATLAS_API_PORT` – Sets the port for the FastAPI backend. Default: 8889.
+- `FASTSCAN_INTERVAL` – Interval in seconds between fast scans. Default: 3600 (1 hour).
+- `DOCKERSCAN_INTERVAL` – Interval in seconds between Docker scans. Default: 3600 (1 hour).
+- `DEEPSCAN_INTERVAL` – Interval in seconds between deep scans. Default: 7200 (2 hours).
+- `SCAN_SUBNETS` – Comma-separated list of subnets to scan (e.g., "192.168.1.0/24,10.0.0.0/24"). If not set, Atlas will auto-detect the local subnet. This allows scanning multiple networks including LAN and remote servers.
 
-If not set, defaults are used (UI: 8888, API: 8889).
+If not set, defaults are used (UI: 8888, API: 8889, scan intervals as shown above).
 
 Example endpoints:
 - UI:                              http://localhost:ATLAS_UI_PORT
 - API(from exposed API port):      http://localhost:ATLAS_API_PORT/api/docs
 - API(based on nginx conf):        http://localhost:ATLAS_UI_PORT/api/docs
 
-Auto-scanning of Docker and local subnets runs on container start.
+**Scan Scheduling:**
+Atlas automatically runs scans at the configured intervals. You can:
+- Set initial intervals via environment variables (see above)
+- Change intervals dynamically through the Scripts Panel in the UI
+- Manually trigger scans via the UI or API at any time
+
+The scheduler starts automatically when the container starts and runs scans in the background.
 
 ---
 
@@ -221,19 +231,45 @@ To deploy a new version and upload it to Docker Hub, use the provided CI/CD scri
 
 > Default exposed port is: `8888`
 
+### 📡 Scheduler API Endpoints
+
+New scheduler management endpoints:
+
+- `GET /api/scheduler/intervals` - Get current scan intervals for all scan types
+- `PUT /api/scheduler/intervals/{scan_type}` - Update interval for a specific scan type (fastscan, dockerscan, or deepscan)
+- `GET /api/scheduler/status` - Get scheduler status and current intervals
+
+Example:
+```bash
+# Get current intervals
+curl http://localhost:8888/api/scheduler/intervals
+
+# Update fastscan interval to 30 minutes (1800 seconds)
+curl -X PUT http://localhost:8888/api/scheduler/intervals/fastscan \
+  -H "Content-Type: application/json" \
+  -d '{"interval": 1800}'
+
+# Check scheduler status
+curl http://localhost:8888/api/scheduler/status
+```
+
 ---
 
 ## ✅ Features
 
+- [x] **Multi-interface scanning** - Automatically detects and scans all physical network interfaces on the host
 - [x] Fast network scans (ping/ARP)
+- [x] **Multiple subnet scanning** - Scan your LAN, remote servers, and multiple networks simultaneously via SCAN_SUBNETS environment variable
 - [x] Docker container inspection with **multi-network support**
 - [x] **Multiple IPs and MACs per container** - Containers on multiple networks show all interfaces
+- [x] **Interface-aware host tracking** - Same host on multiple interfaces appears separately with interface labels
 - [x] External IP discovery
 - [x] Deep port scans with OS enrichment
 - [x] React-based dynamic frontend
 - [x] NGINX + FastAPI routing
 - [x] SQLite persistence
-- [x] Scheduled auto scans using Go timers
+- [x] **Scheduled auto scans with configurable intervals** - Configure via environment variables or UI
+- [x] **Dynamic interval management** - Change scan intervals without restarting the container
 
 ---
 
@@ -277,6 +313,11 @@ Infrastructure & Automation Engineer
 MIT License — free for personal or commercial use.
 
 ---
+
+## 📚 Documentation
+
+- [Multi-Interface Support](MULTI_INTERFACE_SUPPORT.md) - Detailed guide on the multi-interface scanning feature
+- [Migration Guide](MIGRATION_GUIDE.md) - Guide for migrating from bash scripts to Go implementation
 
 ## 🤝 Contributing
 
