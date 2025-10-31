@@ -84,7 +84,7 @@ export function useNetworkStats(pollIntervalMs = 5000) {
           .filter(Boolean);
         const normalUniqueIps = new Set(normalIpsList);
 
-        // Build canonical container map: containerKey -> { ip, statuses: [] }
+        // Build canonical container map: containerKey -> { ip, statuses: [], networks: [] }
         // containerKey prefers container_id (r[1] in migrated schema) else name (r[3]) else id (r[0])
         const containerMap = new Map();
         dockerRows.forEach((r) => {
@@ -102,14 +102,16 @@ export function useNetworkStats(pollIntervalMs = 5000) {
           else ipCandidate = findIpInRow(r);
 
           const status = findOnlineStatusInRow(r); // online|offline|unknown
+          const network = String(r[8] || "docker"); // network_name at index 8 in docker_hosts
 
           if (!containerMap.has(containerKey)) {
-            containerMap.set(containerKey, { ip: ipCandidate || null, statuses: [] });
+            containerMap.set(containerKey, { ip: ipCandidate || null, statuses: [], networks: [] });
           }
           const entry = containerMap.get(containerKey);
           // Use first non-empty ip as canonical ip
           if (!entry.ip && ipCandidate) entry.ip = ipCandidate;
           entry.statuses.push(status);
+          entry.networks.push(network);
         });
 
         // Now compute docker counts and canonical IP set per container
@@ -144,22 +146,12 @@ export function useNetworkStats(pollIntervalMs = 5000) {
         
         // Count running containers by network+ip
         uniqueDockerContainers.forEach((k) => {
-          const { ip, statuses } = containerMap.get(k) || { ip: null, statuses: [] };
+          const entry = containerMap.get(k);
+          if (!entry) return;
+          const { ip, statuses, networks } = entry;
           if (!ip || !statuses.some((s) => s === "online")) return;
-          // Get network from containerMap - we need to track which network this container is on
-          const containerEntry = Array.from(containerMap.entries()).find(([ck]) => ck === k);
-          if (!containerEntry) return;
-          // Find the network for this container from dockerRows
-          const containerRow = dockerRows.find((r) => {
-            const maybeContainerId = String(r[1] ?? "");
-            let containerKey = "";
-            if (maybeContainerId && !looksLikeIp(maybeContainerId)) containerKey = maybeContainerId;
-            else if (r[3]) containerKey = String(r[3]);
-            else containerKey = String(r[0] ?? "");
-            return containerKey === k;
-          });
-          if (!containerRow) return;
-          const network = String(containerRow[8] || "docker"); // network_name at index 8 in docker_hosts
+          // Use the first network associated with this container
+          const network = networks[0] || "docker";
           const key = `${network}:${ip}`;
           networkIpCounts.set(key, (networkIpCounts.get(key) || 0) + 1);
         });
