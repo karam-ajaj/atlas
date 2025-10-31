@@ -299,29 +299,48 @@ function HostsTable({ showDuplicates = false, onClearPreset }) {
     return sortRows(filtered, sortKey, sortDir);
   }, [allRows, q, sortKey, sortDir, filters]);
 
-  // Derive duplicate IP set across active rows (online hosts + running containers), ignoring blank/invalid IPs
-  const duplicateIpSet = useMemo(() => {
-    const ipCounts = new Map();
+  // Network-aware duplicate IP detection: same IP on different networks is NOT a duplicate
+  // Only count online hosts + running containers, ignoring blank/invalid IPs
+  const duplicateNetworkIpSet = useMemo(() => {
+    const networkIpCounts = new Map();
     allRows.forEach((r) => {
       const ip = (r.ip || "").trim();
       if (!/^\d+\.\d+\.\d+\.\d+$/.test(ip)) return;
       const status = (r.online_status || "").toLowerCase();
-      const isDocker = r.group === "docker";
       const isOnline = status === "online" || status === "running";
       if (!isOnline) return; // exclude offline/stopped
-      ipCounts.set(ip, (ipCounts.get(ip) || 0) + 1);
+      
+      // Use network to make duplicate detection network-aware
+      const network = r.network || "default";
+      const key = `${network}:${ip}`;
+      networkIpCounts.set(key, (networkIpCounts.get(key) || 0) + 1);
     });
+    
+    // Build a set of network:ip combinations that are duplicates
     const dups = new Set();
-    ipCounts.forEach((count, ip) => {
-      if (count > 1) dups.add(ip);
+    networkIpCounts.forEach((count, key) => {
+      if (count > 1) dups.add(key);
     });
     return dups;
   }, [allRows]);
 
   const displayRows = useMemo(() => {
     if (!showDuplicates) return rows;
-    return rows.filter((r) => duplicateIpSet.has(r.ip));
-  }, [rows, showDuplicates, duplicateIpSet]);
+    // When showing duplicates, filter to:
+    // 1. Rows that have duplicate network:ip combinations
+    // 2. Only show online/running rows (filter out offline/stopped)
+    return rows.filter((r) => {
+      const network = r.network || "default";
+      const key = `${network}:${r.ip}`;
+      const isDuplicate = duplicateNetworkIpSet.has(key);
+      if (!isDuplicate) return false;
+      
+      // Filter out offline/stopped containers
+      const status = (r.online_status || "").toLowerCase();
+      const isOnline = status === "online" || status === "running";
+      return isOnline;
+    });
+  }, [rows, showDuplicates, duplicateNetworkIpSet]);
 
   function exportCSV() {
     const header = columns;
