@@ -82,7 +82,7 @@ docker run -d \
   -e DOCKERSCAN_INTERVAL=3600 \
   -e DEEPSCAN_INTERVAL=7200 \
   -e SCAN_SUBNETS="192.168.1.0/24,10.0.0.0/24" \
-  keinstien/atlas:3.2.29
+  keinstien/atlas:latest
 ```
 
 **Environment Variables:**
