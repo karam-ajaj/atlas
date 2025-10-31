@@ -32,25 +32,48 @@ Atlas performs three key functions:
 ---
 
 ## 🖼️ Screenshots
+### Dashboard
 
-### Dashboard View
-<div style="display: flex; gap: 24px; flex-wrap: wrap;">
-  <a href="screenshots/dashboard-desktop.svg" target="_blank">
-    <img src="screenshots/dashboard-desktop.svg" alt="Dashboard Desktop" width="300"/>
+<div style="display:flex; gap:18px; flex-wrap:wrap; align-items:center">
+  <a href="screenshots/dashboard_big_c.png" target="_blank">
+    <img src="screenshots/dashboard_big_c.png" alt="Dashboard (big, collapsed)" width="360"/>
   </a>
-  <a href="screenshots/dashboard-mobile.svg" target="_blank">
-    <img src="screenshots/dashboard-mobile.svg" alt="Dashboard Mobile" width="180"/>
+  <a href="screenshots/dashboard_big_h.png" target="_blank">
+    <img src="screenshots/dashboard_big_h.png" alt="Dashboard (big, horizontal)" width="360"/>
+  </a>
+  <a href="screenshots/dashboard_small_c.png" target="_blank">
+    <img src="screenshots/dashboard_small_c.png" alt="Dashboard (small, collapsed)" width="180"/>
+  </a>
+  <a href="screenshots/dashboard_small_h.png" target="_blank">
+    <img src="screenshots/dashboard_small_h.png" alt="Dashboard (small, horizontal)" width="180"/>
   </a>
 </div>
 
-### Hosts Table
+### Hosts / Table
 
-<div style="display: flex; gap: 24px; flex-wrap: wrap;">
-  <a href="screenshots/hosts-desktop.svg" target="_blank">
-    <img src="screenshots/hosts-desktop.svg" alt="Hosts Desktop" width="300"/>
+<div style="display:flex; gap:18px; flex-wrap:wrap; align-items:center">
+  <a href="screenshots/table_big.png" target="_blank">
+    <img src="screenshots/table_big.png" alt="Hosts Table (big)" width="420"/>
   </a>
-  <a href="screenshots/hosts-mobile.svg" target="_blank">
-    <img src="screenshots/hosts-mobile.svg" alt="Hosts Mobile" width="180"/>
+  <a href="screenshots/table_small.png" target="_blank">
+    <img src="screenshots/table_small.png" alt="Hosts Table (small)" width="200"/>
+  </a>
+</div>
+
+### Logs & Scripts
+
+<div style="display:flex; gap:18px; flex-wrap:wrap; align-items:center">
+  <a href="screenshots/logs_big.png" target="_blank">
+    <img src="screenshots/logs_big.png" alt="Logs (big)" width="360"/>
+  </a>
+  <a href="screenshots/logs_small.png" target="_blank">
+    <img src="screenshots/logs_small.png" alt="Logs (small)" width="180"/>
+  </a>
+  <a href="screenshots/scripts_big.png" target="_blank">
+    <img src="screenshots/scripts_big.png" alt="Scripts (big)" width="360"/>
+  </a>
+  <a href="screenshots/scripts_small.png" target="_blank">
+    <img src="screenshots/scripts_small.png" alt="Scripts (small)" width="180"/>
   </a>
 </div>
 
