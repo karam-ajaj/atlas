@@ -1,1 +1,1 @@
-{ "version": "dev", "commit": "local", "builtAt": "development" }
+{ "version": "dev-local", "commit": "uncommitted", "builtAt": "not-built" }
