@@ -1,7 +1,7 @@
 # Build and UI output
-# data/html/
-# data/react-ui/dist/
-# data/react-ui/node_modules/
+data/html/
+data/react-ui/dist/
+data/react-ui/node_modules/
 
 # Runtime logs and state
 config/logs/
@@ -18,6 +18,14 @@ config/bin/
 data/react-ui/node_modules
 .env
 .DS_Store
+
+# Backup and temporary files
+*.bkp
+*.tmp
+*.swp
+*.swo
+*~
+*.orig
 
 # Archives (optional)
 *.tar
