@@ -1,5 +1,6 @@
 # Build and UI output
-data/html/
+data/html/*
+!data/html/build-info.json
 data/react-ui/dist/
 data/react-ui/node_modules/
 
