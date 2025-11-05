@@ -15,7 +15,7 @@ config/bin/
 *.out
 
 # Node modules, env, OS junk
-node_modules/
+./data/react-ui/node_modules
 .env
 .DS_Store
 
