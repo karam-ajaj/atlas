@@ -18,6 +18,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: data/react-ui/package-lock.json
+
+      - name: Build React UI
+        run: |
+          cd data/react-ui
+          npm ci
+          npm run build
+
+      - name: Prepare HTML directory
+        run: |
+          mkdir -p data/html
+          rm -rf data/html/* 2>/dev/null || true
+          cp -r data/react-ui/dist/* data/html/
+
+      - name: Generate build-info.json
+        run: |
+          VERSION="${{ github.ref_name }}"
+          COMMIT_SHA="${{ github.sha }}"
+          BUILD_TIME="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          echo "{ \"version\": \"${VERSION}\", \"commit\": \"${COMMIT_SHA:0:7}\", \"builtAt\": \"${BUILD_TIME}\" }" > data/html/build-info.json
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
