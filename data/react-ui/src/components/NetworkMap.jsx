@@ -434,7 +434,7 @@ export function NetworkMap() {
           <div ref={containerRef} className="w-full flex-1 min-h-0 bg-gray-200 rounded" />
 
           {/* Overlay the selected node panel so it doesn't change layout height */}
-          <div className="absolute top-20 left-6 z-10 max-w-sm">
+          <div className="absolute top-20 right-6 z-10 max-w-sm">
             <SelectedNodePanel
               node={selectedNode}
               route={selectedRoute}
