@@ -247,6 +247,7 @@ def validate_container_name(name: str) -> str:
     """
     Validate a Docker container name to avoid passing arbitrary user input
     directly to subprocess calls.
+    Only allow a restricted set of characters and a reasonable length.
     """
     # Allow common Docker name characters only and enforce a reasonable length
     if not name or len(name) > 128:
@@ -259,6 +260,10 @@ def validate_log_filename(name: str) -> str:
     """
     Validate a log filename so it can be safely used to construct a path and
     passed as an argument to subprocess calls.
+
+    NOTE: This validator only allows simple filenames (no directories). The
+    allowed character set is restricted to alphanumerics plus dot, underscore,
+    and hyphen, and any path separators are rejected.
     """
     if not name or len(name) > 255:
         raise HTTPException(status_code=400, detail="Invalid log filename length")
