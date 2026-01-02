@@ -255,6 +255,20 @@ def validate_container_name(name: str) -> str:
         raise HTTPException(status_code=400, detail="Invalid container name format")
     return name
 
+def validate_log_filename(name: str) -> str:
+    """
+    Validate a log filename so it can be safely used to construct a path and
+    passed as an argument to subprocess calls.
+    """
+    if not name or len(name) > 255:
+        raise HTTPException(status_code=400, detail="Invalid log filename length")
+    # Disallow any path separators and restrict to a safe character set
+    if "/" in name or "\\" in name:
+        raise HTTPException(status_code=400, detail="Invalid log filename format")
+    if not re.fullmatch(r"[a-zA-Z0-9._-]+", name):
+        raise HTTPException(status_code=400, detail="Invalid log filename format")
+    return name
+
 @app.get("/logs/container/{container_name}", tags=["Docker"])
 def get_container_logs(container_name: str):
     try:
@@ -277,8 +291,9 @@ def stream_log(filename: str):
             safe_container = validate_container_name(container)
             cmd = ["docker", "logs", "-f", "--tail", "10", safe_container]
         else:
+            safe_filename = validate_log_filename(filename)
             base_dir = os.path.abspath(LOGS_DIR)
-            filepath = os.path.normpath(os.path.join(base_dir, filename))
+            filepath = os.path.normpath(os.path.join(base_dir, safe_filename))
             # Ensure the resolved path stays within the logs directory
             if os.path.commonpath([base_dir, filepath]) != base_dir:
                 yield "data: [ERROR] Invalid log file path\n\n"
