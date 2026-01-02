@@ -277,7 +277,12 @@ def stream_log(filename: str):
             safe_container = validate_container_name(container)
             cmd = ["docker", "logs", "-f", "--tail", "10", safe_container]
         else:
-            filepath = f"{LOGS_DIR}/{filename}"
+            base_dir = os.path.abspath(LOGS_DIR)
+            filepath = os.path.normpath(os.path.join(base_dir, filename))
+            # Ensure the resolved path stays within the logs directory
+            if os.path.commonpath([base_dir, filepath]) != base_dir:
+                yield "data: [ERROR] Invalid log file path\n\n"
+                return
             if not os.path.exists(filepath):
                 yield f"data: [ERROR] File not found: {filepath}\n\n"
                 return
