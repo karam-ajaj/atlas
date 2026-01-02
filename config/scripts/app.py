@@ -6,6 +6,7 @@ import sqlite3
 import subprocess
 import logging
 import os
+import re
 from scripts.scheduler import get_scheduler
 
 app = FastAPI(
@@ -242,10 +243,28 @@ def list_containers():
     except Exception:
         return []
 
+def validate_container_name(name: str) -> str:
+    """
+    Validate a Docker container name to avoid passing arbitrary user input
+    directly to subprocess calls.
+    """
+    # Allow common Docker name characters only and enforce a reasonable length
+    if not name or len(name) > 128:
+        raise HTTPException(status_code=400, detail="Invalid container name length")
+    if not re.fullmatch(r"[a-zA-Z0-9._-]+", name):
+        raise HTTPException(status_code=400, detail="Invalid container name format")
+    return name
+
 @app.get("/logs/container/{container_name}", tags=["Docker"])
 def get_container_logs(container_name: str):
     try:
-        result = subprocess.run(["docker", "logs", "--tail", "1000", container_name], capture_output=True, text=True, check=True)
+        safe_name = validate_container_name(container_name)
+        result = subprocess.run(
+            ["docker", "logs", "--tail", "1000", safe_name],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         return {"logs": result.stdout}
     except subprocess.CalledProcessError as e:
         return {"logs": f"[ERROR] Failed to get logs: {e.stderr}"}
@@ -255,7 +274,8 @@ def stream_log(filename: str):
     def event_generator():
         if filename.startswith("container:"):
             container = filename.split("container:")[1]
-            cmd = ["docker", "logs", "-f", "--tail", "10", container]
+            safe_container = validate_container_name(container)
+            cmd = ["docker", "logs", "-f", "--tail", "10", safe_container]
         else:
             filepath = f"{LOGS_DIR}/{filename}"
             if not os.path.exists(filepath):
