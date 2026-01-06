@@ -8,7 +8,7 @@ import (
     "strings"
     "time"
 
-    _ "github.com/mattn/go-sqlite3"
+    _ "modernc.org/sqlite"
     "atlas/internal/utils"
 )
 
@@ -58,7 +58,7 @@ func runNmap(subnet string) (map[string]string, error) {
 // POINT 2: Assign next_hop for LAN hosts to the gateway IP
 func updateSQLiteDB(hosts map[string]string, gatewayIP string, interfaceName string) error {
     dbPath := "/config/db/atlas.db"
-    db, err := sql.Open("sqlite3", dbPath)
+    db, err := sql.Open("sqlite", dbPath)
     if err != nil {
         return err
     }
@@ -108,7 +108,7 @@ func updateExternalIPInDB(dbPath string) {
         return
     }
 
-    db, err := sql.Open("sqlite3", dbPath)
+    db, err := sql.Open("sqlite", dbPath)
     if err != nil {
         fmt.Println("❌ Failed to open DB:", err)
         return

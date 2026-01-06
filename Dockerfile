@@ -11,7 +11,7 @@ FROM python:3.11-slim
 
 RUN apt-get update && \
     apt-get install -y \
-        nginx iputils-ping traceroute nmap sqlite3 net-tools curl jq ca-certificates nbtscan docker.io && \
+        nginx iputils-ping traceroute nmap net-tools curl jq ca-certificates nbtscan docker.io && \
     apt-get upgrade -y && \
     pip install --no-cache-dir fastapi==0.121.0 uvicorn==0.38.0 protobuf==4.25.8 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
