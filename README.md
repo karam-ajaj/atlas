@@ -363,3 +363,6 @@ MIT License — free for personal or commercial use.
 
 Suggestions, bug reports, and pull requests are welcome!
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=karam-ajaj/atlas&type=date&legend=top-left)](https://www.star-history.com/#karam-ajaj/atlas&type=date&legend=top-left)
