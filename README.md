@@ -112,35 +112,35 @@ docker run -d \
   --cap-add=NET_RAW \
   --cap-add=NET_ADMIN \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -e ATLAS_UI_PORT=8884 \
-  -e ATLAS_API_PORT=8885 \
+  -e ATLAS_UI_PORT='8884' \
+  -e ATLAS_API_PORT='8885' \
   -e ATLAS_ADMIN_USER='admin' \
   -e ATLAS_ADMIN_PASSWORD='change-me' \
   -e ATLAS_AUTH_TTL_SECONDS='86400'
-  -e FASTSCAN_INTERVAL=3600 \
-  -e DOCKERSCAN_INTERVAL=3600 \
-  -e DEEPSCAN_INTERVAL=7200 \
+  -e FASTSCAN_INTERVAL='3600' \
+  -e DOCKERSCAN_INTERVAL='3600' \
+  -e DEEPSCAN_INTERVAL='7200' \
   -e SCAN_SUBNETS="192.168.1.0/24,10.0.0.0/24" \
-  keinstien/atlas:latest
+  keinstien/atlas:{tag}
 ```
 
 **Environment Variables:**
-- `ATLAS_UI_PORT` – Sets the port for the Atlas UI (Nginx). Default: 8888.
-- `ATLAS_API_PORT` – Sets the port for the FastAPI backend. Default: 8889.
-- `ATLAS_ADMIN_PASSWORD` – Enables UI/API authentication when set (required password for login). Default: disabled.
+- `ATLAS_UI_PORT` – Sets the port for the Atlas UI (Nginx). Default: `8888`.
+- `ATLAS_API_PORT` – Sets the port for the FastAPI backend. Default: `8889`.
 - `ATLAS_ADMIN_USER` – Admin username for login (single user). Default: `admin`.
+- `ATLAS_ADMIN_PASSWORD` – Enables UI/API authentication when set (required password for login). Default: `disabled`.
 - `ATLAS_AUTH_TTL_SECONDS` – Session lifetime in seconds. Default: `86400` (24h).
-- `FASTSCAN_INTERVAL` – Interval in seconds between fast scans. Default: 3600 (1 hour).
-- `DOCKERSCAN_INTERVAL` – Interval in seconds between Docker scans. Default: 3600 (1 hour).
-- `DEEPSCAN_INTERVAL` – Interval in seconds between deep scans. Default: 7200 (2 hours).
+- `FASTSCAN_INTERVAL` – Interval in seconds between fast scans. Default: `3600` (1 hour).
+- `DOCKERSCAN_INTERVAL` – Interval in seconds between Docker scans. Default: `3600` (1 hour).
+- `DEEPSCAN_INTERVAL` – Interval in seconds between deep scans. Default: `7200` (2 hours).
 - `SCAN_SUBNETS` – Comma-separated list of subnets to scan (e.g., "192.168.1.0/24,10.0.0.0/24"). If not set, Atlas will auto-detect the local subnet. This allows scanning multiple networks including LAN and remote servers.
 
-If not set, defaults are used (UI: 8888, API: 8889, scan intervals as shown above).
+If not set, defaults are used (UI: `8888`, API: `8889`, scan intervals as shown above).
 
 Example endpoints:
-- UI:                              http://localhost:ATLAS_UI_PORT
-- API(from exposed API port):      http://localhost:ATLAS_API_PORT/api/docs
-- API(based on nginx conf):        http://localhost:ATLAS_UI_PORT/api/docs
+- UI:                               `http://localhost:ATLAS_UI_PORT`
+- API (from exposed API port):      `http://localhost:ATLAS_API_PORT/api/docs`
+- API (based on nginx conf):        `http://localhost:ATLAS_UI_PORT/api/docs`
 
 ### 🔐 Authentication
 
