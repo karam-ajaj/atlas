@@ -114,6 +114,8 @@ docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e ATLAS_UI_PORT=8884 \
   -e ATLAS_API_PORT=8885 \
+  -e ATLAS_ADMIN_PASSWORD='change-me' \
+  -e ATLAS_ADMIN_USER='admin' \
   -e FASTSCAN_INTERVAL=3600 \
   -e DOCKERSCAN_INTERVAL=3600 \
   -e DEEPSCAN_INTERVAL=7200 \
@@ -124,6 +126,9 @@ docker run -d \
 **Environment Variables:**
 - `ATLAS_UI_PORT` – Sets the port for the Atlas UI (Nginx). Default: 8888.
 - `ATLAS_API_PORT` – Sets the port for the FastAPI backend. Default: 8889.
+- `ATLAS_ADMIN_PASSWORD` – Enables UI/API authentication when set (required password for login). Default: disabled.
+- `ATLAS_ADMIN_USER` – Admin username for login (single user). Default: `admin`.
+- `ATLAS_AUTH_TTL_SECONDS` – Session lifetime in seconds. Default: `86400` (24h).
 - `FASTSCAN_INTERVAL` – Interval in seconds between fast scans. Default: 3600 (1 hour).
 - `DOCKERSCAN_INTERVAL` – Interval in seconds between Docker scans. Default: 3600 (1 hour).
 - `DEEPSCAN_INTERVAL` – Interval in seconds between deep scans. Default: 7200 (2 hours).
@@ -135,6 +140,20 @@ Example endpoints:
 - UI:                              http://localhost:ATLAS_UI_PORT
 - API(from exposed API port):      http://localhost:ATLAS_API_PORT/api/docs
 - API(based on nginx conf):        http://localhost:ATLAS_UI_PORT/api/docs
+
+### 🔐 Authentication
+
+Atlas authentication is optional and disabled by default.
+
+- **Enable auth:** set `ATLAS_ADMIN_PASSWORD` (and optionally `ATLAS_ADMIN_USER`).
+- **UI behavior:** when auth is enabled, the UI shows a login gate before any data is rendered.
+- **API behavior:** when auth is enabled, core endpoints (hosts, external, scripts, logs, scheduler, containers) require a token.
+
+Relevant auth endpoints:
+- `GET /api/auth/enabled` – returns whether auth is enabled
+- `POST /api/auth/login` – returns a bearer token
+- `GET /api/auth/me` – validates current token
+- `POST /api/auth/logout` – invalidates the current token
 
 **Scan Scheduling:**
 Atlas automatically runs scans at the configured intervals. You can:
