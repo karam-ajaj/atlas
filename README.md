@@ -114,8 +114,9 @@ docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e ATLAS_UI_PORT=8884 \
   -e ATLAS_API_PORT=8885 \
-  -e ATLAS_ADMIN_PASSWORD='change-me' \
   -e ATLAS_ADMIN_USER='admin' \
+  -e ATLAS_ADMIN_PASSWORD='change-me' \
+  -e ATLAS_AUTH_TTL_SECONDS='86400'
   -e FASTSCAN_INTERVAL=3600 \
   -e DOCKERSCAN_INTERVAL=3600 \
   -e DEEPSCAN_INTERVAL=7200 \
