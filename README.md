@@ -4,7 +4,12 @@
 **Atlas** is a full-stack containerized tool to **scan**, **analyze**, and **visualize** network infrastructure dynamically. Built with Go, FastAPI, NGINX, and a custom React frontend, it provides automated scanning, storage, and rich dashboards for insight into your infrastructure.
 
 ---
-### Live Demo 🔗 [atlasdemo.vnerd.nl](https://atlasdemo.vnerd.nl/)
+
+## 🌍 Live Demo
+
+🔗 **URL:** https://atlasdemo.vnerd.nl/  
+👤 **Username:** `admin`  
+🔑 **Password:** `change-me`
 
 ---
 ## 🚀 What It Does
