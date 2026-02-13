@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from "react";
-import { apiGet, sseUrl, API_BASE_URL } from "../api";
+import { apiGet, sseUrl } from "../api";
 
 // Custom searchable dropdown for log files
 function LogFileDropdown({ files, value, onChange }) {
@@ -144,7 +144,8 @@ export function LogsPanel() {
     if (!selectedFile) return;
     const enc = encodeURIComponent(selectedFile);
     const link = document.createElement("a");
-    link.href = `${API_BASE_URL}/logs/${enc}/download`;
+    // Use sseUrl() so auth token is added as ?token= when auth is enabled.
+    link.href = sseUrl(`/logs/${enc}/download`);
     link.download = selectedFile;
     link.click();
   };

@@ -143,6 +143,7 @@ docker run -d \
   --cap-add=NET_ADMIN \
   -e ATLAS_UI_PORT=8884 \
   -e ATLAS_API_PORT=8885 \
+  -e ATLAS_ADMIN_PASSWORD='change-me' \
   -v /var/run/docker.sock:/var/run/docker.sock \
   "$IMAGE:$VERSION"
 

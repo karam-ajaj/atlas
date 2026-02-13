@@ -4,6 +4,7 @@ import { HostsTable } from "./components/HostsTable";
 import { ScriptsPanel } from "./components/ScriptsPanel";
 import { LogsPanel } from "./components/LogsPanel";
 import { useNetworkStats } from "./hooks/useNetworkStats";
+import { apiGet, getAuthToken } from "./api";
 import BuildTag from "./components/BuildTag";
 import MobileHeader from "./components/MobileHeader";
 import LoginModal from "./components/LoginModal";
@@ -155,6 +156,7 @@ function Sidebar({ activeTab, setActiveTab, visible, setVisible, onShowDuplicate
             <p className="mt-2 text-gray-400 italic">Updated: {stats.updatedAt}</p>
           )}
         </div>
+
       </div>
     </>
   );
@@ -167,14 +169,126 @@ export default function App() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [loginVisible, setLoginVisible] = useState(false);
   const [hostsShowDuplicates, setHostsShowDuplicates] = useState(false);
+  const githubUrl = "https://github.com/karam-ajaj/atlas";
+
+  const [authState, setAuthState] = useState({ checked: false, enabled: false, authenticated: false });
 
   const openLogin = () => setLoginVisible(true);
   const closeLogin = () => setLoginVisible(false);
 
+  // Auth gate: if server auth is enabled, require login before rendering the app.
+  useEffect(() => {
+    let aborted = false;
+
+    async function checkAuth() {
+      try {
+        const enabledJson = await apiGet("/auth/enabled");
+        const enabled = !!enabledJson?.enabled;
+
+        if (!enabled) {
+          if (!aborted) setAuthState({ checked: true, enabled: false, authenticated: true });
+          return;
+        }
+
+        let authenticated = false;
+        if (getAuthToken()) {
+          try {
+            const me = await apiGet("/auth/me");
+            authenticated = !!me?.authenticated;
+          } catch {
+            authenticated = false;
+          }
+        }
+
+        if (!aborted) setAuthState({ checked: true, enabled: true, authenticated });
+        if (!aborted && !authenticated) setLoginVisible(true);
+      } catch {
+        // If auth check fails, fall back to previous behavior (render app).
+        if (!aborted) setAuthState({ checked: true, enabled: false, authenticated: true });
+      }
+    }
+
+    checkAuth();
+    return () => {
+      aborted = true;
+    };
+  }, []);
+
+  // Keep UI in sync with token changes (logout, expiry, manual localStorage clear).
+  useEffect(() => {
+    function onAuthChanged() {
+      if (!authState.checked) return;
+      if (!authState.enabled) return;
+
+      const token = getAuthToken();
+      if (!token) {
+        setAuthState((s) => ({ ...s, authenticated: false }));
+        setLoginVisible(true);
+        return;
+      }
+
+      apiGet("/auth/me")
+        .then((me) => {
+          const ok = !!me?.authenticated;
+          setAuthState((s) => ({ ...s, authenticated: ok }));
+          if (!ok) setLoginVisible(true);
+        })
+        .catch(() => {
+          setAuthState((s) => ({ ...s, authenticated: false }));
+          setLoginVisible(true);
+        });
+    }
+
+    window.addEventListener("atlas-auth-changed", onAuthChanged);
+    return () => window.removeEventListener("atlas-auth-changed", onAuthChanged);
+  }, [authState.checked, authState.enabled]);
+
+  // If auth is enabled and we become unauthenticated, reset transient UI state.
+  useEffect(() => {
+    if (!authState.enabled) return;
+    if (!authState.checked) return;
+    if (authState.authenticated) return;
+
+    setActiveTab("Network Map");
+    setSelectedNode(null);
+    setHostsShowDuplicates(false);
+    setSidebarVisible(false);
+  }, [authState.checked, authState.enabled, authState.authenticated]);
+
+  const mustLogin = authState.checked && authState.enabled && !authState.authenticated;
+
+  // Prevent any data/UI flash before auth check completes.
+  // If auth is enabled, we will immediately show the login gate after the check.
+  if (!authState.checked) {
+    return <div className="h-screen bg-gray-100" />;
+  }
+
+  if (mustLogin) {
+    return (
+      <div className="h-screen bg-gray-100 relative">
+        <LoginModal
+          open
+          force
+          onAuthed={() => {
+            setAuthState((s) => ({ ...s, authenticated: true }));
+            setLoginVisible(false);
+          }}
+          onClose={() => {
+            // forced: do nothing
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gray-100 relative">
       {/* Mobile Header - only visible on mobile; pass menu opener */}
-  <MobileHeader onOpenMenu={() => setSidebarVisible(true)} onOpenLogin={openLogin} />
+      <MobileHeader
+        onOpenMenu={() => setSidebarVisible(true)}
+        onOpenLogin={openLogin}
+        githubUrl={githubUrl}
+      />
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
@@ -196,6 +310,18 @@ export default function App() {
 
             {/* Right: desktop-only login button (placeholder for real auth) */}
             <div className="flex items-center">
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="hidden lg:inline-flex bg-transparent text-gray-700 hover:text-gray-900 p-2 rounded-md"
+                title="View on GitHub"
+                aria-label="View on GitHub"
+              >
+                <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current" role="img" aria-hidden="true">
+                  <path d="M12 2c-5.5 0-10 4.5-10 10 0 4.4 2.9 8.2 6.9 9.5.5.1.7-.2.7-.5v-2c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.2-.4-1.3.1-2.7 0 0 .8-.3 2.8 1a9.4 9.4 0 0 1 5 0c2-1.3 2.8-1 2.8-1 .5 1.4.2 2.5.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.8-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 22 12c0-5.5-4.5-10-10-10z" />
+                </svg>
+              </a>
               <button
                 className="hidden lg:inline-flex bg-transparent text-gray-700 hover:text-gray-900 p-2 rounded-md"
                 title="Login"
@@ -228,7 +354,18 @@ export default function App() {
           </div>
         </div>
       </div>
-      <LoginModal open={loginVisible} onClose={closeLogin} />
+      <LoginModal
+        open={loginVisible}
+        onClose={closeLogin}
+        onAuthed={(session) => {
+          if (!session) {
+            setAuthState((s) => ({ ...s, authenticated: false }));
+            setLoginVisible(true);
+            return;
+          }
+          setAuthState((s) => ({ ...s, authenticated: true }));
+        }}
+      />
     </div>
   );
 }

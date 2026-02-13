@@ -70,6 +70,29 @@ function sanitize(base) {
 
 export const API_BASE_URL = decideBase();
 
+// ---- Auth token helpers ----
+
+const AUTH_TOKEN_KEY = "atlas_auth_token";
+
+export function getAuthToken() {
+  try {
+    return localStorage.getItem(AUTH_TOKEN_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+export function setAuthToken(token) {
+  try {
+    if (!token) localStorage.removeItem(AUTH_TOKEN_KEY);
+    else localStorage.setItem(AUTH_TOKEN_KEY, token);
+  } catch {}
+
+  try {
+    window.dispatchEvent(new Event("atlas-auth-changed"));
+  } catch {}
+}
+
 // ---- Generic helpers ----
 
 function buildUrl(path) {
@@ -79,11 +102,13 @@ function buildUrl(path) {
 
 async function apiRequest(method, path, { json, headers, ...rest } = {}) {
   const url = buildUrl(path);
+  const token = getAuthToken();
   const init = {
     method,
     ...rest,
     headers: {
       Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(json ? { "Content-Type": "application/json" } : {}),
       ...(headers || {}),
     },
@@ -95,6 +120,11 @@ async function apiRequest(method, path, { json, headers, ...rest } = {}) {
     res = await fetch(url, init);
   } catch (e) {
     throw new Error(`Network error for ${url}: ${e.message}`);
+  }
+
+  // If the server says we're unauthorized, clear local token so the UI can re-gate.
+  if (res.status === 401 && token) {
+    setAuthToken("");
   }
 
   if (!res.ok) {
@@ -123,9 +153,24 @@ export function apiPost(path, options = {}) {
   return apiRequest("POST", path, options);
 }
 
+export function apiPut(path, options = {}) {
+  return apiRequest("PUT", path, options);
+}
+
 // Streaming (SSE) URL builder
 export function sseUrl(path) {
-  return buildUrl(path);
+  const raw = buildUrl(path);
+  try {
+    const url = new URL(raw, window.location.origin);
+    const token = getAuthToken();
+    if (token && !url.searchParams.get("token")) {
+      url.searchParams.set("token", token);
+    }
+    return url.toString();
+  } catch {
+    // As a fallback (should be rare), return raw without token.
+    return raw;
+  }
 }
 
 // Domain-specific helpers

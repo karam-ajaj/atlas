@@ -5,9 +5,7 @@ import useEventSource from "../hooks/useEventSource";
 // - Primary: stream from GET /api/scripts/run/{script}/stream (if backend supports it)
 // - Fallback: POST /api/scripts/run/{script} and display the response output
 
-import { apiGet } from "../api"; // NEW: centralized API helper (uses VITE_ envs)
-
-const API = "/api";
+import { apiGet, apiPost, apiPut, sseUrl } from "../api";
 
 const SCRIPTS = [
   { key: "scan-hosts-fast", label: "Fast Scan", intervalKey: "fastscan" },
@@ -36,11 +34,8 @@ export function ScriptsPanel() {
 
   const fetchIntervals = async () => {
     try {
-      const res = await fetch(`${API}/scheduler/intervals`);
-      if (res.ok) {
-        const data = await res.json();
-        setIntervals(data);
-      }
+      const data = await apiGet("/scheduler/intervals");
+      setIntervals(data || {});
     } catch (e) {
       console.error("Failed to fetch intervals:", e);
     } finally {
@@ -50,20 +45,12 @@ export function ScriptsPanel() {
 
   const updateInterval = async (scanType, newInterval) => {
     try {
-      const res = await fetch(`${API}/scheduler/intervals/${scanType}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ interval: parseInt(newInterval) }),
+      await apiPut(`/scheduler/intervals/${scanType}`, {
+        json: { interval: parseInt(newInterval) },
       });
-      
-      if (res.ok) {
-        await fetchIntervals();
-        setEditingInterval({});
-        alert(`✅ ${scanType} interval updated to ${newInterval} seconds`);
-      } else {
-        const error = await res.json();
-        alert(`❌ Failed to update interval: ${error.detail}`);
-      }
+      await fetchIntervals();
+      setEditingInterval({});
+      alert(`✅ ${scanType} interval updated to ${newInterval} seconds`);
     } catch (e) {
       alert(`❌ Failed to update interval: ${e.message}`);
     }
@@ -85,7 +72,7 @@ export function ScriptsPanel() {
 
   // Primary live streaming URL (starts the scan and streams)
   const liveUrl = useMemo(
-    () => (isLive ? `${API}/scripts/run/${selected}/stream` : ""),
+    () => (isLive ? sseUrl(`/scripts/run/${selected}/stream`) : ""),
     [isLive, selected]
   );
 
@@ -170,13 +157,7 @@ export function ScriptsPanel() {
   async function runViaPost(scriptKey, options = {}) {
     try {
       setBusy(true);
-      const res = await fetch(`${API}/scripts/run/${scriptKey}`, { method: "POST" });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setLiveLines((prev) => [...prev, `POST failed: ${json.output || res.statusText}`]);
-        return;
-      }
-
+      const json = await apiPost(`/scripts/run/${scriptKey}`);
       const lines = (json?.output ? json.output : "Started.").split("\n");
       const annotate = options.annotate ? [options.annotate] : [];
       setLiveLines((prev) => [...prev, ...annotate, ...lines]);

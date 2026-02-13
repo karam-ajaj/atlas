@@ -1,12 +1,15 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.responses import JSONResponse, FileResponse, StreamingResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
 import sqlite3
 import subprocess
 import logging
 import os
 import re
+import secrets
+import time
 from scripts.scheduler import get_scheduler
 
 app = FastAPI(
@@ -30,6 +33,66 @@ app.add_middleware(
 class IntervalUpdate(BaseModel):
     interval: int
 
+
+# ---- Authentication (minimal, single-admin token auth) ----
+#
+# Backward compatible behavior:
+# - If ATLAS_ADMIN_PASSWORD is not set, auth is disabled and all endpoints work as before.
+# - If ATLAS_ADMIN_PASSWORD is set, protected endpoints require a valid token.
+
+ATLAS_ADMIN_USER = os.getenv("ATLAS_ADMIN_USER", "admin")
+ATLAS_ADMIN_PASSWORD = os.getenv("ATLAS_ADMIN_PASSWORD", "")
+ATLAS_AUTH_TTL_SECONDS = int(os.getenv("ATLAS_AUTH_TTL_SECONDS", "86400"))  # 24h
+AUTH_ENABLED = bool(ATLAS_ADMIN_PASSWORD)
+
+# In-memory token store: token -> {user, expires_at}
+_SESSIONS = {}
+_bearer = HTTPBearer(auto_error=False)
+
+
+class LoginRequest(BaseModel):
+    username: str = ""
+    password: str = ""
+
+
+def _now() -> int:
+    return int(time.time())
+
+
+def _create_session(user: str) -> dict:
+    token = secrets.token_urlsafe(32)
+    expires_at = _now() + ATLAS_AUTH_TTL_SECONDS
+    _SESSIONS[token] = {"user": user, "expires_at": expires_at}
+    return {"token": token, "user": user, "expires_at": expires_at}
+
+
+def _get_token(request: Request, creds: HTTPAuthorizationCredentials = Depends(_bearer)) -> str:
+    if creds and (creds.scheme or "").lower() == "bearer" and creds.credentials:
+        return creds.credentials
+    # SSE/EventSource cannot send custom headers; allow token in query for streaming endpoints.
+    return request.query_params.get("token", "")
+
+
+def require_auth(token: str = Depends(_get_token)) -> str:
+    if not AUTH_ENABLED:
+        return ""  # auth disabled
+
+    if not token:
+        raise HTTPException(status_code=401, detail="Missing auth token")
+
+    session = _SESSIONS.get(token)
+    if not session:
+        raise HTTPException(status_code=401, detail="Invalid auth token")
+
+    if session.get("expires_at", 0) < _now():
+        try:
+            del _SESSIONS[token]
+        except Exception:
+            pass
+        raise HTTPException(status_code=401, detail="Auth token expired")
+
+    return session.get("user", "")
+
 # Initialize scheduler on startup
 scheduler = get_scheduler()
 
@@ -41,6 +104,45 @@ async def startup_event():
 
 LOGS_DIR = "/config/logs"
 os.makedirs(LOGS_DIR, exist_ok=True)
+
+
+@app.get("/auth/enabled", tags=["Auth"])
+def auth_enabled():
+    return {"enabled": AUTH_ENABLED, "user": ATLAS_ADMIN_USER if AUTH_ENABLED else None}
+
+
+@app.post("/auth/login", tags=["Auth"])
+def auth_login(data: LoginRequest):
+    if not AUTH_ENABLED:
+        raise HTTPException(status_code=400, detail="Authentication is not enabled")
+
+    username = (data.username or "").strip() or ATLAS_ADMIN_USER
+    password = data.password or ""
+
+    # Single-admin: username must match and password must match.
+    if username != ATLAS_ADMIN_USER:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    if not secrets.compare_digest(password, ATLAS_ADMIN_PASSWORD):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    return _create_session(username)
+
+
+@app.get("/auth/me", tags=["Auth"])
+def auth_me(user: str = Depends(require_auth)):
+    if not AUTH_ENABLED:
+        return {"authenticated": False, "user": None}
+    return {"authenticated": True, "user": user}
+
+
+@app.post("/auth/logout", tags=["Auth"])
+def auth_logout(token: str = Depends(_get_token), user: str = Depends(require_auth)):
+    if AUTH_ENABLED and token:
+        try:
+            del _SESSIONS[token]
+        except Exception:
+            pass
+    return {"status": "ok"}
 
 # Scripts and their log files (used for POST tee + stream)
 ALLOWED_SCRIPTS = {
@@ -80,7 +182,7 @@ def health():
     }
 
 @app.get("/hosts", tags=["Hosts"])
-def get_hosts():
+def get_hosts(user: str = Depends(require_auth)):
     conn = sqlite3.connect("/config/db/atlas.db")
     cursor1 = conn.cursor()
     cursor2 = conn.cursor()
@@ -92,7 +194,7 @@ def get_hosts():
     return [rows1, rows2]
 
 @app.get("/external", tags=["Hosts"])
-def get_external_networks():
+def get_external_networks(user: str = Depends(require_auth)):
     try:
         conn = sqlite3.connect("/config/db/atlas.db")
         cursor = conn.cursor()
@@ -105,7 +207,7 @@ def get_external_networks():
 
 # POST still supported; now tees output to a persistent log file too
 @app.post("/scripts/run/{script_name}", tags=["Scripts"])
-def run_named_script(script_name: str):
+def run_named_script(script_name: str, user: str = Depends(require_auth)):
     if script_name not in ALLOWED_SCRIPTS:
         raise HTTPException(status_code=400, detail="Invalid script name")
 
@@ -131,7 +233,7 @@ def run_named_script(script_name: str):
 
 # NEW: proper live stream endpoint that ends when the process exits
 @app.get("/scripts/run/{script_name}/stream", tags=["Scripts"])
-def stream_named_script(script_name: str):
+def stream_named_script(script_name: str, user: str = Depends(require_auth)):
     if script_name not in ALLOWED_SCRIPTS:
         raise HTTPException(status_code=400, detail="Invalid script name")
 
@@ -167,7 +269,7 @@ def stream_named_script(script_name: str):
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @app.get("/scripts/last-scan-status", tags=["Scripts"])
-def last_scan_status():
+def last_scan_status(user: str = Depends(require_auth)):
     conn = sqlite3.connect("/config/db/atlas.db")
     cur = conn.cursor()
 
@@ -183,7 +285,7 @@ def last_scan_status():
     }
 
 @app.get("/logs/list", tags=["Logs"])
-def list_logs():
+def list_logs(user: str = Depends(require_auth)):
     files = []
     for name in os.listdir(LOGS_DIR):
         if not name.endswith(".log"):
@@ -200,7 +302,7 @@ def list_logs():
     return files
 
 @app.get("/logs/{filename}", tags=["Logs"])
-def read_log(filename: str):
+def read_log(filename: str, user: str = Depends(require_auth)):
     if filename.startswith("container:"):
         container = filename.split("container:")[1]
         try:
@@ -217,7 +319,7 @@ def read_log(filename: str):
         return {"content": f.read()}
 
 @app.get("/logs/{filename}/download", tags=["Logs"])
-def download_log(filename: str):
+def download_log(filename: str, user: str = Depends(require_auth)):
     if filename.startswith("container:"):
         container = filename.split("container:")[1]
         try:
@@ -236,7 +338,7 @@ def download_log(filename: str):
     return FileResponse(filepath, filename=filename)
 
 @app.get("/containers", tags=["Docker"])
-def list_containers():
+def list_containers(user: str = Depends(require_auth)):
     try:
         output = subprocess.check_output(["docker", "ps", "--format", "{{.Names}}"], text=True)
         return output.strip().split("\n")
@@ -275,7 +377,7 @@ def validate_log_filename(name: str) -> str:
     return name
 
 @app.get("/logs/container/{container_name}", tags=["Docker"])
-def get_container_logs(container_name: str):
+def get_container_logs(container_name: str, user: str = Depends(require_auth)):
     try:
         safe_name = validate_container_name(container_name)
         result = subprocess.run(
@@ -289,7 +391,7 @@ def get_container_logs(container_name: str):
         return {"logs": f"[ERROR] Failed to get logs: {e.stderr}"}
 
 @app.get("/logs/{filename}/stream", tags=["Logs"])
-def stream_log(filename: str):
+def stream_log(filename: str, user: str = Depends(require_auth)):
     def event_generator():
         if filename.startswith("container:"):
             container = filename.split("container:")[1]
@@ -321,12 +423,12 @@ def stream_log(filename: str):
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @app.get("/scheduler/intervals", tags=["Scheduler"])
-def get_scheduler_intervals():
+def get_scheduler_intervals(user: str = Depends(require_auth)):
     """Get current scan intervals for all scan types."""
     return scheduler.get_intervals()
 
 @app.put("/scheduler/intervals/{scan_type}", tags=["Scheduler"])
-def update_scheduler_interval(scan_type: str, data: IntervalUpdate):
+def update_scheduler_interval(scan_type: str, data: IntervalUpdate, user: str = Depends(require_auth)):
     """Update the interval for a specific scan type."""
     try:
         scheduler.update_interval(scan_type, data.interval)
@@ -337,7 +439,7 @@ def update_scheduler_interval(scan_type: str, data: IntervalUpdate):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/scheduler/status", tags=["Scheduler"])
-def get_scheduler_status():
+def get_scheduler_status(user: str = Depends(require_auth)):
     """Get scheduler status."""
     return {
         "running": scheduler.is_running(),

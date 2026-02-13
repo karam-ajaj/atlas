@@ -48,7 +48,7 @@ function findOnlineStatusInRow(row = []) {
   return "unknown";
 }
 
-export function useNetworkStats(pollIntervalMs = 5000) {
+export function useNetworkStats(pollIntervalMs = 30000) {
   const [stats, setStats] = useState({
     total: 0,
     docker: 0,

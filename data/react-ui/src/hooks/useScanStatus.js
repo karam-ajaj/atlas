@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiGet } from "../api";
 
 function formatAgo(timestamp) {
   if (!timestamp) return "Never";
@@ -12,8 +13,7 @@ export function useScanStatus() {
   const [status, setStatus] = useState({ fast: null, deep: null, docker: null });
 
   useEffect(() => {
-    fetch("/api/scripts/last-scan-status")
-      .then((res) => res.json())
+    apiGet("/scripts/last-scan-status")
       .then((data) => setStatus(data))
       .catch(() => setStatus({}));
   }, []);
