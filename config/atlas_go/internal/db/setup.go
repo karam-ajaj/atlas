@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 const dbPath = "/config/db/atlas.db"
@@ -18,7 +18,7 @@ func InitDB() error {
 	}
 
 	// Step 2: Open the SQLite database (it will be created if not exists)
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return fmt.Errorf("failed to open DB: %v", err)
 	}

@@ -10,7 +10,7 @@ import (
     "time"
     "strconv"
 
-    _ "github.com/mattn/go-sqlite3"
+    _ "modernc.org/sqlite"
 )
 
 type DockerContainer struct {
@@ -216,7 +216,7 @@ func isDockerInternalGateway(gateway string) bool {
 }
 
 func updateDockerDB(containers []DockerContainer) error {
-    db, err := sql.Open("sqlite3", "/config/db/atlas.db")
+    db, err := sql.Open("sqlite", "/config/db/atlas.db")
     if err != nil {
         return err
     }

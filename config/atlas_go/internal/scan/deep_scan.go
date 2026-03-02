@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 	"atlas/internal/utils"
 )
 
@@ -239,7 +239,7 @@ func DeepScan() error {
 	fmt.Fprintf(lf, "Total discovered: %d hosts in %s\n", total, time.Since(startTime))
 
 	dbPath := "/config/db/atlas.db"
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		fmt.Fprintf(lf, "Failed to open DB: %v\n", err)
 		return err
